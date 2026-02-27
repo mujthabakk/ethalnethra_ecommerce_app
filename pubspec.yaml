@@ -1,0 +1,45 @@
+name: ethalnethra_ecommerce_app
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  carousel_slider: ^5.1.2
+  flutter:
+    sdk: flutter
+  go_router: ^14.2.0
+  google_fonts: ^6.2.1
+  provider: ^6.1.5+1
+  google_maps_flutter: ^2.10.0
+  geolocator: ^13.0.2
+  http: ^1.2.1
+  uuid: ^4.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - asstes/images/
+    - asstes/icons/
+  
+  # fonts:
+  #   - family: Gilroy
+  #     fonts:
+  #       - asset: assets/fonts/Gilroy-Regular.ttf
+  #         weight: 400
+  #       - asset: assets/fonts/Gilroy-Medium.ttf
+  #         weight: 500
+  #       - asset: assets/fonts/Gilroy-SemiBold.ttf
+  #         weight: 600
+  #       - asset: assets/fonts/Gilroy-Bold.ttf
+  #         weight: 700
+  #       - asset: assets/fonts/Gilroy-ExtraBold.ttf
+  #         weight: 800
