@@ -28,8 +28,4 @@ abstract final class ApiEndpoints {
 
   static const String orders = '/api/orders';
   static const String ordersPlace = '/api/orders/place';
-
-  static String orderTrack(String orderId) => '/api/orders/$orderId/track';
-
-  static String orderCancel(String orderId) => '/api/orders/$orderId/cancel';
 }

@@ -8,6 +8,7 @@ import '../../views/location/location_screen.dart';
 import '../../views/login/login_screen.dart';
 import '../../views/signup/signup_screen.dart';
 import '../../views/main_nav/main_nav_screen.dart';
+import '../../views/home/services_screen.dart';
 import '../../views/product_detail/product_detail_screen.dart';
 import '../../views/explore/category_products_screen.dart';
 import '../../views/explore/filter_screen.dart';
@@ -71,6 +72,7 @@ class AppRouter {
   static const String deliveryAddress = '/delivery-address';
   static const String promoCode = '/promo-code';
   static const String selectLocation = '/select-location';
+  static const String services = '/services';
 
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
@@ -122,6 +124,11 @@ class AppRouter {
         path: mainNav,
         name: 'mainNav',
         builder: (context, state) => const MainNavScreen(),
+      ),
+      GoRoute(
+        path: services,
+        name: 'services',
+        builder: (context, state) => const ServicesScreen(),
       ),
       GoRoute(
         path: productDetail,

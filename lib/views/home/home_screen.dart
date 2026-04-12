@@ -9,6 +9,7 @@ import '../../core/mappers/category_image_path.dart';
 import '../../core/models/catalog/catalog_product.dart';
 import '../../core/models/catalog/category_item.dart';
 import '../../core/providers/catalog_providers.dart';
+import '../../core/providers/main_nav_tab_provider.dart';
 import '../../core/routes/app_router.dart';
 import '../../models/category_model.dart';
 import 'widgets/banner_widget.dart';
@@ -141,44 +142,48 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      Container(
-                        width: 110,
-                        height: 115,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFA2D3B1).withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              'asstes/images/service.png',
-                              width: 60,
-                              height: 60,
-                              errorBuilder: (_, __, ___) => Container(
-                                width: 56,
-                                height: 56,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF53B175),
-                                  borderRadius: BorderRadius.circular(12),
+                      Material(
+                        color: const Color(0xFFA2D3B1).withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(10),
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () => context.push(AppRouter.services),
+                          child: SizedBox(
+                            width: 110,
+                            height: 115,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'asstes/images/service.png',
+                                  width: 60,
+                                  height: 60,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    width: 56,
+                                    height: 56,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF53B175),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Icon(
+                                      Icons.build_circle_outlined,
+                                      color: Colors.white,
+                                      size: 32,
+                                    ),
+                                  ),
                                 ),
-                                child: const Icon(
-                                  Icons.build_circle_outlined,
-                                  color: Colors.white,
-                                  size: 32,
+                                const SizedBox(height: 5),
+                                const Text(
+                                  'Our Services',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF53B175),
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
-                            const SizedBox(height: 5),
-                            const Text(
-                              'Our Services',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF53B175),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ],
@@ -217,11 +222,11 @@ class HomeScreen extends ConsumerWidget {
                                   padding: EdgeInsets.zero,
                                   gridDelegate:
                                       SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    crossAxisSpacing: spacing,
-                                    mainAxisSpacing: spacing,
-                                    childAspectRatio: cellW / cellH,
-                                  ),
+                                        crossAxisCount: 2,
+                                        crossAxisSpacing: spacing,
+                                        mainAxisSpacing: spacing,
+                                        childAspectRatio: cellW / cellH,
+                                      ),
                                   itemCount: exclusive.length,
                                   itemBuilder: (context, index) {
                                     return ProductCard(
@@ -288,26 +293,9 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                   SectionHeader(
-                    title: 'Groceries',
+                    title: 'Categories',
                     onSeeAll: () {
-                      final cats = ref.read(homeCategoriesProvider).valueOrNull;
-                      final prods = ref.read(homeProductsProvider).valueOrNull;
-                      if (cats == null || cats.isEmpty) return;
-                      final first = cats.first;
-                      final matched = prods
-                              ?.where(
-                                (p) =>
-                                    p.category.toLowerCase() ==
-                                    first.name.toLowerCase(),
-                              )
-                              .toList() ??
-                          <CatalogProduct>[];
-                      _pushProductList(
-                        context,
-                        first.name,
-                        matched.isNotEmpty ? matched : (prods ?? []),
-                        apiCategory: first.name,
-                      );
+                      ref.read(mainNavTabIndexProvider.notifier).state = 1;
                     },
                   ),
                   const SizedBox(height: 15),
@@ -316,9 +304,7 @@ class HomeScreen extends ConsumerWidget {
                     child: categoriesAsync.when(
                       data: (categories) {
                         if (categories.isEmpty) {
-                          return const Center(
-                            child: Text('No categories'),
-                          );
+                          return const Center(child: Text('No categories'));
                         }
                         return ListView.separated(
                           scrollDirection: Axis.horizontal,
@@ -353,5 +339,4 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
-
 }

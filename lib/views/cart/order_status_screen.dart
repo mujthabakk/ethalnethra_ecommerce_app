@@ -60,15 +60,15 @@ class _OrderStatusScreenState extends ConsumerState<OrderStatusScreen> {
       ref.invalidate(orderTrackProvider(widget.orderId));
       ref.invalidate(ordersListProvider);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg.message)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(msg.message)));
       context.pop();
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) setState(() => _cancelling = false);
     }
@@ -139,26 +139,11 @@ class _OrderStatusScreenState extends ConsumerState<OrderStatusScreen> {
           final stepIndex = _stepIndexFromStatus(track.status);
           final delivered = stepIndex >= 4;
           const steps = <({IconData icon, String label})>[
-            (
-              icon: Icons.description_outlined,
-              label: 'order placed',
-            ),
-            (
-              icon: Icons.assignment_turned_in_outlined,
-              label: 'Accepted',
-            ),
-            (
-              icon: Icons.access_time_filled,
-              label: 'In Progress',
-            ),
-            (
-              icon: Icons.local_shipping_outlined,
-              label: 'On the Way',
-            ),
-            (
-              icon: Icons.inventory_2_outlined,
-              label: 'Delivered',
-            ),
+            (icon: Icons.description_outlined, label: 'order placed'),
+            (icon: Icons.assignment_turned_in_outlined, label: 'Accepted'),
+            (icon: Icons.access_time_filled, label: 'In Progress'),
+            (icon: Icons.local_shipping_outlined, label: 'On the Way'),
+            (icon: Icons.inventory_2_outlined, label: 'Delivered'),
           ];
 
           return SingleChildScrollView(

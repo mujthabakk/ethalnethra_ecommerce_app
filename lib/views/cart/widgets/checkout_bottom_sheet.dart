@@ -17,6 +17,7 @@ class CheckoutBottomSheet extends ConsumerStatefulWidget {
   });
 
   final double totalPrice;
+
   /// Matches cart tab: instant vs pre-order.
   final bool isInstantCart;
 
@@ -28,9 +29,8 @@ class CheckoutBottomSheet extends ConsumerStatefulWidget {
 class _CheckoutBottomSheetState extends ConsumerState<CheckoutBottomSheet> {
   int? _selectedAddressId;
 
-  String get _deliveryLabel => widget.isInstantCart
-      ? 'Instant delivery'
-      : 'Pre-order delivery';
+  String get _deliveryLabel =>
+      widget.isInstantCart ? 'Instant delivery' : 'Pre-order delivery';
 
   Future<void> _openAddAddress() async {
     await context.push(AppRouter.deliveryAddress);
@@ -52,10 +52,9 @@ class _CheckoutBottomSheetState extends ConsumerState<CheckoutBottomSheet> {
       return;
     }
 
-    final res = await ref.read(placeOrderNotifierProvider.notifier).submit(
-          isInstantCart: widget.isInstantCart,
-          addressId: id,
-        );
+    final res = await ref
+        .read(placeOrderNotifierProvider.notifier)
+        .submit(isInstantCart: widget.isInstantCart, addressId: id);
 
     if (!mounted) return;
 
@@ -64,7 +63,9 @@ class _CheckoutBottomSheetState extends ConsumerState<CheckoutBottomSheet> {
       context.push(AppRouter.orderSuccess, extra: res);
       ref.invalidate(placeOrderNotifierProvider);
     } else {
-      ref.read(placeOrderNotifierProvider).whenOrNull(
+      ref
+          .read(placeOrderNotifierProvider)
+          .whenOrNull(
             error: (e, _) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -84,7 +85,8 @@ class _CheckoutBottomSheetState extends ConsumerState<CheckoutBottomSheet> {
 
     addressesAsync.whenData((list) {
       if (list.isEmpty) return;
-      final valid = _selectedAddressId != null &&
+      final valid =
+          _selectedAddressId != null &&
           list.any((e) => e.id == _selectedAddressId);
       if (!valid) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -129,8 +131,10 @@ class _CheckoutBottomSheetState extends ConsumerState<CheckoutBottomSheet> {
             ),
             Flexible(
               child: SingleChildScrollView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 25, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 25,
+                  vertical: 16,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -141,7 +145,10 @@ class _CheckoutBottomSheetState extends ConsumerState<CheckoutBottomSheet> {
                       style: AppTextStyles.checkoutValueLabel,
                     ),
                     const Divider(
-                        height: 32, color: Color(0xFFE2E2E2), thickness: 1),
+                      height: 32,
+                      color: Color(0xFFE2E2E2),
+                      thickness: 1,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -150,8 +157,9 @@ class _CheckoutBottomSheetState extends ConsumerState<CheckoutBottomSheet> {
                           style: AppTextStyles.checkoutSectionLabel,
                         ),
                         TextButton(
-                          onPressed:
-                              placeAsync.isLoading ? null : _openAddAddress,
+                          onPressed: placeAsync.isLoading
+                              ? null
+                              : _openAddAddress,
                           child: const Text('Add new'),
                         ),
                       ],
@@ -214,8 +222,9 @@ class _CheckoutBottomSheetState extends ConsumerState<CheckoutBottomSheet> {
                                   ),
                                   onChanged: placeAsync.isLoading
                                       ? null
-                                      : (v) =>
-                                          setState(() => _selectedAddressId = v),
+                                      : (v) => setState(
+                                          () => _selectedAddressId = v,
+                                        ),
                                 ),
                               )
                               .toList(),
@@ -223,13 +232,19 @@ class _CheckoutBottomSheetState extends ConsumerState<CheckoutBottomSheet> {
                       },
                     ),
                     const Divider(
-                        height: 32, color: Color(0xFFE2E2E2), thickness: 1),
+                      height: 32,
+                      color: Color(0xFFE2E2E2),
+                      thickness: 1,
+                    ),
                     Text('Payment', style: AppTextStyles.checkoutSectionLabel),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.payments_outlined,
-                            color: AppColors.primary, size: 22),
+                        Icon(
+                          Icons.payments_outlined,
+                          color: AppColors.primary,
+                          size: 22,
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Column(
@@ -251,7 +266,10 @@ class _CheckoutBottomSheetState extends ConsumerState<CheckoutBottomSheet> {
                       ],
                     ),
                     const Divider(
-                        height: 32, color: Color(0xFFE2E2E2), thickness: 1),
+                      height: 32,
+                      color: Color(0xFFE2E2E2),
+                      thickness: 1,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -271,7 +289,8 @@ class _CheckoutBottomSheetState extends ConsumerState<CheckoutBottomSheet> {
                         style: AppTextStyles.checkoutTerms,
                         children: [
                           const TextSpan(
-                              text: 'By placing an order you agree to our '),
+                            text: 'By placing an order you agree to our ',
+                          ),
                           TextSpan(
                             text: 'Terms',
                             style: AppTextStyles.checkoutTerms.copyWith(

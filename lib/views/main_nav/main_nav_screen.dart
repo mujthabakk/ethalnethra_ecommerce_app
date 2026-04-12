@@ -1,33 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/constants/app_colors.dart';
+import '../../core/providers/main_nav_tab_provider.dart';
 import '../home/home_screen.dart';
 import '../explore/explore_screen.dart';
 import '../cart/cart_screen.dart';
 import '../favourite/favourite_screen.dart';
 import '../account/account_screen.dart';
 
-class MainNavScreen extends StatefulWidget {
+class MainNavScreen extends ConsumerWidget {
   const MainNavScreen({super.key});
 
-  @override
-  State<MainNavScreen> createState() => _MainNavScreenState();
-}
-
-class _MainNavScreenState extends State<MainNavScreen> {
-  int _currentIndex = 0;
-
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const ExploreScreen(),
-    const CartScreen(),
-    const FavouriteScreen(),
-    const AccountScreen(),
+  static const List<Widget> _screens = [
+    HomeScreen(),
+    ExploreScreen(),
+    CartScreen(),
+    FavouriteScreen(),
+    AccountScreen(),
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentIndex = ref.watch(mainNavTabIndexProvider);
+
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: _screens[currentIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.only(
@@ -48,11 +46,9 @@ class _MainNavScreenState extends State<MainNavScreen> {
             topRight: Radius.circular(15),
           ),
           child: BottomNavigationBar(
-            currentIndex: _currentIndex,
+            currentIndex: currentIndex,
             onTap: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
+              ref.read(mainNavTabIndexProvider.notifier).state = index;
             },
             type: BottomNavigationBarType.fixed,
             backgroundColor: Colors.white,

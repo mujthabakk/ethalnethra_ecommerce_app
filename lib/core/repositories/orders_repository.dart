@@ -36,7 +36,7 @@ class OrdersRepository {
 
   Future<OrderTrackResponse> fetchOrderTrack(String orderId) async {
     final response = await _dio.get<Map<String, dynamic>>(
-      ApiEndpoints.orderTrack(orderId),
+      '${ApiEndpoints.orders}/$orderId/track',
     );
     final data = response.data;
     if (data == null) throw Exception('Empty order track response');
@@ -45,7 +45,7 @@ class OrdersRepository {
 
   Future<CancelOrderResponse> cancelOrder(String orderId) async {
     final response = await _dio.post<Map<String, dynamic>>(
-      ApiEndpoints.orderCancel(orderId),
+      '${ApiEndpoints.orders}/$orderId/cancel',
     );
     final data = response.data;
     if (data == null) throw Exception('Empty cancel order response');

@@ -76,46 +76,46 @@ class DeliveryAddressScreen extends ConsumerWidget {
           data: (addresses) {
             return ListView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 25.0),
-              children: [
-                const SizedBox(height: 10),
-                GestureDetector(
+        padding: const EdgeInsets.symmetric(horizontal: 25.0),
+          children: [
+            const SizedBox(height: 10),
+            GestureDetector(
                   onTap: () => _openAddSheet(context, ref),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 15,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: const Color(0xFFE2E2E2)),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      children: [
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 15,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFE2E2E2)),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
                         const Icon(
                           Icons.add,
                           color: Color(0xFFF3603F),
                           size: 24,
                         ),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Add New Address',
-                          style: AppTextStyles.addNewAddressButtonText,
-                        ),
-                        const Spacer(),
-                        const Icon(
-                          Icons.arrow_forward,
-                          color: Color(0xFFF3603F),
-                          size: 24,
-                        ),
-                      ],
+                    const SizedBox(width: 10),
+                    Text(
+                      'Add New Address',
+                      style: AppTextStyles.addNewAddressButtonText,
                     ),
-                  ),
+                    const Spacer(),
+                    const Icon(
+                      Icons.arrow_forward,
+                      color: Color(0xFFF3603F),
+                      size: 24,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 40),
+              ),
+            ),
+            const SizedBox(height: 40),
                 Text('SAVED ADDRESSES',
                     style: AppTextStyles.addressSectionHeader),
-                const SizedBox(height: 20),
+            const SizedBox(height: 20),
                 if (addresses.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 32),
@@ -133,9 +133,9 @@ class DeliveryAddressScreen extends ConsumerWidget {
                         icon: _iconForLabel(a.label),
                       ),
                     ),
-                  ),
-                const SizedBox(height: 30),
-              ],
+            ),
+            const SizedBox(height: 30),
+          ],
             );
           },
         ),
@@ -176,31 +176,31 @@ class _AddressCard extends StatelessWidget {
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: AppColors.darkBackground, size: 28),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+            children: [
+              Icon(icon, color: AppColors.darkBackground, size: 28),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                 Text(
                   address.label.toUpperCase(),
                   style: AppTextStyles.orderItemTitle,
                 ),
-                const SizedBox(height: 5),
-                Text(
+                    const SizedBox(height: 5),
+                    Text(
                   address.displayLines,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF181725),
-                    height: 1.4,
-                  ),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Color(0xFF181725),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }
@@ -291,9 +291,9 @@ class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
       ),
       child: SingleChildScrollView(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+              mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+              children: [
             Center(
               child: Container(
                 width: 40,
