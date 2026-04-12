@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/location/area_item.dart';
 import '../models/location/zone_item.dart';
 import '../models/user/user_details_models.dart';
+import '../models/orders/orders_models.dart';
+import '../models/user/user_address_models.dart';
 import '../repositories/locations_repository.dart';
+import '../repositories/orders_repository.dart';
 import '../repositories/user_profile_repository.dart';
 import 'auth_providers.dart';
 
@@ -13,6 +16,25 @@ final locationsRepositoryProvider = Provider<LocationsRepository>((ref) {
 
 final userProfileRepositoryProvider = Provider<UserProfileRepository>((ref) {
   return UserProfileRepository(ref.watch(dioProvider));
+});
+
+final ordersRepositoryProvider = Provider<OrdersRepository>((ref) {
+  return OrdersRepository(ref.watch(dioProvider));
+});
+
+final userAddressesProvider =
+    FutureProvider.autoDispose<List<UserAddressDto>>((ref) async {
+  return ref.watch(userProfileRepositoryProvider).fetchAddresses();
+});
+
+final ordersListProvider =
+    FutureProvider.autoDispose<OrdersListResponse>((ref) async {
+  return ref.watch(ordersRepositoryProvider).fetchOrders();
+});
+
+final orderTrackProvider = FutureProvider.autoDispose
+    .family<OrderTrackResponse, String>((ref, orderId) async {
+  return ref.watch(ordersRepositoryProvider).fetchOrderTrack(orderId);
 });
 
 final zonesProvider = FutureProvider.autoDispose<List<ZoneItem>>((ref) async {
@@ -70,6 +92,7 @@ class SaveAddressNotifier extends Notifier<SaveAddressUiState> {
             addressLine: addressLine,
             pincode: pincode,
           );
+      ref.invalidate(userAddressesProvider);
       state = const SaveAddressUiState();
       return true;
     } catch (e) {
@@ -116,6 +139,7 @@ class UpdateProfileNotifier extends Notifier<UpdateProfileUiState> {
     required String name,
     required String email,
     required String phone,
+    String? gender,
   }) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
@@ -123,6 +147,7 @@ class UpdateProfileNotifier extends Notifier<UpdateProfileUiState> {
             name: name,
             email: email,
             phone: phone,
+            gender: gender,
           );
       ref.invalidate(userDetailsProvider);
       state = const UpdateProfileUiState();

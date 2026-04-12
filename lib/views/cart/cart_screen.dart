@@ -158,6 +158,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                   builder: (context) {
                                     return CheckoutBottomSheet(
                                       totalPrice: total,
+                                      isInstantCart: _isInstantCart,
                                     );
                                   },
                                 );

@@ -9,6 +9,15 @@ class UserProfileRepository {
 
   final Dio _dio;
 
+  Future<List<UserAddressDto>> fetchAddresses() async {
+    final response = await _dio.get<List<dynamic>>(ApiEndpoints.userAddresses);
+    final data = response.data;
+    if (data == null) return [];
+    return data
+        .map((e) => UserAddressDto.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<UserDetails> fetchUserDetails() async {
     final response =
         await _dio.get<Map<String, dynamic>>(ApiEndpoints.userDetails);
@@ -21,6 +30,7 @@ class UserProfileRepository {
     required String name,
     required String email,
     required String phone,
+    String? gender,
   }) async {
     final response = await _dio.post<Map<String, dynamic>>(
       ApiEndpoints.userDetails,
@@ -28,6 +38,7 @@ class UserProfileRepository {
         'name': name,
         'email': email,
         'phone': phone,
+        if (gender != null && gender.isNotEmpty) 'gender': gender,
       },
     );
     final data = response.data;

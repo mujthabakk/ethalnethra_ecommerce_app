@@ -17,3 +17,28 @@ class CreateAddressResponse with _$CreateAddressResponse {
   factory CreateAddressResponse.fromJson(Map<String, dynamic> json) =>
       _$CreateAddressResponseFromJson(json);
 }
+
+/// One row from `GET /api/user/addresses` (JSON array).
+@freezed
+class UserAddressDto with _$UserAddressDto {
+  @JsonSerializable(fieldRename: FieldRename.snake)
+  const factory UserAddressDto({
+    @JsonKey(fromJson: intFromJson) required int id,
+    @JsonKey(name: 'user_id', fromJson: intFromJson) required int userId,
+    required String label,
+    @JsonKey(fromJson: stringFromJson) required String zoneId,
+    @JsonKey(fromJson: stringFromJson) required String areaId,
+    required String addressLine,
+    required String pincode,
+    String? createdAt,
+    String? updatedAt,
+  }) = _UserAddressDto;
+
+  factory UserAddressDto.fromJson(Map<String, dynamic> json) =>
+      _$UserAddressDtoFromJson(json);
+}
+
+extension UserAddressDtoX on UserAddressDto {
+  String get displayLines =>
+      '$addressLine\nPin $pincode (Zone $zoneId, Area $areaId)';
+}

@@ -27,6 +27,7 @@ mixin _$UserDetails {
   String? get username => throw _privateConstructorUsedError;
   String? get email => throw _privateConstructorUsedError;
   String? get phone => throw _privateConstructorUsedError;
+  String? get gender => throw _privateConstructorUsedError;
 
   /// Serializes this UserDetails to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -51,6 +52,7 @@ abstract class $UserDetailsCopyWith<$Res> {
     String? username,
     String? email,
     String? phone,
+    String? gender,
   });
 }
 
@@ -74,6 +76,7 @@ class _$UserDetailsCopyWithImpl<$Res, $Val extends UserDetails>
     Object? username = freezed,
     Object? email = freezed,
     Object? phone = freezed,
+    Object? gender = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -97,6 +100,10 @@ class _$UserDetailsCopyWithImpl<$Res, $Val extends UserDetails>
                 ? _value.phone
                 : phone // ignore: cast_nullable_to_non_nullable
                       as String?,
+            gender: freezed == gender
+                ? _value.gender
+                : gender // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -118,6 +125,7 @@ abstract class _$$UserDetailsImplCopyWith<$Res>
     String? username,
     String? email,
     String? phone,
+    String? gender,
   });
 }
 
@@ -140,6 +148,7 @@ class __$$UserDetailsImplCopyWithImpl<$Res>
     Object? username = freezed,
     Object? email = freezed,
     Object? phone = freezed,
+    Object? gender = freezed,
   }) {
     return _then(
       _$UserDetailsImpl(
@@ -163,6 +172,10 @@ class __$$UserDetailsImplCopyWithImpl<$Res>
             ? _value.phone
             : phone // ignore: cast_nullable_to_non_nullable
                   as String?,
+        gender: freezed == gender
+            ? _value.gender
+            : gender // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -178,6 +191,7 @@ class _$UserDetailsImpl implements _UserDetails {
     this.username,
     this.email,
     this.phone,
+    this.gender,
   });
 
   factory _$UserDetailsImpl.fromJson(Map<String, dynamic> json) =>
@@ -194,10 +208,12 @@ class _$UserDetailsImpl implements _UserDetails {
   final String? email;
   @override
   final String? phone;
+  @override
+  final String? gender;
 
   @override
   String toString() {
-    return 'UserDetails(id: $id, name: $name, username: $username, email: $email, phone: $phone)';
+    return 'UserDetails(id: $id, name: $name, username: $username, email: $email, phone: $phone, gender: $gender)';
   }
 
   @override
@@ -210,13 +226,14 @@ class _$UserDetailsImpl implements _UserDetails {
             (identical(other.username, username) ||
                 other.username == username) &&
             (identical(other.email, email) || other.email == email) &&
-            (identical(other.phone, phone) || other.phone == phone));
+            (identical(other.phone, phone) || other.phone == phone) &&
+            (identical(other.gender, gender) || other.gender == gender));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
-      Object.hash(runtimeType, id, name, username, email, phone);
+      Object.hash(runtimeType, id, name, username, email, phone, gender);
 
   /// Create a copy of UserDetails
   /// with the given fields replaced by the non-null parameter values.
@@ -239,6 +256,7 @@ abstract class _UserDetails implements UserDetails {
     final String? username,
     final String? email,
     final String? phone,
+    final String? gender,
   }) = _$UserDetailsImpl;
 
   factory _UserDetails.fromJson(Map<String, dynamic> json) =
@@ -255,6 +273,8 @@ abstract class _UserDetails implements UserDetails {
   String? get email;
   @override
   String? get phone;
+  @override
+  String? get gender;
 
   /// Create a copy of UserDetails
   /// with the given fields replaced by the non-null parameter values.

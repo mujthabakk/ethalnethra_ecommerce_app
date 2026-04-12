@@ -1,31 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/constants/app_text_styles.dart';
-import '../../core/routes/app_router.dart';
-import '../home/widgets/search_bar_widget.dart';
 
-class AccountScreen extends StatelessWidget {
+import '../../core/constants/app_text_styles.dart';
+import '../../core/models/user/user_details_models.dart';
+import '../../core/providers/location_user_providers.dart';
+import '../../core/routes/app_router.dart';
+
+class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final detailsAsync = ref.watch(userDetailsProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 10),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: CustomSearchBar(),
-            ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 16),
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    const SizedBox(height: 10),
-                    // Profile Header
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 25.0),
                       child: Row(
@@ -44,46 +42,97 @@ class AccountScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 20),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+                          Expanded(
+                            child: detailsAsync.when(
+                              loading: () => Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'Afsar Hossen',
-                                    style: AppTextStyles.accountName,
+                                  Container(
+                                    height: 20,
+                                    width: 140,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade300,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
                                   ),
-                                  const SizedBox(width: 5),
-                                  GestureDetector(
-                                    onTap: () =>
-                                        context.push(AppRouter.editProfile),
-                                    child: const Icon(
-                                      Icons.edit_outlined,
-                                      color: Color(0xFF53B175),
-                                      size: 18,
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    height: 16,
+                                    width: 200,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade200,
+                                      borderRadius: BorderRadius.circular(4),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 5),
-                              Text(
-                                'Imshuvo97@gmail.com',
-                                style: AppTextStyles.accountEmail,
+                              error: (e, _) => Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Could not load profile',
+                                    style: AppTextStyles.accountName.copyWith(
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        ref.invalidate(userDetailsProvider),
+                                    child: const Text('Retry'),
+                                  ),
+                                ],
                               ),
-                            ],
+                              data: (d) {
+                                final name = d.displayName.isNotEmpty
+                                    ? d.displayName
+                                    : '—';
+                                final email = (d.email != null &&
+                                        d.email!.trim().isNotEmpty)
+                                    ? d.email!.trim()
+                                    : '—';
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            name,
+                                            style: AppTextStyles.accountName,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        GestureDetector(
+                                          onTap: () => context
+                                              .push(AppRouter.editProfile),
+                                          child: const Icon(
+                                            Icons.edit_outlined,
+                                            color: Color(0xFF53B175),
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      email,
+                                      style: AppTextStyles.accountEmail,
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 30),
                     const Divider(color: Color(0xFFE2E2E2), thickness: 1),
-
-                    // Menu Items
                     _buildMenuItem(
                       context,
                       'Orders',
                       'asstes/icons/ic_orders.png',
-                      onTap: () => context.push(AppRouter.orderStatus),
+                      onTap: () => context.push(AppRouter.ordersList),
                     ),
                     _buildMenuItem(
                       context,
@@ -99,23 +148,13 @@ class AccountScreen extends StatelessWidget {
                     ),
                     _buildMenuItem(
                       context,
-                      'Promo Cord',
-                      'asstes/icons/ic_promo_cord.png',
-                      onTap: () => context.push(AppRouter.promoCode),
+                      'Help',
+                      'asstes/icons/ic_help.png',
                     ),
-                    _buildMenuItem(
-                      context,
-                      'Notifications',
-                      'asstes/icons/ic_bell.png',
-                      onTap: () => context.push(AppRouter.notifications),
-                    ),
-                    _buildMenuItem(context, 'Help', 'asstes/icons/ic_help.png'),
                   ],
                 ),
               ),
             ),
-
-            // Logout Button at the bottom
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 25.0,
@@ -168,7 +207,16 @@ class AccountScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 15),
             child: Row(
               children: [
-                Image.asset(iconPath, width: 22, height: 22),
+                Image.asset(
+                  iconPath,
+                  width: 22,
+                  height: 22,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.circle_outlined,
+                    size: 22,
+                    color: Color(0xFF181725),
+                  ),
+                ),
                 const SizedBox(width: 20),
                 Text(title, style: AppTextStyles.accountMenuLabel),
                 const Spacer(),

@@ -13,6 +13,7 @@ _$UserDetailsImpl _$$UserDetailsImplFromJson(Map<String, dynamic> json) =>
       username: json['username'] as String?,
       email: json['email'] as String?,
       phone: json['phone'] as String?,
+      gender: json['gender'] as String?,
     );
 
 Map<String, dynamic> _$$UserDetailsImplToJson(_$UserDetailsImpl instance) =>
@@ -22,6 +23,7 @@ Map<String, dynamic> _$$UserDetailsImplToJson(_$UserDetailsImpl instance) =>
       'username': instance.username,
       'email': instance.email,
       'phone': instance.phone,
+      'gender': instance.gender,
     };
 
 _$UpdateUserDetailsResponseImpl _$$UpdateUserDetailsResponseImplFromJson(

@@ -13,13 +13,34 @@ import '../../views/explore/category_products_screen.dart';
 import '../../views/explore/filter_screen.dart';
 import '../../views/cart/order_success_screen.dart';
 import '../../views/cart/order_status_screen.dart';
+import '../../views/cart/orders_list_screen.dart';
 import '../../views/cart/order_history_screen.dart';
 import '../../views/account/edit_profile_screen.dart';
 import '../../views/account/notifications_screen.dart';
 import '../../views/account/delivery_address_screen.dart';
 import '../../views/account/promo_code_screen.dart';
 import '../../views/account/select_delivery_location_screen.dart';
+import '../../core/models/orders/orders_models.dart';
 import '../../models/product_model.dart';
+
+/// GoRouter may surface `extra` map values as [List<dynamic>] even when callers
+/// intended [List<ProductModel>]; avoid direct casts that throw.
+List<ProductModel> _productListFromExtra(dynamic value) {
+  if (value == null) return const [];
+  if (value is List<ProductModel>) return value;
+  if (value is List) {
+    return value.whereType<ProductModel>().toList();
+  }
+  return const [];
+}
+
+Map<String, dynamic> _extraMap(Object? extra) {
+  if (extra is Map<String, dynamic>) return extra;
+  if (extra is Map) {
+    return extra.map((k, v) => MapEntry(k.toString(), v));
+  }
+  return {};
+}
 
 /// App Router Configuration using GoRouter
 class AppRouter {
@@ -41,7 +62,9 @@ class AppRouter {
   static const String categoryProducts = '/category-products';
   static const String filter = '/filter';
   static const String orderSuccess = '/order-success';
+  static const String ordersList = '/orders';
   static const String orderStatus = '/order-status';
+  static String orderStatusPath(String orderId) => '$orderStatus/$orderId';
   static const String orderHistory = '/order-history';
   static const String editProfile = '/edit-profile';
   static const String notifications = '/notifications';
@@ -112,12 +135,17 @@ class AppRouter {
         path: categoryProducts,
         name: 'categoryProducts',
         builder: (context, state) {
-          final extras = state.extra as Map<String, dynamic>;
-          final products = extras['products'] as List<ProductModel>?;
-          final initial = extras['initialProducts'] as List<ProductModel>?;
+          final extras = _extraMap(state.extra);
+          final fromProducts = _productListFromExtra(extras['products']);
+          final fromInitial = _productListFromExtra(extras['initialProducts']);
+          final initialProducts =
+              fromProducts.isNotEmpty ? fromProducts : fromInitial;
+          final title = extras['title'] is String
+              ? extras['title'] as String
+              : 'Products';
           return CategoryProductsScreen(
-            title: extras['title'] as String,
-            initialProducts: products ?? initial ?? const [],
+            title: title,
+            initialProducts: initialProducts,
             apiCategory: extras['apiCategory'] as String?,
             apiSearch: extras['apiSearch'] as String?,
             productType: extras['productType'] as String?,
@@ -133,12 +161,26 @@ class AppRouter {
       GoRoute(
         path: orderSuccess,
         name: 'orderSuccess',
-        builder: (context, state) => const OrderSuccessScreen(),
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra is PlaceOrderResponse) {
+            return OrderSuccessScreen(result: extra);
+          }
+          return const OrderSuccessScreen();
+        },
       ),
       GoRoute(
-        path: orderStatus,
+        path: ordersList,
+        name: 'ordersList',
+        builder: (context, state) => const OrdersListScreen(),
+      ),
+      GoRoute(
+        path: '$orderStatus/:orderId',
         name: 'orderStatus',
-        builder: (context, state) => const OrderStatusScreen(),
+        builder: (context, state) {
+          final id = state.pathParameters['orderId'] ?? '';
+          return OrderStatusScreen(orderId: id);
+        },
       ),
       GoRoute(
         path: orderHistory,
