@@ -55,6 +55,9 @@ class CustomTextField extends StatelessWidget {
           maxLength: maxLength,
           readOnly: readOnly,
           showCursor: showCursor,
+          // Read-only + software keypad (e.g. TextInputType.none): long-press
+          // would open the system context menu without a text input connection.
+          enableInteractiveSelection: !readOnly,
           style: AppTextStyles.inputText,
           cursorColor: AppColors.primary,
           decoration: InputDecoration(

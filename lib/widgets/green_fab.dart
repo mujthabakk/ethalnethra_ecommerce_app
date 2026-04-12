@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
+import '../core/widgets/app_shimmer.dart';
 
 /// Green Floating Action Button Widget
 /// Used for next/submit actions on input screens
@@ -26,14 +27,7 @@ class GreenFab extends StatelessWidget {
         backgroundColor: AppColors.primary,
         shape: const CircleBorder(),
         child: isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: AppColors.white,
-                ),
-              )
+            ? GreenFabShimmer(size: size)
             : const Icon(
                 Icons.arrow_forward_ios,
                 color: AppColors.white,

@@ -4,14 +4,17 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/routes/app_router.dart';
+import '../../../core/widgets/app_network_image.dart';
 import '../../../models/product_model.dart';
 import '../../../core/providers/cart_provider.dart';
 import 'pre_order_modal.dart';
 
 class ProductCard extends StatelessWidget {
   final ProductModel product;
+  /// When set (e.g. home “Exclusive Offer”), width fits ~2 cards per viewport.
+  final double? width;
 
-  const ProductCard({super.key, required this.product});
+  const ProductCard({super.key, required this.product, this.width});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +26,7 @@ class ProductCard extends StatelessWidget {
       },
       borderRadius: BorderRadius.circular(18),
       child: Container(
-        width: 173,
+        width: width ?? 173,
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -37,7 +40,7 @@ class ProductCard extends StatelessWidget {
               child: Center(
                 child: Hero(
                   tag: 'product_${product.id}',
-                  child: Image.asset(product.imagePath, fit: BoxFit.contain),
+                  child: AppImage(path: product.imagePath, fit: BoxFit.contain),
                 ),
               ),
             ),

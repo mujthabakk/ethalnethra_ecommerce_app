@@ -98,6 +98,7 @@ class _OtpInputState extends State<OtpInput> {
             focusNode: _focusNodes[index],
             keyboardType: TextInputType.none, // Disable system keyboard
             readOnly: true, // Use custom keypad
+            enableInteractiveSelection: false,
             textAlign: TextAlign.center,
             maxLength: 1,
             autofocus: false,

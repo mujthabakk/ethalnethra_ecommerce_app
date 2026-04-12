@@ -67,7 +67,10 @@ class AppRouter {
       GoRoute(
         path: mobileNumber,
         name: 'mobileNumber',
-        builder: (context, state) => const MobileNumberScreen(),
+        builder: (context, state) {
+          final initialPhone = state.extra as String? ?? '';
+          return MobileNumberScreen(initialPhone: initialPhone);
+        },
       ),
       GoRoute(
         path: otpVerification,

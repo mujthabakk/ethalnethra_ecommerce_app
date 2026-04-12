@@ -87,7 +87,7 @@ class WelcomeScreen extends StatelessWidget {
                   PrimaryButton(
                     text: 'Get Started',
                     onPressed: () {
-                      context.push(AppRouter.signin);
+                      context.push(AppRouter.mobileNumber, extra: '');
                     },
                   ),
 

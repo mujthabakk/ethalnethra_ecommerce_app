@@ -36,7 +36,7 @@ class CustomDropdown extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          initialValue: value,
+          initialValue: value != null && items.contains(value) ? value : null,
           hint: Text(
             hint,
             style: const TextStyle(

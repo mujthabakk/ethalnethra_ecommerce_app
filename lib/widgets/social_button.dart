@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_text_styles.dart';
+import '../core/widgets/app_shimmer.dart';
 
 /// Social Button Type
 enum SocialButtonType { google, facebook }
@@ -40,13 +41,12 @@ class SocialButton extends StatelessWidget {
           ),
         ),
         child: isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: AppColors.white,
-                ),
+            ? ShimmerButtonFill(
+                baseColor: (isGoogle ? AppColors.googleBlue : AppColors.facebookBlue)
+                    .withValues(alpha: 0.75),
+                highlightColor:
+                    isGoogle ? AppColors.googleBlue : AppColors.facebookBlue,
+                borderRadius: 19,
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,

@@ -1,22 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
+import '../../core/providers/auth_providers.dart';
 import '../../core/routes/app_router.dart';
+import '../../core/utils/phone_utils.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/green_fab.dart';
 
-/// Mobile Number Screen - Enter phone number for OTP
-class MobileNumberScreen extends StatefulWidget {
-  const MobileNumberScreen({super.key});
+/// Mobile Number Screen — confirms/edits phone, then calls send-OTP API.
+class MobileNumberScreen extends ConsumerStatefulWidget {
+  const MobileNumberScreen({super.key, this.initialPhone = ''});
+
+  /// Digits passed from sign-in (user can change via keypad).
+  final String initialPhone;
 
   @override
-  State<MobileNumberScreen> createState() => _MobileNumberScreenState();
+  ConsumerState<MobileNumberScreen> createState() =>
+      _MobileNumberScreenState();
 }
 
-class _MobileNumberScreenState extends State<MobileNumberScreen> {
+class _MobileNumberScreenState extends ConsumerState<MobileNumberScreen> {
   final _phoneController = TextEditingController();
   final _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialPhone.isNotEmpty) {
+      _phoneController.text = widget.initialPhone;
+    }
+  }
 
   @override
   void dispose() {
@@ -25,16 +40,49 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
     super.dispose();
   }
 
-  void _navigateToOtp() {
-    if (_phoneController.text.isNotEmpty) {
-      context.push(AppRouter.otpVerification, extra: _phoneController.text);
+  Future<void> _submitAndGoToOtp() async {
+    final phone = normalizeIndianPhone(_phoneController.text);
+    if (phone.length < 10) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Enter a valid 10-digit mobile number',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
+          ),
+          backgroundColor: AppColors.primary,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+      return;
+    }
+
+    final ok =
+        await ref.read(sendOtpNotifierProvider.notifier).send(phone);
+    if (!mounted) return;
+    if (ok) {
+      context.push(AppRouter.otpVerification, extra: phone);
+    } else {
+      final err = ref.read(sendOtpNotifierProvider).errorMessage;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            err ?? 'Could not send OTP',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
+          ),
+          backgroundColor: AppColors.primary,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
     }
   }
 
   void _onKeyTap(String key) {
+    if (key.length != 1 || int.tryParse(key) == null) return;
     setState(() {
       _phoneController.text = _phoneController.text + key;
-      // Move cursor to end
       _phoneController.selection = TextSelection.fromPosition(
         TextPosition(offset: _phoneController.text.length),
       );
@@ -57,11 +105,12 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final sendState = ref.watch(sendOtpNotifierProvider);
+
     return Scaffold(
       backgroundColor: AppColors.white,
       body: Stack(
         children: [
-          // Top Background Image Pattern
           Positioned(
             top: -50,
             left: 0,
@@ -74,8 +123,6 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
               ),
             ),
           ),
-
-          // Bottom Background Image Pattern
           Positioned(
             bottom: -50,
             left: 0,
@@ -91,14 +138,11 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
               ),
             ),
           ),
-
-          // Content
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                // Back Button
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: IconButton(
@@ -110,7 +154,6 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                     ),
                   ),
                 ),
-
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -118,8 +161,6 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 40),
-
-                        // Title
                         Text(
                           'Enter your mobile number',
                           style: AppTextStyles.heading1.copyWith(
@@ -127,10 +168,7 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-
                         const SizedBox(height: 40),
-
-                        // Mobile Number Label
                         Text(
                           'Mobile Number',
                           style: AppTextStyles.inputLabel.copyWith(
@@ -138,10 +176,7 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                             fontSize: 18,
                           ),
                         ),
-
                         const SizedBox(height: 10),
-
-                        // Mobile Number Input - Simulated with TextField
                         CustomTextField(
                           controller: _phoneController,
                           focusNode: _focusNode,
@@ -155,8 +190,6 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                     ),
                   ),
                 ),
-
-                // Button and Keypad Area
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25),
                   child: Column(
@@ -165,7 +198,10 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                         alignment: Alignment.bottomRight,
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: 20),
-                          child: GreenFab(onPressed: _navigateToOtp),
+                          child: GreenFab(
+                            onPressed: _submitAndGoToOtp,
+                            isLoading: sendState.isLoading,
+                          ),
                         ),
                       ),
                       CustomKeypad(onTab: _onKeyTap, onDelete: _onDelete),

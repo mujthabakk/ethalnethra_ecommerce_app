@@ -4,6 +4,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
+import '../../core/widgets/app_network_image.dart';
 import '../../models/product_model.dart';
 import '../../core/providers/cart_provider.dart';
 import '../../core/providers/favourites_provider.dart';
@@ -92,8 +93,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         items: productImages.map((imagePath) {
                           return Hero(
                             tag: 'product_${widget.product.id}',
-                            child: Image.asset(
-                              imagePath,
+                            child: AppImage(
+                              path: imagePath,
                               height: 200,
                               fit: BoxFit.contain,
                             ),

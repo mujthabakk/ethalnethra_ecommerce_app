@@ -1,23 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
+import '../../core/providers/auth_providers.dart';
 import '../../core/routes/app_router.dart';
-import '../../widgets/otp_input.dart';
+import '../../core/utils/phone_utils.dart';
 import '../../widgets/green_fab.dart';
+import '../../widgets/otp_input.dart';
 
-/// OTP Verification Screen - Enter 4-digit code
-class OtpVerificationScreen extends StatefulWidget {
-  final String phoneNumber;
-
+/// OTP Verification — resend and verify APIs; session saved on success.
+class OtpVerificationScreen extends ConsumerStatefulWidget {
   const OtpVerificationScreen({super.key, required this.phoneNumber});
 
+  final String phoneNumber;
+
   @override
-  State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
+  ConsumerState<OtpVerificationScreen> createState() =>
+      _OtpVerificationScreenState();
 }
 
-class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
+class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
+  late final String _phone;
   String _otp = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _phone = normalizeIndianPhone(widget.phoneNumber);
+  }
 
   void _onOtpChanged(String otp) {
     setState(() {
@@ -25,33 +36,84 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     });
   }
 
-  void _onOtpCompleted(String otp) {
-    // Auto navigate when OTP is complete
-    _navigateToLocation();
-  }
+  Future<void> _verifyAndNavigate({String? otpOverride}) async {
+    final otp = otpOverride ?? _otp;
+    if (otp.length != 4) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Enter the 4-digit code',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
+          ),
+          backgroundColor: AppColors.primary,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+      return;
+    }
 
-  void _navigateToLocation() {
-    if (_otp.length == 4) {
-      context.go(AppRouter.mainNav);
+    final ok = await ref
+        .read(verifyOtpNotifierProvider.notifier)
+        .verify(phone: _phone, otp: otp);
+    if (!mounted) return;
+    if (ok) {
+      context.go(AppRouter.location);
+    } else {
+      final err = ref.read(verifyOtpNotifierProvider).errorMessage;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            err ?? 'Verification failed',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
+          ),
+          backgroundColor: AppColors.primary,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
     }
   }
 
-  void _resendCode() {
-    // Handle resend code
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Code resent to +91 ${widget.phoneNumber}',
-          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
+  void _onOtpCompleted(String otp) {
+    _verifyAndNavigate(otpOverride: otp);
+  }
+
+  Future<void> _resendCode() async {
+    final ok =
+        await ref.read(resendOtpNotifierProvider.notifier).resend(_phone);
+    if (!mounted) return;
+    if (ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Code resent to +91 $_phone',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
+          ),
+          backgroundColor: AppColors.primary,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
-        backgroundColor: AppColors.primary,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
+      );
+    } else {
+      final err = ref.read(resendOtpNotifierProvider).errorMessage;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            err ?? 'Could not resend code',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
+          ),
+          backgroundColor: AppColors.primary,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
   }
 
   void _onKeyTap(String key) {
+    if (key.length != 1 || int.tryParse(key) == null) return;
     if (_otp.length < 4) {
       final newOtp = _otp + key;
       _onOtpChanged(newOtp);
@@ -69,11 +131,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final verifyState = ref.watch(verifyOtpNotifierProvider);
+    final resendState = ref.watch(resendOtpNotifierProvider);
+    final fabLoading = verifyState.isLoading;
+
     return Scaffold(
       backgroundColor: AppColors.white,
       body: Stack(
         children: [
-          // Top Background Image Pattern
           Positioned(
             top: -50,
             left: 0,
@@ -86,8 +151,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               ),
             ),
           ),
-
-          // Bottom Background Image Pattern
           Positioned(
             bottom: -50,
             left: 0,
@@ -103,14 +166,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               ),
             ),
           ),
-
-          // Content
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                // Back Button
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: IconButton(
@@ -122,7 +182,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     ),
                   ),
                 ),
-
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -130,8 +189,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 40),
-
-                        // Title
                         Text(
                           'Enter your 4-digit code',
                           style: AppTextStyles.heading1.copyWith(
@@ -139,10 +196,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-
                         const SizedBox(height: 40),
-
-                        // Code Label
                         Text(
                           'Code',
                           style: AppTextStyles.inputLabel.copyWith(
@@ -150,10 +204,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                             fontSize: 18,
                           ),
                         ),
-
                         const SizedBox(height: 16),
-
-                        // OTP Input Display
                         OtpInput(
                           length: 4,
                           onChanged: _onOtpChanged,
@@ -164,8 +215,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     ),
                   ),
                 ),
-
-                // Bottom area with Resend, FAB and Keypad
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25),
                   child: Column(
@@ -174,21 +223,22 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // Resend Code
                           GestureDetector(
-                            onTap: _resendCode,
+                            onTap: resendState.isLoading ? null : _resendCode,
                             child: Text(
-                              'Resend Code',
+                              resendState.isLoading
+                                  ? 'Sending…'
+                                  : 'Resend Code',
                               style: AppTextStyles.link.copyWith(fontSize: 16),
                             ),
                           ),
-
-                          // FAB
-                          GreenFab(onPressed: _navigateToLocation),
+                          GreenFab(
+                            onPressed: () => _verifyAndNavigate(),
+                            isLoading: fabLoading,
+                          ),
                         ],
                       ),
                       const SizedBox(height: 20),
-                      // Custom Keypad
                       CustomKeypad(onTab: _onKeyTap, onDelete: _onDelete),
                       const SizedBox(height: 20),
                     ],

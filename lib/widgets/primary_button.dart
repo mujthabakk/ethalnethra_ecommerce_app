@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_text_styles.dart';
+import '../core/widgets/app_shimmer.dart';
 
 /// Primary Button Widget
 /// Used for main action buttons like "Get Started", "Submit"
@@ -39,13 +40,10 @@ class PrimaryButton extends StatelessWidget {
           ),
         ),
         child: isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: AppColors.white,
-                ),
+            ? ShimmerButtonFill(
+                baseColor: AppColors.primary.withValues(alpha: 0.72),
+                highlightColor: AppColors.primary,
+                borderRadius: borderRadius,
               )
             : Text(text, style: AppTextStyles.buttonLarge),
       ),
