@@ -4,6 +4,7 @@ import '../models/catalog/banner_item.dart';
 import '../models/catalog/catalog_product.dart';
 import '../models/catalog/category_item.dart';
 import '../models/catalog/filters_response.dart';
+import '../models/catalog/product_detail_dto.dart';
 import '../repositories/catalog_repository.dart';
 import 'auth_providers.dart';
 
@@ -33,6 +34,11 @@ final homeProductsProvider =
 
 final filtersProvider = FutureProvider.autoDispose<FiltersResponse>((ref) async {
   return ref.watch(catalogRepositoryProvider).fetchFilters();
+});
+
+final productDetailProvider =
+    FutureProvider.autoDispose.family<ProductDetailDto, String>((ref, id) async {
+  return ref.watch(catalogRepositoryProvider).fetchProductDetail(id);
 });
 
 /// Normalized search query for client-side product filtering on home.

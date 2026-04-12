@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../core/mappers/catalog_product_mapper.dart';
 import '../../../core/providers/catalog_providers.dart';
 import '../../../core/routes/app_router.dart';
 
@@ -26,19 +25,14 @@ class _HomeStoreSearchBarState extends ConsumerState<HomeStoreSearchBar> {
 
   void _openResults(String rawQuery) {
     final q = rawQuery.trim();
-    final productsAsync = ref.read(homeProductsProvider);
-    final products = productsAsync.valueOrNull ?? [];
-    final lower = q.toLowerCase();
-    final filtered = lower.isEmpty
-        ? products
-        : products.where((p) => p.name.toLowerCase().contains(lower)).toList();
-
     if (!mounted) return;
     context.push(
       AppRouter.categoryProducts,
       extra: {
         'title': q.isEmpty ? 'All products' : 'Search: $q',
-        'products': filtered.map((e) => e.toProductModel()).toList(),
+        'products': const [],
+        if (q.isNotEmpty) 'apiSearch': q,
+        if (q.isEmpty) 'fetchAll': true,
       },
     );
   }

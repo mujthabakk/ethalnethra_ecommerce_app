@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/app_shimmer.dart';
 import '../../core/mappers/catalog_product_mapper.dart';
+import '../../core/mappers/category_image_path.dart';
 import '../../core/models/catalog/catalog_product.dart';
 import '../../core/models/catalog/category_item.dart';
 import '../../core/providers/catalog_providers.dart';
@@ -36,13 +37,10 @@ const _categoryBgColors = [
 ];
 
 CategoryModel _categoryModelFromApi(CategoryItem c, int index) {
-  final path = (c.imageUrl != null && c.imageUrl!.isNotEmpty)
-      ? c.imageUrl!
-      : 'asstes/images/grocery.png';
   return CategoryModel(
     id: c.id,
     name: c.name,
-    imagePath: path,
+    imagePath: categoryDisplayImagePath(c),
     backgroundColor: _categoryBgColors[index % _categoryBgColors.length],
   );
 }
@@ -50,13 +48,17 @@ CategoryModel _categoryModelFromApi(CategoryItem c, int index) {
 void _pushProductList(
   BuildContext context,
   String title,
-  List<CatalogProduct> list,
-) {
+  List<CatalogProduct> list, {
+  String? apiCategory,
+  String? productType,
+}) {
   context.push(
     AppRouter.categoryProducts,
     extra: {
       'title': title,
       'products': list.map((e) => e.toProductModel()).toList(),
+      if (apiCategory != null) 'apiCategory': apiCategory,
+      if (productType != null) 'productType': productType,
     },
   );
 }
@@ -196,6 +198,7 @@ class HomeScreen extends ConsumerWidget {
                                 context,
                                 'Exclusive Offer',
                                 exclusive,
+                                productType: 'exclusive',
                               ),
                             ),
                             const SizedBox(height: 15),
@@ -239,6 +242,7 @@ class HomeScreen extends ConsumerWidget {
                                 context,
                                 'Best Selling',
                                 best,
+                                productType: 'best_selling',
                               ),
                             ),
                             const SizedBox(height: 15),
@@ -302,6 +306,7 @@ class HomeScreen extends ConsumerWidget {
                         context,
                         first.name,
                         matched.isNotEmpty ? matched : (prods ?? []),
+                        apiCategory: first.name,
                       );
                     },
                   ),

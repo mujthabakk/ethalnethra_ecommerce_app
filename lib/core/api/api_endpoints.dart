@@ -9,6 +9,18 @@ abstract final class ApiEndpoints {
   static const String products = '/api/products';
   static const String filters = '/api/filters';
 
+  static String productById(String id) => '/api/products/$id';
+
+  static const String cart = '/api/cart';
+  static const String cartAdd = '/api/cart/add';
+  static String cartUpdate(String lineId) => '/api/cart/update/$lineId';
+  static String cartRemove(String lineId) => '/api/cart/remove/$lineId';
+
+  static const String favorites = '/api/favorites';
+  static const String favoritesAdd = '/api/favorites/add';
+  static String favoritesRemove(String productId) =>
+      '/api/favorites/remove/$productId';
+
   static const String locationsZones = '/api/locations/zones';
   static const String locationsAreas = '/api/locations/areas';
   static const String userAddresses = '/api/user/addresses';

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/providers/cart_providers.dart';
+import '../../../core/widgets/app_network_image.dart';
 import '../../../models/product_model.dart';
-import '../../../core/providers/cart_provider.dart';
 
 /// Modal shown when user taps pre-order on a product card. Single CTA: Add To Pre-order Basket.
-class PreOrderModal extends StatelessWidget {
+class PreOrderModal extends ConsumerWidget {
   final ProductModel product;
 
   const PreOrderModal({super.key, required this.product});
@@ -21,7 +23,7 @@ class PreOrderModal extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -52,8 +54,8 @@ class PreOrderModal extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  product.imagePath,
+                child: AppImage(
+                  path: product.imagePath,
                   width: 80,
                   height: 80,
                   fit: BoxFit.contain,
@@ -90,16 +92,35 @@ class PreOrderModal extends StatelessWidget {
             width: double.infinity,
             height: 67,
             child: ElevatedButton(
-              onPressed: () {
-                context.read<CartProvider>().addItemToPreOrder(product);
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${product.name} added to pre-order basket!'),
-                    duration: const Duration(seconds: 1),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
+              onPressed: () async {
+                try {
+                  await ref.read(cartNotifierProvider.notifier).addToCart(
+                        product.id,
+                        quantity: 1,
+                        preorder: true,
+                      );
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          '${product.name} added to pre-order basket!',
+                        ),
+                        duration: const Duration(seconds: 1),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('$e'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.preOrderOrange,

@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:get_storage/get_storage.dart';
-import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/routes/app_router.dart';
-import 'core/providers/cart_provider.dart';
-import 'core/providers/favourites_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,17 +36,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => CartProvider()),
-        ChangeNotifierProvider(create: (_) => FavouritesProvider()),
-      ],
-      child: MaterialApp.router(
-        title: 'Nectar - Grocery Store',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        routerConfig: AppRouter.router,
-      ),
+    return MaterialApp.router(
+      title: 'Nectar - Grocery Store',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
+      routerConfig: AppRouter.router,
     );
   }
 }

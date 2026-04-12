@@ -1,31 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
-import '../../core/providers/cart_provider.dart';
+import '../../core/models/commerce/cart_dtos.dart';
+import '../../core/providers/cart_providers.dart';
 import '../home/widgets/search_bar_widget.dart';
 import 'widgets/cart_item_widget.dart';
 import 'widgets/checkout_bottom_sheet.dart';
 
-class CartScreen extends StatefulWidget {
+class CartScreen extends ConsumerStatefulWidget {
   const CartScreen({super.key});
 
   @override
-  State<CartScreen> createState() => _CartScreenState();
+  ConsumerState<CartScreen> createState() => _CartScreenState();
 }
 
-class _CartScreenState extends State<CartScreen> {
+class _CartScreenState extends ConsumerState<CartScreen> {
   bool _isInstantCart = true;
+
+  double _tabTotal(List<CartLineDto> lines) {
+    return lines.fold<double>(0, (a, b) => a + b.subtotal);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final cart = context.watch<CartProvider>();
-    final cartItems = _isInstantCart
-        ? cart.getInstantItemsList()
-        : cart.getPreOrderItemsList();
-    final total = _isInstantCart
-        ? cart.instantTotalAmount
-        : cart.preOrderTotalAmount;
+    final cartAsync = ref.watch(cartNotifierProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -46,134 +46,170 @@ class _CartScreenState extends State<CartScreen> {
           child: Container(color: const Color(0xFFE2E2E2), height: 1),
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 10),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: CustomSearchBar(),
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
+      body: cartAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Expanded(
-                  child: _CartTab(
-                    label: 'Instant cart',
-                    isSelected: _isInstantCart,
-                    activeColor: AppColors.preOrderOrange,
-                    onTap: () => setState(() => _isInstantCart = true),
+                Text(
+                  'Could not load cart',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.red.shade800,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _CartTab(
-                    label: 'Pre-order cart',
-                    isSelected: !_isInstantCart,
-                    activeColor: AppColors.primary,
-                    onTap: () => setState(() => _isInstantCart = false),
-                  ),
+                const SizedBox(height: 8),
+                Text('$e', textAlign: TextAlign.center),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: () =>
+                      ref.invalidate(cartNotifierProvider),
+                  child: const Text('Retry'),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: Stack(
-              children: [
-                ListView.builder(
-                  itemCount: cartItems.length,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  itemBuilder: (context, index) {
-                    final item = cartItems[index];
-                    return CartItemWidget(
-                      product: item.product,
-                      quantity: item.quantity,
-                      onIncrement: () {
-                        if (_isInstantCart) {
-                          cart.addItemToInstant(item.product);
-                        } else {
-                          cart.addItemToPreOrder(item.product);
-                        }
-                      },
-                      onDecrement: () {
-                        cart.removeSingleItem(item.product.id);
-                      },
-                      onRemove: () {
-                        if (_isInstantCart) {
-                          cart.removeInstantItem(item.product.id);
-                        } else {
-                          cart.removePreOrderItem(item.product.id);
-                        }
-                      },
-                    );
-                  },
+        ),
+        data: (cart) {
+          final cartItems =
+              _isInstantCart ? cart.instant : cart.preorder;
+          final total = _tabTotal(cartItems);
+          final notifier = ref.read(cartNotifierProvider.notifier);
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: CustomSearchBar(),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _CartTab(
+                        label: 'Instant cart',
+                        isSelected: _isInstantCart,
+                        activeColor: AppColors.preOrderOrange,
+                        onTap: () => setState(() => _isInstantCart = true),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _CartTab(
+                        label: 'Pre-order cart',
+                        isSelected: !_isInstantCart,
+                        activeColor: AppColors.primary,
+                        onTap: () => setState(() => _isInstantCart = false),
+                      ),
+                    ),
+                  ],
                 ),
-                Positioned(
-                  bottom: 25,
-                  left: 20,
-                  right: 20,
-                  child: ElevatedButton(
-                    onPressed: cartItems.isEmpty
-                        ? null
-                        : () {
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              builder: (context) {
-                                return CheckoutBottomSheet(totalPrice: total);
-                              },
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: Stack(
+                  children: [
+                    ListView.builder(
+                      itemCount: cartItems.length,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
+                      itemBuilder: (context, index) {
+                        final item = cartItems[index];
+                        final qty = item.quantity.round();
+                        return CartItemWidget(
+                          line: item,
+                          onIncrement: () {
+                            notifier.setLineQuantity(
+                              item.id,
+                              qty + 1,
                             );
                           },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      disabledBackgroundColor: const Color(0xFFE2E2E2),
-                      minimumSize: const Size(double.infinity, 67),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(19),
-                      ),
-                      elevation: 0,
+                          onDecrement: () {
+                            notifier.setLineQuantity(
+                              item.id,
+                              qty - 1,
+                            );
+                          },
+                          onRemove: () => notifier.removeLine(item.id),
+                        );
+                      },
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(width: 50),
-                        Expanded(
-                          child: Text(
-                            'Go to Checkout',
-                            textAlign: TextAlign.center,
-                            style: AppTextStyles.cartButton,
+                    Positioned(
+                      bottom: 25,
+                      left: 20,
+                      right: 20,
+                      child: ElevatedButton(
+                        onPressed: cartItems.isEmpty
+                            ? null
+                            : () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (context) {
+                                    return CheckoutBottomSheet(
+                                      totalPrice: total,
+                                    );
+                                  },
+                                );
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          disabledBackgroundColor: const Color(0xFFE2E2E2),
+                          minimumSize: const Size(double.infinity, 67),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(19),
                           ),
+                          elevation: 0,
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF489E67),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            '₹${total.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(width: 50),
+                            Expanded(
+                              child: Text(
+                                'Go to Checkout',
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.cartButton,
+                              ),
                             ),
-                          ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF489E67),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                '₹${total.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }

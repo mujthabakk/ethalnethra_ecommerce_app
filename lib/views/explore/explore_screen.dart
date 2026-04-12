@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/app_shimmer.dart';
-import '../../core/mappers/catalog_product_mapper.dart';
+import '../../core/mappers/category_image_path.dart';
+import '../../core/models/catalog/category_item.dart';
 import '../../core/providers/catalog_providers.dart';
 import '../../core/routes/app_router.dart';
 import '../../models/category_model.dart';
+import '../../models/product_model.dart';
 import '../home/widgets/home_store_search_bar.dart';
 import 'widgets/explore_category_card.dart';
 
@@ -24,19 +26,26 @@ class ExploreScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(homeProductsProvider);
     final filtersAsync = ref.watch(filtersProvider);
     final categoriesAsync = ref.watch(homeCategoriesProvider);
 
-    final fromCategories = categoriesAsync.maybeWhen(
-      data: (list) => list.map((c) => c.name).toList(),
-      orElse: () => <String>[],
+    final categoryItems = categoriesAsync.maybeWhen(
+      data: (list) => list,
+      orElse: () => <CategoryItem>[],
     );
 
+    final fromCategoryNames =
+        categoryItems.map((c) => c.name).toList();
+
     final names = filtersAsync.maybeWhen(
-      data: (f) => f.categories.isNotEmpty ? f.categories : fromCategories,
-      orElse: () => fromCategories,
+      data: (f) =>
+          f.categories.isNotEmpty ? f.categories : fromCategoryNames,
+      orElse: () => fromCategoryNames,
     );
+
+    final byName = {
+      for (final c in categoryItems) c.name.toLowerCase(): c,
+    };
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -103,34 +112,26 @@ class ExploreScreen extends ConsumerWidget {
                           ),
                           itemBuilder: (context, index) {
                             final title = names[index];
+                            final match = byName[title.toLowerCase()];
+                            final imagePath = match != null
+                                ? categoryDisplayImagePath(match)
+                                : categoryFallbackAssetForName(title);
                             final model = CategoryModel(
-                              id: title,
+                              id: match?.id ?? title,
                               name: title,
-                              imagePath: 'asstes/images/grocery.png',
+                              imagePath: imagePath,
                               backgroundColor: _exploreCategoryColors[
                                   index % _exploreCategoryColors.length],
                             );
                             return ExploreCategoryCard(
                               category: model,
                               onTap: () {
-                                final prods = ref
-                                        .read(homeProductsProvider)
-                                        .valueOrNull ??
-                                    [];
-                                final filtered = prods
-                                    .where(
-                                      (p) =>
-                                          p.category.toLowerCase() ==
-                                          title.toLowerCase(),
-                                    )
-                                    .toList();
                                 context.push(
                                   AppRouter.categoryProducts,
                                   extra: {
                                     'title': title,
-                                    'products': filtered
-                                        .map((e) => e.toProductModel())
-                                        .toList(),
+                                    'products': const <ProductModel>[],
+                                    'apiCategory': title,
                                   },
                                 );
                               },

@@ -1,37 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:provider/provider.dart';
+
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
+import '../../core/mappers/product_detail_mapper.dart';
+import '../../core/models/catalog/product_detail_dto.dart';
+import '../../core/providers/cart_providers.dart';
+import '../../core/providers/catalog_providers.dart';
+import '../../core/providers/favorites_providers.dart';
 import '../../core/widgets/app_network_image.dart';
 import '../../models/product_model.dart';
-import '../../core/providers/cart_provider.dart';
-import '../../core/providers/favourites_provider.dart';
 
-class ProductDetailScreen extends StatefulWidget {
+class ProductDetailScreen extends ConsumerStatefulWidget {
   final ProductModel product;
 
   const ProductDetailScreen({super.key, required this.product});
 
   @override
-  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
+  ConsumerState<ProductDetailScreen> createState() =>
+      _ProductDetailScreenState();
 }
 
-class _ProductDetailScreenState extends State<ProductDetailScreen> {
+class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   int quantity = 1;
   int _currentImageIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final detailAsync = ref.watch(productDetailProvider(widget.product.id));
+    final detail = detailAsync.valueOrNull;
 
-    // Dummy images for slider
-    final List<String> productImages = [
-      widget.product.imagePath,
-      widget.product.imagePath, // In a real app these would be different
-      widget.product.imagePath,
-    ];
+    final merged = detail != null
+        ? detail.toProductModel(widget.product)
+        : widget.product;
+
+    final productImages = _imageUrls(detail, merged.imagePath);
+
+    final favList = ref.watch(favoritesNotifierProvider).valueOrNull ?? [];
+    final isFavorite = favoriteIdsContain(favList, widget.product.id);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -64,7 +73,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Product Image Slider Container
                 Container(
                   height: 371.4,
                   width: screenWidth,
@@ -90,19 +98,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             });
                           },
                         ),
-                        items: productImages.map((imagePath) {
-                          return Hero(
-                            tag: 'product_${widget.product.id}',
-                            child: AppImage(
-                              path: imagePath,
-                              height: 200,
-                              fit: BoxFit.contain,
-                            ),
+                        items: productImages.asMap().entries.map((entry) {
+                          final imagePath = entry.value;
+                          final img = AppImage(
+                            path: imagePath,
+                            height: 200,
+                            fit: BoxFit.contain,
                           );
+                          return entry.key == 0
+                              ? Hero(
+                                  tag: 'product_${widget.product.id}',
+                                  child: img,
+                                )
+                              : img;
                         }).toList(),
                       ),
                       const SizedBox(height: 30),
-                      // Interactive Indicator dots
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: productImages.asMap().entries.map((entry) {
@@ -133,38 +144,54 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              widget.product.name,
+                              merged.name,
                               style: AppTextStyles.productDetailTitle,
                             ),
                           ),
-                          Consumer<FavouritesProvider>(
-                            builder: (context, favProvider, child) {
-                              final isFavorite = favProvider.isFavourite(
-                                widget.product.id,
-                              );
-                              return IconButton(
-                                onPressed: () {
-                                  favProvider.toggleFavourite(widget.product);
-                                },
-                                icon: Icon(
-                                  isFavorite
-                                      ? Icons.favorite
-                                      : Icons.favorite_border,
-                                  color: isFavorite
-                                      ? Colors.red
-                                      : const Color(0xFF7C7C7C),
-                                  size: 28,
-                                ),
-                              );
-                            },
+                          IconButton(
+                            onPressed: detailAsync.isLoading
+                                ? null
+                                : () async {
+                                    try {
+                                      await ref
+                                          .read(favoritesNotifierProvider
+                                              .notifier)
+                                          .toggleFavorite(widget.product.id);
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text('$e'),
+                                            behavior:
+                                                SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                            icon: Icon(
+                              isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: isFavorite
+                                  ? Colors.red
+                                  : const Color(0xFF7C7C7C),
+                              size: 28,
+                            ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 5),
                       Text(
-                        '1kg, Price',
+                        merged.description,
                         style: AppTextStyles.productDetailSubtitle,
                       ),
+                      if (detailAsync.isLoading)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 8),
+                          child: LinearProgressIndicator(minHeight: 2),
+                        ),
                       const SizedBox(height: 30),
                       Row(
                         children: [
@@ -203,7 +230,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           }, color: AppColors.primary),
                           const Spacer(),
                           Text(
-                            '₹${(widget.product.price * quantity).toStringAsFixed(2)}',
+                            '₹${(merged.price * quantity).toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -216,53 +243,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       const _CustomDivider(),
                       _buildExpansionTile(
                         'Product Detail',
-                        widget.product.longDescription,
+                        merged.longDescription,
                       ),
                       const _CustomDivider(),
-                      _buildListTile(
-                        'Nutrations',
-                        trailing: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEBEBEB),
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          child: const Text(
-                            '100gr',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF7C7C7C),
-                            ),
-                          ),
-                        ),
-                      ),
+                      _buildNutritionSection(detail),
                       const _CustomDivider(),
-                      _buildListTile(
-                        'Review',
-                        trailing: Row(
-                          children: List.generate(
-                            5,
-                            (index) => const Icon(
-                              Icons.star,
-                              color: Color(0xFFF3603F),
-                              size: 16,
-                            ),
-                          ),
-                        ),
-                      ),
+                      _buildReviewSection(detail),
                       SizedBox(
-                          height: widget.product.isPreOrder ? 200 : 120),
+                          height: merged.isPreOrder ? 200 : 120),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-          // Add To Instant Basket & Add To Pre-order Basket
           Positioned(
             bottom: 30,
             left: 25,
@@ -274,20 +268,36 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   width: double.infinity,
                   height: 67,
                   child: ElevatedButton(
-                    onPressed: () {
-                      context.read<CartProvider>().addItemToInstant(
-                        widget.product,
-                        quantity: quantity,
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            '${widget.product.name} added to instant basket!',
-                          ),
-                          duration: const Duration(seconds: 1),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
+                    onPressed: () async {
+                      try {
+                        await ref
+                            .read(cartNotifierProvider.notifier)
+                            .addToCart(
+                              merged.id,
+                              quantity: quantity,
+                              preorder: false,
+                            );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                '${merged.name} added to instant basket!',
+                              ),
+                              duration: const Duration(seconds: 1),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('$e'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -302,26 +312,42 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                   ),
                 ),
-                if (widget.product.isPreOrder) ...[
+                if (merged.isPreOrder) ...[
                   const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,
                     height: 67,
                     child: ElevatedButton(
-                      onPressed: () {
-                        context.read<CartProvider>().addItemToPreOrder(
-                          widget.product,
-                          quantity: quantity,
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '${widget.product.name} added to pre-order basket!',
-                            ),
-                            duration: const Duration(seconds: 1),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
+                      onPressed: () async {
+                        try {
+                          await ref
+                              .read(cartNotifierProvider.notifier)
+                              .addToCart(
+                                merged.id,
+                                quantity: quantity,
+                                preorder: true,
+                              );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  '${merged.name} added to pre-order basket!',
+                                ),
+                                duration: const Duration(seconds: 1),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('$e'),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.preOrderOrange,
@@ -340,6 +366,126 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  List<String> _imageUrls(ProductDetailDto? detail, String fallback) {
+    if (detail != null && detail.images.isNotEmpty) {
+      return detail.images;
+    }
+    return [fallback];
+  }
+
+  Widget _buildNutritionSection(ProductDetailDto? detail) {
+    final list = detail?.nutritions ?? [];
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        title: Text(
+          'Nutrition',
+          style: AppTextStyles.productDetailSectionHeader,
+        ),
+        tilePadding: EdgeInsets.zero,
+        iconColor: AppColors.darkBackground,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20.0),
+            child: list.isEmpty
+                ? Text(
+                    'No nutrition information available.',
+                    style: AppTextStyles.productDetailDescription,
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: list
+                        .map(
+                          (e) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              e is Map
+                                  ? e.entries
+                                      .map((x) => '${x.key}: ${x.value}')
+                                      .join(', ')
+                                  : e.toString(),
+                              style: AppTextStyles.productDetailDescription,
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewSection(ProductDetailDto? detail) {
+    final reviews = detail?.reviews ?? [];
+    final count = detail?.reviewCount ?? 0;
+    final rating = detail?.rating;
+
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        title: Text(
+          'Reviews',
+          style: AppTextStyles.productDetailSectionHeader,
+        ),
+        tilePadding: EdgeInsets.zero,
+        iconColor: AppColors.darkBackground,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: Row(
+              children: [
+                Text(
+                  count == 0 ? 'No ratings yet' : '$count review(s)',
+                  style: AppTextStyles.productDetailDescription,
+                ),
+                const Spacer(),
+                if (rating != null)
+                  Row(
+                    children: List.generate(5, (i) {
+                      final v = rating - i;
+                      final fill = v >= 1 ? 1.0 : (v > 0 ? v : 0.0);
+                      return Icon(
+                        fill >= 1
+                            ? Icons.star
+                            : (fill > 0 ? Icons.star_half : Icons.star_border),
+                        color: const Color(0xFFF3603F),
+                        size: 18,
+                      );
+                    }),
+                  ),
+              ],
+            ),
+          ),
+          if (reviews.isEmpty)
+            Text(
+              'No reviews yet.',
+              style: AppTextStyles.productDetailDescription,
+            )
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: reviews
+                  .map(
+                    (e) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        e is Map
+                            ? e.entries
+                                .map((x) => '${x.key}: ${x.value}')
+                                .join('\n')
+                            : e.toString(),
+                        style: AppTextStyles.productDetailDescription,
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
         ],
       ),
     );
@@ -372,27 +518,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       ),
     );
   }
-
-  Widget _buildListTile(String title, {Widget? trailing}) {
-    return InkWell(
-      onTap: () {},
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20.0),
-        child: Row(
-          children: [
-            Text(title, style: AppTextStyles.productDetailSectionHeader),
-            const Spacer(),
-            if (trailing != null) ...[trailing, const SizedBox(width: 15)],
-            const Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: AppColors.darkBackground,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _CustomDivider extends StatelessWidget {
@@ -403,7 +528,7 @@ class _CustomDivider extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: 1,
-      color: const Color(0xFFE2E2E2).withOpacity(0.7),
+      color: const Color(0xFFE2E2E2).withValues(alpha: 0.7),
     );
   }
 }

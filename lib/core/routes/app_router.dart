@@ -113,9 +113,15 @@ class AppRouter {
         name: 'categoryProducts',
         builder: (context, state) {
           final extras = state.extra as Map<String, dynamic>;
+          final products = extras['products'] as List<ProductModel>?;
+          final initial = extras['initialProducts'] as List<ProductModel>?;
           return CategoryProductsScreen(
             title: extras['title'] as String,
-            products: extras['products'] as List<ProductModel>,
+            initialProducts: products ?? initial ?? const [],
+            apiCategory: extras['apiCategory'] as String?,
+            apiSearch: extras['apiSearch'] as String?,
+            productType: extras['productType'] as String?,
+            fetchAll: extras['fetchAll'] == true,
           );
         },
       ),
