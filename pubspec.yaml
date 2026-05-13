@@ -1,7 +1,7 @@
 name: ethalnethra_ecommerce_app
-description: "A new Flutter project."
+description: "Ethalnethra mart"
 publish_to: 'none'
-version: 0.1.0
+version: 1.0.0+7
 
 environment:
   sdk: ^3.9.2

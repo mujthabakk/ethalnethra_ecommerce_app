@@ -21,6 +21,7 @@ import '../../views/account/notifications_screen.dart';
 import '../../views/account/delivery_address_screen.dart';
 import '../../views/account/promo_code_screen.dart';
 import '../../views/account/select_delivery_location_screen.dart';
+import '../../core/storage/auth_storage.dart';
 import '../../core/models/orders/orders_models.dart';
 import '../../models/product_model.dart';
 
@@ -50,6 +51,7 @@ class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
   // Route names
+  static const String splash = '/splash';
   static const String welcome = '/';
   static const String signin = '/signin';
   static const String mobileNumber = '/mobile-number';
@@ -74,10 +76,15 @@ class AppRouter {
   static const String selectLocation = '/select-location';
   static const String services = '/services';
 
+  static String get _initialLocation {
+    final token = AuthStorage().token;
+    return token != null && token.isNotEmpty ? mainNav : mobileNumber;
+  }
+
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: mainNav,
-    debugLogDiagnostics: true,
+    initialLocation: _initialLocation,
+    debugLogDiagnostics: false,
     routes: [
       GoRoute(
         path: welcome,

@@ -23,7 +23,6 @@ class MobileNumberScreen extends ConsumerStatefulWidget {
 
 class _MobileNumberScreenState extends ConsumerState<MobileNumberScreen> {
   final _phoneController = TextEditingController();
-  final _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -36,7 +35,6 @@ class _MobileNumberScreenState extends ConsumerState<MobileNumberScreen> {
   @override
   void dispose() {
     _phoneController.dispose();
-    _focusNode.dispose();
     super.dispose();
   }
 
@@ -123,21 +121,6 @@ class _MobileNumberScreenState extends ConsumerState<MobileNumberScreen> {
               ),
             ),
           ),
-          Positioned(
-            bottom: -50,
-            left: 0,
-            right: 0,
-            child: Opacity(
-              opacity: 0.15,
-              child: Transform.rotate(
-                angle: 3.14159,
-                child: Image.asset(
-                  'asstes/images/numbers_page_bg.png',
-                  fit: BoxFit.fitWidth,
-                ),
-              ),
-            ),
-          ),
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,10 +162,9 @@ class _MobileNumberScreenState extends ConsumerState<MobileNumberScreen> {
                         const SizedBox(height: 10),
                         CustomTextField(
                           controller: _phoneController,
-                          focusNode: _focusNode,
                           keyboardType: TextInputType.none,
-                          autofocus: true,
-                          showCursor: true,
+                          autofocus: false,
+                          showCursor: false,
                           readOnly: true,
                           hintText: '',
                         ),

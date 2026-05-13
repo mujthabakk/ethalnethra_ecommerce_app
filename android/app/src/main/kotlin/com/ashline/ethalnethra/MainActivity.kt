@@ -1,4 +1,4 @@
-package com.example.ethalnethra_ecommerce_app
+package com.ashline.ethalnethra
 
 import io.flutter.embedding.android.FlutterActivity
 
