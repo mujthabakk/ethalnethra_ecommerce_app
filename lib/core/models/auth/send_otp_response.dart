@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../safe_json_parse.dart';
 import 'msg91_info.dart';
 
 part 'send_otp_response.freezed.dart';
@@ -15,5 +16,5 @@ class SendOtpResponse with _$SendOtpResponse {
   }) = _SendOtpResponse;
 
   factory SendOtpResponse.fromJson(Map<String, dynamic> json) =>
-      _$SendOtpResponseFromJson(json);
+      sendOtpResponseFromJsonLoose(json);
 }

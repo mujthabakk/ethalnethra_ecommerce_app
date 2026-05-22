@@ -194,13 +194,20 @@ mixin _$UserAddressDto {
   int get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'user_id', fromJson: intFromJson)
   int get userId => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: stringFromJson)
   String get label => throw _privateConstructorUsedError;
   @JsonKey(fromJson: stringFromJson)
   String get zoneId => throw _privateConstructorUsedError;
   @JsonKey(fromJson: stringFromJson)
   String get areaId => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: stringFromJson)
   String get addressLine => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: stringFromJson)
   String get pincode => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: boolFromJson)
+  bool get isDefault => throw _privateConstructorUsedError;
+  @JsonKey(name: 'pincode_id', fromJson: intNullableFromJson)
+  int? get pincodeId => throw _privateConstructorUsedError;
   String? get createdAt => throw _privateConstructorUsedError;
   String? get updatedAt => throw _privateConstructorUsedError;
 
@@ -224,11 +231,13 @@ abstract class $UserAddressDtoCopyWith<$Res> {
   $Res call({
     @JsonKey(fromJson: intFromJson) int id,
     @JsonKey(name: 'user_id', fromJson: intFromJson) int userId,
-    String label,
+    @JsonKey(fromJson: stringFromJson) String label,
     @JsonKey(fromJson: stringFromJson) String zoneId,
     @JsonKey(fromJson: stringFromJson) String areaId,
-    String addressLine,
-    String pincode,
+    @JsonKey(fromJson: stringFromJson) String addressLine,
+    @JsonKey(fromJson: stringFromJson) String pincode,
+    @JsonKey(fromJson: boolFromJson) bool isDefault,
+    @JsonKey(name: 'pincode_id', fromJson: intNullableFromJson) int? pincodeId,
     String? createdAt,
     String? updatedAt,
   });
@@ -256,6 +265,8 @@ class _$UserAddressDtoCopyWithImpl<$Res, $Val extends UserAddressDto>
     Object? areaId = null,
     Object? addressLine = null,
     Object? pincode = null,
+    Object? isDefault = null,
+    Object? pincodeId = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -289,6 +300,14 @@ class _$UserAddressDtoCopyWithImpl<$Res, $Val extends UserAddressDto>
                 ? _value.pincode
                 : pincode // ignore: cast_nullable_to_non_nullable
                       as String,
+            isDefault: null == isDefault
+                ? _value.isDefault
+                : isDefault // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            pincodeId: freezed == pincodeId
+                ? _value.pincodeId
+                : pincodeId // ignore: cast_nullable_to_non_nullable
+                      as int?,
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -315,11 +334,13 @@ abstract class _$$UserAddressDtoImplCopyWith<$Res>
   $Res call({
     @JsonKey(fromJson: intFromJson) int id,
     @JsonKey(name: 'user_id', fromJson: intFromJson) int userId,
-    String label,
+    @JsonKey(fromJson: stringFromJson) String label,
     @JsonKey(fromJson: stringFromJson) String zoneId,
     @JsonKey(fromJson: stringFromJson) String areaId,
-    String addressLine,
-    String pincode,
+    @JsonKey(fromJson: stringFromJson) String addressLine,
+    @JsonKey(fromJson: stringFromJson) String pincode,
+    @JsonKey(fromJson: boolFromJson) bool isDefault,
+    @JsonKey(name: 'pincode_id', fromJson: intNullableFromJson) int? pincodeId,
     String? createdAt,
     String? updatedAt,
   });
@@ -346,6 +367,8 @@ class __$$UserAddressDtoImplCopyWithImpl<$Res>
     Object? areaId = null,
     Object? addressLine = null,
     Object? pincode = null,
+    Object? isDefault = null,
+    Object? pincodeId = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -379,6 +402,14 @@ class __$$UserAddressDtoImplCopyWithImpl<$Res>
             ? _value.pincode
             : pincode // ignore: cast_nullable_to_non_nullable
                   as String,
+        isDefault: null == isDefault
+            ? _value.isDefault
+            : isDefault // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        pincodeId: freezed == pincodeId
+            ? _value.pincodeId
+            : pincodeId // ignore: cast_nullable_to_non_nullable
+                  as int?,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -399,11 +430,13 @@ class _$UserAddressDtoImpl implements _UserAddressDto {
   const _$UserAddressDtoImpl({
     @JsonKey(fromJson: intFromJson) required this.id,
     @JsonKey(name: 'user_id', fromJson: intFromJson) required this.userId,
-    required this.label,
+    @JsonKey(fromJson: stringFromJson) required this.label,
     @JsonKey(fromJson: stringFromJson) required this.zoneId,
     @JsonKey(fromJson: stringFromJson) required this.areaId,
-    required this.addressLine,
-    required this.pincode,
+    @JsonKey(fromJson: stringFromJson) required this.addressLine,
+    @JsonKey(fromJson: stringFromJson) required this.pincode,
+    @JsonKey(fromJson: boolFromJson) this.isDefault = false,
+    @JsonKey(name: 'pincode_id', fromJson: intNullableFromJson) this.pincodeId,
     this.createdAt,
     this.updatedAt,
   });
@@ -418,6 +451,7 @@ class _$UserAddressDtoImpl implements _UserAddressDto {
   @JsonKey(name: 'user_id', fromJson: intFromJson)
   final int userId;
   @override
+  @JsonKey(fromJson: stringFromJson)
   final String label;
   @override
   @JsonKey(fromJson: stringFromJson)
@@ -426,9 +460,17 @@ class _$UserAddressDtoImpl implements _UserAddressDto {
   @JsonKey(fromJson: stringFromJson)
   final String areaId;
   @override
+  @JsonKey(fromJson: stringFromJson)
   final String addressLine;
   @override
+  @JsonKey(fromJson: stringFromJson)
   final String pincode;
+  @override
+  @JsonKey(fromJson: boolFromJson)
+  final bool isDefault;
+  @override
+  @JsonKey(name: 'pincode_id', fromJson: intNullableFromJson)
+  final int? pincodeId;
   @override
   final String? createdAt;
   @override
@@ -436,7 +478,7 @@ class _$UserAddressDtoImpl implements _UserAddressDto {
 
   @override
   String toString() {
-    return 'UserAddressDto(id: $id, userId: $userId, label: $label, zoneId: $zoneId, areaId: $areaId, addressLine: $addressLine, pincode: $pincode, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserAddressDto(id: $id, userId: $userId, label: $label, zoneId: $zoneId, areaId: $areaId, addressLine: $addressLine, pincode: $pincode, isDefault: $isDefault, pincodeId: $pincodeId, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -452,6 +494,10 @@ class _$UserAddressDtoImpl implements _UserAddressDto {
             (identical(other.addressLine, addressLine) ||
                 other.addressLine == addressLine) &&
             (identical(other.pincode, pincode) || other.pincode == pincode) &&
+            (identical(other.isDefault, isDefault) ||
+                other.isDefault == isDefault) &&
+            (identical(other.pincodeId, pincodeId) ||
+                other.pincodeId == pincodeId) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -469,6 +515,8 @@ class _$UserAddressDtoImpl implements _UserAddressDto {
     areaId,
     addressLine,
     pincode,
+    isDefault,
+    pincodeId,
     createdAt,
     updatedAt,
   );
@@ -494,11 +542,14 @@ abstract class _UserAddressDto implements UserAddressDto {
   const factory _UserAddressDto({
     @JsonKey(fromJson: intFromJson) required final int id,
     @JsonKey(name: 'user_id', fromJson: intFromJson) required final int userId,
-    required final String label,
+    @JsonKey(fromJson: stringFromJson) required final String label,
     @JsonKey(fromJson: stringFromJson) required final String zoneId,
     @JsonKey(fromJson: stringFromJson) required final String areaId,
-    required final String addressLine,
-    required final String pincode,
+    @JsonKey(fromJson: stringFromJson) required final String addressLine,
+    @JsonKey(fromJson: stringFromJson) required final String pincode,
+    @JsonKey(fromJson: boolFromJson) final bool isDefault,
+    @JsonKey(name: 'pincode_id', fromJson: intNullableFromJson)
+    final int? pincodeId,
     final String? createdAt,
     final String? updatedAt,
   }) = _$UserAddressDtoImpl;
@@ -513,6 +564,7 @@ abstract class _UserAddressDto implements UserAddressDto {
   @JsonKey(name: 'user_id', fromJson: intFromJson)
   int get userId;
   @override
+  @JsonKey(fromJson: stringFromJson)
   String get label;
   @override
   @JsonKey(fromJson: stringFromJson)
@@ -521,9 +573,17 @@ abstract class _UserAddressDto implements UserAddressDto {
   @JsonKey(fromJson: stringFromJson)
   String get areaId;
   @override
+  @JsonKey(fromJson: stringFromJson)
   String get addressLine;
   @override
+  @JsonKey(fromJson: stringFromJson)
   String get pincode;
+  @override
+  @JsonKey(fromJson: boolFromJson)
+  bool get isDefault;
+  @override
+  @JsonKey(name: 'pincode_id', fromJson: intNullableFromJson)
+  int? get pincodeId;
   @override
   String? get createdAt;
   @override

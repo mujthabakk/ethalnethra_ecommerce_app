@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/providers/cart_providers.dart';
+import '../../core/providers/catalog_providers.dart';
+import '../../core/providers/favorites_providers.dart';
+import '../../core/providers/location_user_providers.dart';
 import '../../core/providers/main_nav_tab_provider.dart';
 import '../home/home_screen.dart';
 import '../explore/explore_screen.dart';
@@ -49,6 +53,7 @@ class MainNavScreen extends ConsumerWidget {
             currentIndex: currentIndex,
             onTap: (index) {
               ref.read(mainNavTabIndexProvider.notifier).state = index;
+              _refreshTabData(ref, index);
             },
             type: BottomNavigationBarType.fixed,
             backgroundColor: Colors.white,
@@ -132,5 +137,30 @@ class MainNavScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  static void _refreshTabData(WidgetRef ref, int index) {
+    switch (index) {
+      case 0:
+        ref.invalidate(homeBannersProvider);
+        ref.invalidate(homeCategoriesProvider);
+        ref.invalidate(homeProductsProvider);
+        ref.invalidate(filtersProvider);
+        break;
+      case 1:
+        ref.invalidate(homeProductsProvider);
+        ref.invalidate(filtersProvider);
+        break;
+      case 2:
+        ref.invalidate(cartNotifierProvider);
+        break;
+      case 3:
+        ref.invalidate(favoritesNotifierProvider);
+        break;
+      case 4:
+        ref.invalidate(userDetailsProvider);
+        ref.invalidate(userAddressesProvider);
+        break;
+    }
   }
 }

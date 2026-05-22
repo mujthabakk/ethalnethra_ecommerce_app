@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../safe_json_parse.dart';
+
 part 'msg91_info.freezed.dart';
 part 'msg91_info.g.dart';
 
@@ -13,5 +15,5 @@ class Msg91Info with _$Msg91Info {
   }) = _Msg91Info;
 
   factory Msg91Info.fromJson(Map<String, dynamic> json) =>
-      _$Msg91InfoFromJson(json);
+      msg91InfoFromJsonLoose(json);
 }

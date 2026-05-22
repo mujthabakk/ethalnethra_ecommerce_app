@@ -23,6 +23,7 @@ abstract final class ApiEndpoints {
 
   static const String locationsZones = '/api/locations/zones';
   static const String locationsAreas = '/api/locations/areas';
+  static const String locationsPincodes = '/api/locations/pincodes';
   static const String userAddresses = '/api/user/addresses';
   static const String userDetails = '/api/user/details';
 

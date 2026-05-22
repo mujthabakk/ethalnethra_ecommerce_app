@@ -100,7 +100,12 @@ class _CategoryProductsScreenState extends ConsumerState<CategoryProductsScreen>
       _visible = q.isEmpty
           ? List<ProductModel>.from(_allProducts)
           : _allProducts
-              .where((p) => p.name.toLowerCase().contains(q))
+              .where(
+                (p) =>
+                    p.displayName.toLowerCase().contains(q) ||
+                    p.name.toLowerCase().contains(q) ||
+                    p.nameMl.toLowerCase().contains(q),
+              )
               .toList();
     });
   }

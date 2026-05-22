@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/models/location/area_item.dart';
+import '../../core/models/location/pincode_item.dart';
 import '../../core/models/location/zone_item.dart';
 import '../../core/providers/location_user_providers.dart';
 import '../../core/routes/app_router.dart';
@@ -23,21 +24,21 @@ class LocationScreen extends ConsumerStatefulWidget {
 class _LocationScreenState extends ConsumerState<LocationScreen> {
   final _labelController = TextEditingController(text: 'Home');
   final _addressLineController = TextEditingController();
-  final _pincodeController = TextEditingController();
 
   String? _selectedZoneName;
   int? _selectedZoneId;
   String? _selectedAreaName;
   int? _selectedAreaId;
+  String? _selectedPincodeId;
 
   bool _seededFirstZone = false;
   bool _pendingAreaSync = false;
+  bool _pendingPincodeSync = false;
 
   @override
   void dispose() {
     _labelController.dispose();
     _addressLineController.dispose();
-    _pincodeController.dispose();
     super.dispose();
   }
 
@@ -72,14 +73,28 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
       setState(() {
         _selectedAreaName = areas.first.name;
         _selectedAreaId = int.tryParse(areas.first.id);
+        _selectedPincodeId = null;
       });
+    });
+  }
+
+  void _syncDefaultPincodeIfNeeded(List<PincodeItem> pincodes) {
+    if (pincodes.isEmpty || !mounted) return;
+    final valid = _selectedPincodeId != null &&
+        pincodes.any((p) => p.id == _selectedPincodeId);
+    if (valid || _pendingPincodeSync) return;
+    _pendingPincodeSync = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _pendingPincodeSync = false;
+      if (!mounted) return;
+      setState(() => _selectedPincodeId = pincodes.first.id);
     });
   }
 
   Future<void> _onSubmit(List<ZoneItem> zones) async {
     final zoneId = _selectedZoneId ?? _zoneIdForName(zones, _selectedZoneName);
     final addressLine = _addressLineController.text.trim();
-    final pincode = _pincodeController.text.trim();
+    final pincodeId = _selectedPincodeId?.trim() ?? '';
     final label = _labelController.text.trim().isEmpty
         ? 'Home'
         : _labelController.text.trim();
@@ -87,11 +102,11 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
     if (zoneId == null ||
         _selectedAreaId == null ||
         addressLine.isEmpty ||
-        pincode.isEmpty) {
+        pincodeId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Please select zone & area and fill address & pincode',
+            'Please select zone, area, pincode and fill address',
           ),
         ),
       );
@@ -103,7 +118,7 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
           zoneId: zoneId,
           areaId: _selectedAreaId!,
           addressLine: addressLine,
-          pincode: pincode,
+          pincodeId: pincodeId,
         );
     if (!mounted) return;
     if (ok) {
@@ -136,6 +151,7 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
             _selectedZoneId = int.tryParse(zones.first.id);
             _selectedAreaName = null;
             _selectedAreaId = null;
+            _selectedPincodeId = null;
           });
         });
       }
@@ -144,6 +160,10 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
     final areasAsync = _selectedZoneId != null
         ? ref.watch(areasForZoneProvider(_selectedZoneId!))
         : const AsyncValue<List<AreaItem>>.data([]);
+
+    final pincodesAsync = _selectedAreaId != null
+        ? ref.watch(pincodesForAreaProvider(_selectedAreaId!))
+        : const AsyncValue<List<PincodeItem>>.data([]);
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -265,6 +285,8 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
                                       _zoneIdForName(zones, value);
                                   _selectedAreaName = null;
                                   _selectedAreaId = null;
+                                  _selectedPincodeId = null;
+                                  _pendingPincodeSync = false;
                                 });
                               },
                             ),
@@ -294,6 +316,8 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
                                       _selectedAreaName = value;
                                       _selectedAreaId =
                                           _areaIdForName(areas, value);
+                                      _selectedPincodeId = null;
+                                      _pendingPincodeSync = false;
                                     });
                                   },
                                 );
@@ -312,11 +336,36 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
                               hintText: '123 Main St',
                             ),
                             const SizedBox(height: 16),
-                            CustomTextField(
-                              label: 'Pincode',
-                              controller: _pincodeController,
-                              hintText: '673001',
-                              keyboardType: TextInputType.number,
+                            pincodesAsync.when(
+                              loading: () => const AreaDropdownShimmer(),
+                              error: (e, _) => Text(
+                                'Pincodes: $e',
+                                style: TextStyle(color: Colors.red.shade800),
+                              ),
+                              data: (pincodes) {
+                                if (_selectedAreaId == null) {
+                                  return const SizedBox.shrink();
+                                }
+                                if (pincodes.isEmpty) {
+                                  return const Text(
+                                    'No pincodes for this area',
+                                  );
+                                }
+                                _syncDefaultPincodeIfNeeded(pincodes);
+                                return CustomDropdown(
+                                  key: ValueKey(_selectedAreaId),
+                                  label: 'Pincode',
+                                  value: _selectedPincodeId,
+                                  hint: 'Select your pincode',
+                                  items: pincodes.map((p) => p.id).toList(),
+                                  itemLabels: {
+                                    for (final p in pincodes) p.id: p.pincode,
+                                  },
+                                  onChanged: (value) {
+                                    setState(() => _selectedPincodeId = value);
+                                  },
+                                );
+                              },
                             ),
                             const SizedBox(height: 32),
                             PrimaryButton(

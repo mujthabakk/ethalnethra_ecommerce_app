@@ -18,11 +18,15 @@ _$UserAddressDtoImpl _$$UserAddressDtoImplFromJson(Map<String, dynamic> json) =>
     _$UserAddressDtoImpl(
       id: intFromJson(json['id']),
       userId: intFromJson(json['user_id']),
-      label: json['label'] as String,
+      label: stringFromJson(json['label']),
       zoneId: stringFromJson(json['zone_id']),
       areaId: stringFromJson(json['area_id']),
-      addressLine: json['address_line'] as String,
-      pincode: json['pincode'] as String,
+      addressLine: stringFromJson(json['address_line']),
+      pincode: stringFromJson(json['pincode']),
+      isDefault: json['is_default'] == null
+          ? false
+          : boolFromJson(json['is_default']),
+      pincodeId: intNullableFromJson(json['pincode_id']),
       createdAt: json['created_at'] as String?,
       updatedAt: json['updated_at'] as String?,
     );
@@ -37,6 +41,8 @@ Map<String, dynamic> _$$UserAddressDtoImplToJson(
   'area_id': instance.areaId,
   'address_line': instance.addressLine,
   'pincode': instance.pincode,
+  'is_default': instance.isDefault,
+  'pincode_id': instance.pincodeId,
   'created_at': instance.createdAt,
   'updated_at': instance.updatedAt,
 };

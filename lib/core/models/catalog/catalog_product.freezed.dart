@@ -23,6 +23,8 @@ CatalogProduct _$CatalogProductFromJson(Map<String, dynamic> json) {
 mixin _$CatalogProduct {
   @JsonKey(fromJson: stringFromJson)
   String get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'name_ml')
+  String get nameMl => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   @JsonKey(fromJson: doubleFromJson)
   double get price => throw _privateConstructorUsedError;
@@ -32,17 +34,20 @@ mixin _$CatalogProduct {
   double get finalPrice => throw _privateConstructorUsedError;
   @JsonKey(fromJson: doubleFromJson)
   double get displayPrice => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: boolFromJson)
   bool get preorderAvailable => throw _privateConstructorUsedError;
   @JsonKey(fromJson: doubleNullableFromJson)
   double? get preorderPrice => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: boolFromJson)
   bool get hasDiscount => throw _privateConstructorUsedError;
   @JsonKey(fromJson: doubleFromJson)
   double get discountPercentage => throw _privateConstructorUsedError;
   String get imageUrl => throw _privateConstructorUsedError;
   String get weight => throw _privateConstructorUsedError;
   String get category => throw _privateConstructorUsedError;
-  @JsonKey(fromJson: doubleFromJson)
-  double get stock => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: intFromJson)
+  int get stock => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: stringFromJson)
   String get type => throw _privateConstructorUsedError;
 
   /// Serializes this CatalogProduct to a JSON map.
@@ -64,20 +69,21 @@ abstract class $CatalogProductCopyWith<$Res> {
   @useResult
   $Res call({
     @JsonKey(fromJson: stringFromJson) String id,
+    @JsonKey(name: 'name_ml') String nameMl,
     String name,
     @JsonKey(fromJson: doubleFromJson) double price,
     @JsonKey(fromJson: doubleFromJson) double ourPrice,
     @JsonKey(fromJson: doubleFromJson) double finalPrice,
     @JsonKey(fromJson: doubleFromJson) double displayPrice,
-    bool preorderAvailable,
+    @JsonKey(fromJson: boolFromJson) bool preorderAvailable,
     @JsonKey(fromJson: doubleNullableFromJson) double? preorderPrice,
-    bool hasDiscount,
+    @JsonKey(fromJson: boolFromJson) bool hasDiscount,
     @JsonKey(fromJson: doubleFromJson) double discountPercentage,
     String imageUrl,
     String weight,
     String category,
-    @JsonKey(fromJson: doubleFromJson) double stock,
-    String type,
+    @JsonKey(fromJson: intFromJson) int stock,
+    @JsonKey(fromJson: stringFromJson) String type,
   });
 }
 
@@ -97,6 +103,7 @@ class _$CatalogProductCopyWithImpl<$Res, $Val extends CatalogProduct>
   @override
   $Res call({
     Object? id = null,
+    Object? nameMl = null,
     Object? name = null,
     Object? price = null,
     Object? ourPrice = null,
@@ -117,6 +124,10 @@ class _$CatalogProductCopyWithImpl<$Res, $Val extends CatalogProduct>
             id: null == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            nameMl: null == nameMl
+                ? _value.nameMl
+                : nameMl // ignore: cast_nullable_to_non_nullable
                       as String,
             name: null == name
                 ? _value.name
@@ -169,7 +180,7 @@ class _$CatalogProductCopyWithImpl<$Res, $Val extends CatalogProduct>
             stock: null == stock
                 ? _value.stock
                 : stock // ignore: cast_nullable_to_non_nullable
-                      as double,
+                      as int,
             type: null == type
                 ? _value.type
                 : type // ignore: cast_nullable_to_non_nullable
@@ -191,20 +202,21 @@ abstract class _$$CatalogProductImplCopyWith<$Res>
   @useResult
   $Res call({
     @JsonKey(fromJson: stringFromJson) String id,
+    @JsonKey(name: 'name_ml') String nameMl,
     String name,
     @JsonKey(fromJson: doubleFromJson) double price,
     @JsonKey(fromJson: doubleFromJson) double ourPrice,
     @JsonKey(fromJson: doubleFromJson) double finalPrice,
     @JsonKey(fromJson: doubleFromJson) double displayPrice,
-    bool preorderAvailable,
+    @JsonKey(fromJson: boolFromJson) bool preorderAvailable,
     @JsonKey(fromJson: doubleNullableFromJson) double? preorderPrice,
-    bool hasDiscount,
+    @JsonKey(fromJson: boolFromJson) bool hasDiscount,
     @JsonKey(fromJson: doubleFromJson) double discountPercentage,
     String imageUrl,
     String weight,
     String category,
-    @JsonKey(fromJson: doubleFromJson) double stock,
-    String type,
+    @JsonKey(fromJson: intFromJson) int stock,
+    @JsonKey(fromJson: stringFromJson) String type,
   });
 }
 
@@ -223,6 +235,7 @@ class __$$CatalogProductImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
+    Object? nameMl = null,
     Object? name = null,
     Object? price = null,
     Object? ourPrice = null,
@@ -243,6 +256,10 @@ class __$$CatalogProductImplCopyWithImpl<$Res>
         id: null == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        nameMl: null == nameMl
+            ? _value.nameMl
+            : nameMl // ignore: cast_nullable_to_non_nullable
                   as String,
         name: null == name
             ? _value.name
@@ -295,7 +312,7 @@ class __$$CatalogProductImplCopyWithImpl<$Res>
         stock: null == stock
             ? _value.stock
             : stock // ignore: cast_nullable_to_non_nullable
-                  as double,
+                  as int,
         type: null == type
             ? _value.type
             : type // ignore: cast_nullable_to_non_nullable
@@ -311,20 +328,21 @@ class __$$CatalogProductImplCopyWithImpl<$Res>
 class _$CatalogProductImpl implements _CatalogProduct {
   const _$CatalogProductImpl({
     @JsonKey(fromJson: stringFromJson) required this.id,
+    @JsonKey(name: 'name_ml') this.nameMl = '',
     required this.name,
     @JsonKey(fromJson: doubleFromJson) required this.price,
     @JsonKey(fromJson: doubleFromJson) required this.ourPrice,
     @JsonKey(fromJson: doubleFromJson) required this.finalPrice,
     @JsonKey(fromJson: doubleFromJson) required this.displayPrice,
-    required this.preorderAvailable,
+    @JsonKey(fromJson: boolFromJson) required this.preorderAvailable,
     @JsonKey(fromJson: doubleNullableFromJson) this.preorderPrice,
-    required this.hasDiscount,
+    @JsonKey(fromJson: boolFromJson) required this.hasDiscount,
     @JsonKey(fromJson: doubleFromJson) required this.discountPercentage,
     required this.imageUrl,
     required this.weight,
     required this.category,
-    @JsonKey(fromJson: doubleFromJson) required this.stock,
-    required this.type,
+    @JsonKey(fromJson: intFromJson) required this.stock,
+    @JsonKey(fromJson: stringFromJson) this.type = '',
   });
 
   factory _$CatalogProductImpl.fromJson(Map<String, dynamic> json) =>
@@ -333,6 +351,9 @@ class _$CatalogProductImpl implements _CatalogProduct {
   @override
   @JsonKey(fromJson: stringFromJson)
   final String id;
+  @override
+  @JsonKey(name: 'name_ml')
+  final String nameMl;
   @override
   final String name;
   @override
@@ -348,11 +369,13 @@ class _$CatalogProductImpl implements _CatalogProduct {
   @JsonKey(fromJson: doubleFromJson)
   final double displayPrice;
   @override
+  @JsonKey(fromJson: boolFromJson)
   final bool preorderAvailable;
   @override
   @JsonKey(fromJson: doubleNullableFromJson)
   final double? preorderPrice;
   @override
+  @JsonKey(fromJson: boolFromJson)
   final bool hasDiscount;
   @override
   @JsonKey(fromJson: doubleFromJson)
@@ -364,14 +387,15 @@ class _$CatalogProductImpl implements _CatalogProduct {
   @override
   final String category;
   @override
-  @JsonKey(fromJson: doubleFromJson)
-  final double stock;
+  @JsonKey(fromJson: intFromJson)
+  final int stock;
   @override
+  @JsonKey(fromJson: stringFromJson)
   final String type;
 
   @override
   String toString() {
-    return 'CatalogProduct(id: $id, name: $name, price: $price, ourPrice: $ourPrice, finalPrice: $finalPrice, displayPrice: $displayPrice, preorderAvailable: $preorderAvailable, preorderPrice: $preorderPrice, hasDiscount: $hasDiscount, discountPercentage: $discountPercentage, imageUrl: $imageUrl, weight: $weight, category: $category, stock: $stock, type: $type)';
+    return 'CatalogProduct(id: $id, nameMl: $nameMl, name: $name, price: $price, ourPrice: $ourPrice, finalPrice: $finalPrice, displayPrice: $displayPrice, preorderAvailable: $preorderAvailable, preorderPrice: $preorderPrice, hasDiscount: $hasDiscount, discountPercentage: $discountPercentage, imageUrl: $imageUrl, weight: $weight, category: $category, stock: $stock, type: $type)';
   }
 
   @override
@@ -380,6 +404,7 @@ class _$CatalogProductImpl implements _CatalogProduct {
         (other.runtimeType == runtimeType &&
             other is _$CatalogProductImpl &&
             (identical(other.id, id) || other.id == id) &&
+            (identical(other.nameMl, nameMl) || other.nameMl == nameMl) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.price, price) || other.price == price) &&
             (identical(other.ourPrice, ourPrice) ||
@@ -410,6 +435,7 @@ class _$CatalogProductImpl implements _CatalogProduct {
   int get hashCode => Object.hash(
     runtimeType,
     id,
+    nameMl,
     name,
     price,
     ourPrice,
@@ -446,20 +472,21 @@ class _$CatalogProductImpl implements _CatalogProduct {
 abstract class _CatalogProduct implements CatalogProduct {
   const factory _CatalogProduct({
     @JsonKey(fromJson: stringFromJson) required final String id,
+    @JsonKey(name: 'name_ml') final String nameMl,
     required final String name,
     @JsonKey(fromJson: doubleFromJson) required final double price,
     @JsonKey(fromJson: doubleFromJson) required final double ourPrice,
     @JsonKey(fromJson: doubleFromJson) required final double finalPrice,
     @JsonKey(fromJson: doubleFromJson) required final double displayPrice,
-    required final bool preorderAvailable,
+    @JsonKey(fromJson: boolFromJson) required final bool preorderAvailable,
     @JsonKey(fromJson: doubleNullableFromJson) final double? preorderPrice,
-    required final bool hasDiscount,
+    @JsonKey(fromJson: boolFromJson) required final bool hasDiscount,
     @JsonKey(fromJson: doubleFromJson) required final double discountPercentage,
     required final String imageUrl,
     required final String weight,
     required final String category,
-    @JsonKey(fromJson: doubleFromJson) required final double stock,
-    required final String type,
+    @JsonKey(fromJson: intFromJson) required final int stock,
+    @JsonKey(fromJson: stringFromJson) final String type,
   }) = _$CatalogProductImpl;
 
   factory _CatalogProduct.fromJson(Map<String, dynamic> json) =
@@ -468,6 +495,9 @@ abstract class _CatalogProduct implements CatalogProduct {
   @override
   @JsonKey(fromJson: stringFromJson)
   String get id;
+  @override
+  @JsonKey(name: 'name_ml')
+  String get nameMl;
   @override
   String get name;
   @override
@@ -483,11 +513,13 @@ abstract class _CatalogProduct implements CatalogProduct {
   @JsonKey(fromJson: doubleFromJson)
   double get displayPrice;
   @override
+  @JsonKey(fromJson: boolFromJson)
   bool get preorderAvailable;
   @override
   @JsonKey(fromJson: doubleNullableFromJson)
   double? get preorderPrice;
   @override
+  @JsonKey(fromJson: boolFromJson)
   bool get hasDiscount;
   @override
   @JsonKey(fromJson: doubleFromJson)
@@ -499,9 +531,10 @@ abstract class _CatalogProduct implements CatalogProduct {
   @override
   String get category;
   @override
-  @JsonKey(fromJson: doubleFromJson)
-  double get stock;
+  @JsonKey(fromJson: intFromJson)
+  int get stock;
   @override
+  @JsonKey(fromJson: stringFromJson)
   String get type;
 
   /// Create a copy of CatalogProduct
@@ -519,12 +552,12 @@ ProductsListResponse _$ProductsListResponseFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$ProductsListResponse {
   List<CatalogProduct> get products => throw _privateConstructorUsedError;
-  @JsonKey(fromJson: doubleFromJson)
-  double get total => throw _privateConstructorUsedError;
-  @JsonKey(fromJson: doubleFromJson)
-  double get pages => throw _privateConstructorUsedError;
-  @JsonKey(fromJson: doubleFromJson)
-  double get currentPage => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: intFromJson)
+  int get total => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: intFromJson)
+  int get pages => throw _privateConstructorUsedError;
+  @JsonKey(name: 'current_page', fromJson: intFromJson)
+  int get currentPage => throw _privateConstructorUsedError;
 
   /// Serializes this ProductsListResponse to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -545,9 +578,9 @@ abstract class $ProductsListResponseCopyWith<$Res> {
   @useResult
   $Res call({
     List<CatalogProduct> products,
-    @JsonKey(fromJson: doubleFromJson) double total,
-    @JsonKey(fromJson: doubleFromJson) double pages,
-    @JsonKey(fromJson: doubleFromJson) double currentPage,
+    @JsonKey(fromJson: intFromJson) int total,
+    @JsonKey(fromJson: intFromJson) int pages,
+    @JsonKey(name: 'current_page', fromJson: intFromJson) int currentPage,
   });
 }
 
@@ -583,15 +616,15 @@ class _$ProductsListResponseCopyWithImpl<
             total: null == total
                 ? _value.total
                 : total // ignore: cast_nullable_to_non_nullable
-                      as double,
+                      as int,
             pages: null == pages
                 ? _value.pages
                 : pages // ignore: cast_nullable_to_non_nullable
-                      as double,
+                      as int,
             currentPage: null == currentPage
                 ? _value.currentPage
                 : currentPage // ignore: cast_nullable_to_non_nullable
-                      as double,
+                      as int,
           )
           as $Val,
     );
@@ -609,9 +642,9 @@ abstract class _$$ProductsListResponseImplCopyWith<$Res>
   @useResult
   $Res call({
     List<CatalogProduct> products,
-    @JsonKey(fromJson: doubleFromJson) double total,
-    @JsonKey(fromJson: doubleFromJson) double pages,
-    @JsonKey(fromJson: doubleFromJson) double currentPage,
+    @JsonKey(fromJson: intFromJson) int total,
+    @JsonKey(fromJson: intFromJson) int pages,
+    @JsonKey(name: 'current_page', fromJson: intFromJson) int currentPage,
   });
 }
 
@@ -643,15 +676,15 @@ class __$$ProductsListResponseImplCopyWithImpl<$Res>
         total: null == total
             ? _value.total
             : total // ignore: cast_nullable_to_non_nullable
-                  as double,
+                  as int,
         pages: null == pages
             ? _value.pages
             : pages // ignore: cast_nullable_to_non_nullable
-                  as double,
+                  as int,
         currentPage: null == currentPage
             ? _value.currentPage
             : currentPage // ignore: cast_nullable_to_non_nullable
-                  as double,
+                  as int,
       ),
     );
   }
@@ -663,9 +696,10 @@ class __$$ProductsListResponseImplCopyWithImpl<$Res>
 class _$ProductsListResponseImpl implements _ProductsListResponse {
   const _$ProductsListResponseImpl({
     required final List<CatalogProduct> products,
-    @JsonKey(fromJson: doubleFromJson) required this.total,
-    @JsonKey(fromJson: doubleFromJson) required this.pages,
-    @JsonKey(fromJson: doubleFromJson) required this.currentPage,
+    @JsonKey(fromJson: intFromJson) required this.total,
+    @JsonKey(fromJson: intFromJson) required this.pages,
+    @JsonKey(name: 'current_page', fromJson: intFromJson)
+    required this.currentPage,
   }) : _products = products;
 
   factory _$ProductsListResponseImpl.fromJson(Map<String, dynamic> json) =>
@@ -680,14 +714,14 @@ class _$ProductsListResponseImpl implements _ProductsListResponse {
   }
 
   @override
-  @JsonKey(fromJson: doubleFromJson)
-  final double total;
+  @JsonKey(fromJson: intFromJson)
+  final int total;
   @override
-  @JsonKey(fromJson: doubleFromJson)
-  final double pages;
+  @JsonKey(fromJson: intFromJson)
+  final int pages;
   @override
-  @JsonKey(fromJson: doubleFromJson)
-  final double currentPage;
+  @JsonKey(name: 'current_page', fromJson: intFromJson)
+  final int currentPage;
 
   @override
   String toString() {
@@ -737,9 +771,10 @@ class _$ProductsListResponseImpl implements _ProductsListResponse {
 abstract class _ProductsListResponse implements ProductsListResponse {
   const factory _ProductsListResponse({
     required final List<CatalogProduct> products,
-    @JsonKey(fromJson: doubleFromJson) required final double total,
-    @JsonKey(fromJson: doubleFromJson) required final double pages,
-    @JsonKey(fromJson: doubleFromJson) required final double currentPage,
+    @JsonKey(fromJson: intFromJson) required final int total,
+    @JsonKey(fromJson: intFromJson) required final int pages,
+    @JsonKey(name: 'current_page', fromJson: intFromJson)
+    required final int currentPage,
   }) = _$ProductsListResponseImpl;
 
   factory _ProductsListResponse.fromJson(Map<String, dynamic> json) =
@@ -748,14 +783,14 @@ abstract class _ProductsListResponse implements ProductsListResponse {
   @override
   List<CatalogProduct> get products;
   @override
-  @JsonKey(fromJson: doubleFromJson)
-  double get total;
+  @JsonKey(fromJson: intFromJson)
+  int get total;
   @override
-  @JsonKey(fromJson: doubleFromJson)
-  double get pages;
+  @JsonKey(fromJson: intFromJson)
+  int get pages;
   @override
-  @JsonKey(fromJson: doubleFromJson)
-  double get currentPage;
+  @JsonKey(name: 'current_page', fromJson: intFromJson)
+  int get currentPage;
 
   /// Create a copy of ProductsListResponse
   /// with the given fields replaced by the non-null parameter values.

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/models/commerce/cart_dtos.dart';
+import '../../core/providers/app_refresh_providers.dart';
 import '../../core/providers/cart_providers.dart';
 import '../home/widgets/search_bar_widget.dart';
 import 'widgets/cart_item_widget.dart';
@@ -20,7 +21,13 @@ class _CartScreenState extends ConsumerState<CartScreen> {
   bool _isInstantCart = true;
 
   double _tabTotal(List<CartLineDto> lines) {
-    return lines.fold<double>(0, (a, b) => a + b.subtotal);
+    return lines
+        .where((l) => l.isAccept)
+        .fold<double>(0, (a, b) => a + b.subtotal);
+  }
+
+  bool _canCheckout(List<CartLineDto> lines) {
+    return lines.isNotEmpty && lines.every((l) => l.isAccept);
   }
 
   @override
@@ -77,6 +84,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
           final cartItems =
               _isInstantCart ? cart.instant : cart.preorder;
           final total = _tabTotal(cartItems);
+          final canCheckout = _canCheckout(cartItems);
           final notifier = ref.read(cartNotifierProvider.notifier);
 
           return Column(
@@ -94,7 +102,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                   children: [
                     Expanded(
                       child: _CartTab(
-                        label: 'Instant cart',
+                        label: 'Instant cart (${cart.instant.length})',
                         isSelected: _isInstantCart,
                         activeColor: AppColors.preOrderOrange,
                         onTap: () => setState(() => _isInstantCart = true),
@@ -103,7 +111,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: _CartTab(
-                        label: 'Pre-order cart',
+                        label: 'Pre-order (${cart.preorder.length})',
                         isSelected: !_isInstantCart,
                         activeColor: AppColors.primary,
                         onTap: () => setState(() => _isInstantCart = false),
@@ -116,11 +124,26 @@ class _CartScreenState extends ConsumerState<CartScreen> {
               Expanded(
                 child: Stack(
                   children: [
+                    if (cartItems.isEmpty)
+                      Center(
+                        child: Text(
+                          _isInstantCart
+                              ? 'No items in instant cart'
+                              : 'No items in pre-order cart',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 16,
+                          ),
+                        ),
+                      )
+                    else
                     ListView.builder(
                       itemCount: cartItems.length,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 10,
+                      padding: const EdgeInsets.only(
+                        left: 20,
+                        right: 20,
+                        top: 10,
+                        bottom: 100,
                       ),
                       itemBuilder: (context, index) {
                         final item = cartItems[index];
@@ -148,9 +171,11 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                       left: 20,
                       right: 20,
                       child: ElevatedButton(
-                        onPressed: cartItems.isEmpty
+                        onPressed: !canCheckout
                             ? null
-                            : () {
+                            : () async {
+                                await refreshCheckoutSheetData(ref);
+                                if (!context.mounted) return;
                                 showModalBottomSheet(
                                   context: context,
                                   isScrollControlled: true,

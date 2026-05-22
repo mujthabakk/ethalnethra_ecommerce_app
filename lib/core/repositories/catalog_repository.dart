@@ -50,7 +50,7 @@ class CatalogRepository {
     );
     final data = response.data;
     if (data == null) throw Exception('Empty products response');
-    return ProductsListResponse.fromJson(data);
+    return productsListResponseFromJsonLoose(data);
   }
 
   Future<ProductDetailDto> fetchProductDetail(String id) async {

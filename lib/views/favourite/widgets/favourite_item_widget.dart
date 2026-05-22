@@ -36,7 +36,7 @@ class FavouriteItemWidget extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(product.name, style: AppTextStyles.cartItemTitle),
+                  Text(product.displayName, style: AppTextStyles.cartItemTitle),
                   const SizedBox(height: 5),
                   Text(
                     product.description,

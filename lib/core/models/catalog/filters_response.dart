@@ -2,22 +2,18 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'json_converters.dart';
+
 part 'filters_response.freezed.dart';
 part 'filters_response.g.dart';
 
-/// Parses API lists that may contain strings or small maps (e.g. `{ "name": "..." }`).
-List<String> stringListFlexibleFromJson(dynamic json) {
-  if (json == null) return [];
-  if (json is! List) return [];
-  return json.map((e) {
-    if (e is String) return e;
-    if (e is Map<String, dynamic>) {
-      final name = e['name'] ?? e['title'] ?? e['brand'];
-      if (name is String) return name;
-    }
-    return e?.toString() ?? '';
-  }).where((s) => s.isNotEmpty).toList();
-}
+FiltersResponse filtersResponseFromJsonLoose(Map<String, dynamic> json) =>
+    FiltersResponse(
+      categories: stringListFlexibleFromJson(
+        json['categories'] ?? json['category'],
+      ),
+      brands: stringListFlexibleFromJson(json['brands'] ?? json['brand']),
+    );
 
 @freezed
 class FiltersResponse with _$FiltersResponse {
@@ -29,5 +25,5 @@ class FiltersResponse with _$FiltersResponse {
   }) = _FiltersResponse;
 
   factory FiltersResponse.fromJson(Map<String, dynamic> json) =>
-      _$FiltersResponseFromJson(json);
+      filtersResponseFromJsonLoose(json);
 }

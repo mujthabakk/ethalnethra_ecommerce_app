@@ -10,6 +10,7 @@ _$FavoriteProductDtoImpl _$$FavoriteProductDtoImplFromJson(
   Map<String, dynamic> json,
 ) => _$FavoriteProductDtoImpl(
   id: stringFromJson(json['id']),
+  nameMl: json['name_ml'] as String? ?? '',
   name: json['name'] as String,
   price: doubleFromJson(json['price']),
   imageUrl: json['image_url'] as String,
@@ -19,6 +20,7 @@ Map<String, dynamic> _$$FavoriteProductDtoImplToJson(
   _$FavoriteProductDtoImpl instance,
 ) => <String, dynamic>{
   'id': instance.id,
+  'name_ml': instance.nameMl,
   'name': instance.name,
   'price': instance.price,
   'image_url': instance.imageUrl,

@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/constants/app_colors.dart';
 import '../../core/widgets/app_shimmer.dart';
 import '../../core/mappers/catalog_product_mapper.dart';
 import '../../core/mappers/category_image_path.dart';
 import '../../core/models/catalog/catalog_product.dart';
 import '../../core/models/catalog/category_item.dart';
 import '../../core/providers/catalog_providers.dart';
+import '../../core/providers/location_user_providers.dart';
 import '../../core/providers/main_nav_tab_provider.dart';
 import '../../core/routes/app_router.dart';
 import '../../models/category_model.dart';
 import 'widgets/banner_widget.dart';
+import 'widgets/home_location_header.dart';
 import 'widgets/category_card.dart';
 import 'widgets/home_store_search_bar.dart';
 import 'widgets/product_card.dart';
@@ -46,12 +47,43 @@ CategoryModel _categoryModelFromApi(CategoryItem c, int index) {
   );
 }
 
+Widget _productGrid(BuildContext context, List<CatalogProduct> products) {
+  if (products.isEmpty) return const SizedBox.shrink();
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      const spacing = 15.0;
+      final maxW = constraints.maxWidth;
+      final cellW = maxW > spacing ? (maxW - spacing) / 2 : 160.0;
+      const cellH = 272.0;
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.zero,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: spacing,
+          mainAxisSpacing: spacing,
+          childAspectRatio: cellW / cellH,
+        ),
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          return ProductCard(
+            width: cellW,
+            product: products[index].toProductModel(),
+          );
+        },
+      );
+    },
+  );
+}
+
 void _pushProductList(
   BuildContext context,
   String title,
   List<CatalogProduct> list, {
   String? apiCategory,
   String? productType,
+  bool fetchAll = false,
 }) {
   context.push(
     AppRouter.categoryProducts,
@@ -60,6 +92,7 @@ void _pushProductList(
       'products': list.map((e) => e.toProductModel()).toList(),
       if (apiCategory != null) 'apiCategory': apiCategory,
       if (productType != null) 'productType': productType,
+      if (fetchAll) 'fetchAll': true,
     },
   );
 }
@@ -82,6 +115,7 @@ class HomeScreen extends ConsumerWidget {
             ref.invalidate(homeCategoriesProvider);
             ref.invalidate(homeProductsProvider);
             ref.invalidate(filtersProvider);
+            ref.invalidate(userAddressesProvider);
             await ref.read(homeProductsProvider.future);
           },
           child: SingleChildScrollView(
@@ -91,32 +125,7 @@ class HomeScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   const SizedBox(height: 10),
-                  Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          'asstes/images/location.png',
-                          width: 15,
-                          height: 18,
-                          errorBuilder: (_, __, ___) => const Icon(
-                            Icons.location_on_outlined,
-                            size: 20,
-                            color: AppColors.darkBackground,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Kochi, kerala',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.darkBackground,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const HomeLocationHeader(),
                   const SizedBox(height: 20),
                   const HomeStoreSearchBar(),
                   const SizedBox(height: 20),
@@ -196,6 +205,20 @@ class HomeScreen extends ConsumerWidget {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          if (products.isNotEmpty) ...[
+                            SectionHeader(
+                              title: 'All Products',
+                              onSeeAll: () => _pushProductList(
+                                context,
+                                'All Products',
+                                products,
+                                fetchAll: true,
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            _productGrid(context, products),
+                            const SizedBox(height: 25),
+                          ],
                           if (exclusive.isNotEmpty) ...[
                             SectionHeader(
                               title: 'Exclusive Offer',
@@ -207,37 +230,7 @@ class HomeScreen extends ConsumerWidget {
                               ),
                             ),
                             const SizedBox(height: 15),
-                            LayoutBuilder(
-                              builder: (context, constraints) {
-                                const spacing = 15.0;
-                                final maxW = constraints.maxWidth;
-                                final cellW = maxW > spacing
-                                    ? (maxW - spacing) / 2
-                                    : 160.0;
-                                // Fixed row height so image + text + actions fit cleanly.
-                                const cellH = 272.0;
-                                return GridView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  padding: EdgeInsets.zero,
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 2,
-                                        crossAxisSpacing: spacing,
-                                        mainAxisSpacing: spacing,
-                                        childAspectRatio: cellW / cellH,
-                                      ),
-                                  itemCount: exclusive.length,
-                                  itemBuilder: (context, index) {
-                                    return ProductCard(
-                                      width: cellW,
-                                      product: exclusive[index]
-                                          .toProductModel(),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
+                            _productGrid(context, exclusive),
                             const SizedBox(height: 25),
                           ],
                           if (best.isNotEmpty) ...[
@@ -267,15 +260,6 @@ class HomeScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 25),
                           ],
-                          if (exclusive.isEmpty && best.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 24),
-                              child: Text(
-                                'No products in featured lists yet.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: Colors.grey.shade700),
-                              ),
-                            ),
                         ],
                       );
                     },
@@ -284,11 +268,29 @@ class HomeScreen extends ConsumerWidget {
                       child: ProductGridShimmer(rows: 2),
                     ),
                     error: (e, _) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 24),
-                      child: Text(
-                        'Could not load products.\n$e',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.red.shade800),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Could not load products.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.red.shade800,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '$e',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                          ),
+                          const SizedBox(height: 16),
+                          FilledButton(
+                            onPressed: () => ref.invalidate(homeProductsProvider),
+                            child: const Text('Retry'),
+                          ),
+                        ],
                       ),
                     ),
                   ),

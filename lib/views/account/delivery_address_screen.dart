@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/models/location/area_item.dart';
+import '../../core/models/location/pincode_item.dart';
 import '../../core/models/user/user_address_models.dart';
 import '../../core/providers/location_user_providers.dart';
 
@@ -183,9 +184,34 @@ class _AddressCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Text(
-                  address.label.toUpperCase(),
-                  style: AppTextStyles.orderItemTitle,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        address.label.toUpperCase(),
+                        style: AppTextStyles.orderItemTitle,
+                      ),
+                    ),
+                    if (address.isDefault)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text(
+                          'Default',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                     const SizedBox(height: 5),
                     Text(
@@ -215,15 +241,14 @@ class _AddAddressSheet extends ConsumerStatefulWidget {
 class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
   final _label = TextEditingController();
   final _line = TextEditingController();
-  final _pin = TextEditingController();
   String? _zoneId;
   String? _areaId;
+  String? _pincodeId;
 
   @override
   void dispose() {
     _label.dispose();
     _line.dispose();
-    _pin.dispose();
     super.dispose();
   }
 
@@ -242,9 +267,9 @@ class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
       );
       return;
     }
-    if (_pin.text.trim().isEmpty) {
+    if (_pincodeId == null || _pincodeId!.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter pincode')),
+        const SnackBar(content: Text('Select pincode')),
       );
       return;
     }
@@ -254,7 +279,7 @@ class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
           zoneId: z,
           areaId: a,
           addressLine: _line.text.trim(),
-          pincode: _pin.text.trim(),
+          pincodeId: _pincodeId!.trim(),
         );
 
     if (!mounted) return;
@@ -279,6 +304,11 @@ class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
     final areasAsync = _zoneId != null && zoneKey > 0
         ? ref.watch(areasForZoneProvider(zoneKey))
         : const AsyncValue<List<AreaItem>>.data([]);
+
+    final areaKey = int.tryParse(_areaId ?? '') ?? 0;
+    final pincodesAsync = _areaId != null && areaKey > 0
+        ? ref.watch(pincodesForAreaProvider(areaKey))
+        : const AsyncValue<List<PincodeItem>>.data([]);
 
     final save = ref.watch(saveAddressNotifierProvider);
 
@@ -340,6 +370,7 @@ class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
                       onChanged: (v) => setState(() {
                         _zoneId = v;
                         _areaId = null;
+                        _pincodeId = null;
                       }),
                     ),
                   ),
@@ -378,7 +409,10 @@ class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
                             ),
                           )
                           .toList(),
-                      onChanged: (v) => setState(() => _areaId = v),
+                      onChanged: (v) => setState(() {
+                        _areaId = v;
+                        _pincodeId = null;
+                      }),
                     ),
                   ),
                 );
@@ -402,13 +436,48 @@ class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
               ),
             ),
             const SizedBox(height: 12),
-            TextField(
-              controller: _pin,
-              keyboardType: TextInputType.text,
-              decoration: const InputDecoration(
-                labelText: 'Pincode',
-                border: OutlineInputBorder(),
+            pincodesAsync.when(
+              loading: () => const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(child: CircularProgressIndicator()),
               ),
+              error: (e, _) => Text('$e'),
+              data: (pincodes) {
+                if (_areaId == null) {
+                  return Text(
+                    'Choose an area to load pincodes',
+                    style: TextStyle(color: Colors.grey.shade600),
+                  );
+                }
+                if (pincodes.isEmpty) {
+                  return Text(
+                    'No pincodes for this area',
+                    style: TextStyle(color: Colors.grey.shade600),
+                  );
+                }
+                return InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'Pincode',
+                    border: OutlineInputBorder(),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      isExpanded: true,
+                      hint: const Text('Select pincode'),
+                      value: _pincodeId,
+                      items: pincodes
+                          .map(
+                            (p) => DropdownMenuItem(
+                              value: p.id,
+                              child: Text(p.pincode),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) => setState(() => _pincodeId = v),
+                    ),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 20),
             FilledButton(

@@ -1,17 +1,34 @@
+import '../core/utils/product_display_name.dart';
+
+/// UI product used across home, explore, favourites, and detail screens.
 class ProductModel {
   final String id;
+  /// English name from API (`name`).
   final String name;
-  final String description; // Subtitle like "1kg, Price"
-  final String longDescription; // Detailed description
+  /// Malayalam name from API (`name_ml`).
+  final String nameMl;
+  final String description;
+  final String longDescription;
   final String imagePath;
   final double price;
   final String unit;
-  /// When true, product shows "Add To Pre-order Basket" option on card and detail.
   final bool isPreOrder;
+
+  final double listPrice;
+  final double ourPrice;
+  final double finalPrice;
+  final double displayPrice;
+  final double? preorderPrice;
+  final bool hasDiscount;
+  final double discountPercentage;
+  final int stock;
+  final String category;
+  final String type;
 
   ProductModel({
     required this.id,
     required this.name,
+    this.nameMl = '',
     required this.description,
     this.longDescription =
         'Apples are nutritious. Apples may be good for weight loss. apples may be good for your heart. As part of a healtful and varied diet.',
@@ -19,5 +36,31 @@ class ProductModel {
     required this.price,
     required this.unit,
     this.isPreOrder = false,
-  });
+    double? listPrice,
+    double? ourPrice,
+    double? finalPrice,
+    double? displayPrice,
+    this.preorderPrice,
+    this.hasDiscount = false,
+    this.discountPercentage = 0,
+    this.stock = 0,
+    this.category = '',
+    this.type = '',
+  })  : listPrice = listPrice ?? price,
+        ourPrice = ourPrice ?? price,
+        finalPrice = finalPrice ?? price,
+        displayPrice = displayPrice ?? price;
+
+  /// Malayalam primary, English in parentheses — for all product UI labels.
+  String get displayName =>
+      formatProductDisplayName(nameMl: nameMl, nameEn: name);
+
+  bool get isInStock => stock > 0;
+
+  bool get showDiscount => hasDiscount && listPrice > finalPrice;
+
+  double get effectivePreorderPrice {
+    if (preorderPrice != null && preorderPrice! > 0) return preorderPrice!;
+    return finalPrice > 0 ? finalPrice : ourPrice;
+  }
 }

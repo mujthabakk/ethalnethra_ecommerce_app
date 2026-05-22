@@ -23,6 +23,8 @@ ProductDetailDto _$ProductDetailDtoFromJson(Map<String, dynamic> json) {
 mixin _$ProductDetailDto {
   @JsonKey(fromJson: stringFromJson)
   String get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'name_ml')
+  String get nameMl => throw _privateConstructorUsedError;
   @JsonKey(fromJson: stringFromJson)
   String get name => throw _privateConstructorUsedError;
   @JsonKey(fromJson: doubleFromJson)
@@ -33,13 +35,27 @@ mixin _$ProductDetailDto {
   double get finalPrice => throw _privateConstructorUsedError;
   @JsonKey(fromJson: doubleFromJson)
   double get displayPrice => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: boolFromJson)
   bool get preorderAvailable => throw _privateConstructorUsedError;
   @JsonKey(fromJson: doubleNullableFromJson)
   double? get preorderPrice => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: boolFromJson)
   bool get hasDiscount => throw _privateConstructorUsedError;
   @JsonKey(fromJson: doubleFromJson)
   double get discountPercentage => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: stringFromJson)
+  String get imageUrl => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: stringFromJson)
+  String get weight => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: stringFromJson)
+  String get category => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: intFromJson)
+  int get stock => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: stringFromJson)
+  String get type => throw _privateConstructorUsedError;
   String? get description => throw _privateConstructorUsedError;
+  @JsonKey(name: 'description_ml')
+  String? get descriptionMl => throw _privateConstructorUsedError;
   @JsonKey(fromJson: stringListFromJson)
   List<String> get images => throw _privateConstructorUsedError;
   @JsonKey(name: 'nutritions', fromJson: dynamicListFromJson)
@@ -70,16 +86,23 @@ abstract class $ProductDetailDtoCopyWith<$Res> {
   @useResult
   $Res call({
     @JsonKey(fromJson: stringFromJson) String id,
+    @JsonKey(name: 'name_ml') String nameMl,
     @JsonKey(fromJson: stringFromJson) String name,
     @JsonKey(fromJson: doubleFromJson) double price,
     @JsonKey(fromJson: doubleFromJson) double ourPrice,
     @JsonKey(fromJson: doubleFromJson) double finalPrice,
     @JsonKey(fromJson: doubleFromJson) double displayPrice,
-    bool preorderAvailable,
+    @JsonKey(fromJson: boolFromJson) bool preorderAvailable,
     @JsonKey(fromJson: doubleNullableFromJson) double? preorderPrice,
-    bool hasDiscount,
+    @JsonKey(fromJson: boolFromJson) bool hasDiscount,
     @JsonKey(fromJson: doubleFromJson) double discountPercentage,
+    @JsonKey(fromJson: stringFromJson) String imageUrl,
+    @JsonKey(fromJson: stringFromJson) String weight,
+    @JsonKey(fromJson: stringFromJson) String category,
+    @JsonKey(fromJson: intFromJson) int stock,
+    @JsonKey(fromJson: stringFromJson) String type,
     String? description,
+    @JsonKey(name: 'description_ml') String? descriptionMl,
     @JsonKey(fromJson: stringListFromJson) List<String> images,
     @JsonKey(name: 'nutritions', fromJson: dynamicListFromJson)
     List<dynamic> nutritions,
@@ -105,6 +128,7 @@ class _$ProductDetailDtoCopyWithImpl<$Res, $Val extends ProductDetailDto>
   @override
   $Res call({
     Object? id = null,
+    Object? nameMl = null,
     Object? name = null,
     Object? price = null,
     Object? ourPrice = null,
@@ -114,7 +138,13 @@ class _$ProductDetailDtoCopyWithImpl<$Res, $Val extends ProductDetailDto>
     Object? preorderPrice = freezed,
     Object? hasDiscount = null,
     Object? discountPercentage = null,
+    Object? imageUrl = null,
+    Object? weight = null,
+    Object? category = null,
+    Object? stock = null,
+    Object? type = null,
     Object? description = freezed,
+    Object? descriptionMl = freezed,
     Object? images = null,
     Object? nutritions = null,
     Object? rating = freezed,
@@ -126,6 +156,10 @@ class _$ProductDetailDtoCopyWithImpl<$Res, $Val extends ProductDetailDto>
             id: null == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            nameMl: null == nameMl
+                ? _value.nameMl
+                : nameMl // ignore: cast_nullable_to_non_nullable
                       as String,
             name: null == name
                 ? _value.name
@@ -163,9 +197,33 @@ class _$ProductDetailDtoCopyWithImpl<$Res, $Val extends ProductDetailDto>
                 ? _value.discountPercentage
                 : discountPercentage // ignore: cast_nullable_to_non_nullable
                       as double,
+            imageUrl: null == imageUrl
+                ? _value.imageUrl
+                : imageUrl // ignore: cast_nullable_to_non_nullable
+                      as String,
+            weight: null == weight
+                ? _value.weight
+                : weight // ignore: cast_nullable_to_non_nullable
+                      as String,
+            category: null == category
+                ? _value.category
+                : category // ignore: cast_nullable_to_non_nullable
+                      as String,
+            stock: null == stock
+                ? _value.stock
+                : stock // ignore: cast_nullable_to_non_nullable
+                      as int,
+            type: null == type
+                ? _value.type
+                : type // ignore: cast_nullable_to_non_nullable
+                      as String,
             description: freezed == description
                 ? _value.description
                 : description // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            descriptionMl: freezed == descriptionMl
+                ? _value.descriptionMl
+                : descriptionMl // ignore: cast_nullable_to_non_nullable
                       as String?,
             images: null == images
                 ? _value.images
@@ -204,16 +262,23 @@ abstract class _$$ProductDetailDtoImplCopyWith<$Res>
   @useResult
   $Res call({
     @JsonKey(fromJson: stringFromJson) String id,
+    @JsonKey(name: 'name_ml') String nameMl,
     @JsonKey(fromJson: stringFromJson) String name,
     @JsonKey(fromJson: doubleFromJson) double price,
     @JsonKey(fromJson: doubleFromJson) double ourPrice,
     @JsonKey(fromJson: doubleFromJson) double finalPrice,
     @JsonKey(fromJson: doubleFromJson) double displayPrice,
-    bool preorderAvailable,
+    @JsonKey(fromJson: boolFromJson) bool preorderAvailable,
     @JsonKey(fromJson: doubleNullableFromJson) double? preorderPrice,
-    bool hasDiscount,
+    @JsonKey(fromJson: boolFromJson) bool hasDiscount,
     @JsonKey(fromJson: doubleFromJson) double discountPercentage,
+    @JsonKey(fromJson: stringFromJson) String imageUrl,
+    @JsonKey(fromJson: stringFromJson) String weight,
+    @JsonKey(fromJson: stringFromJson) String category,
+    @JsonKey(fromJson: intFromJson) int stock,
+    @JsonKey(fromJson: stringFromJson) String type,
     String? description,
+    @JsonKey(name: 'description_ml') String? descriptionMl,
     @JsonKey(fromJson: stringListFromJson) List<String> images,
     @JsonKey(name: 'nutritions', fromJson: dynamicListFromJson)
     List<dynamic> nutritions,
@@ -238,6 +303,7 @@ class __$$ProductDetailDtoImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
+    Object? nameMl = null,
     Object? name = null,
     Object? price = null,
     Object? ourPrice = null,
@@ -247,7 +313,13 @@ class __$$ProductDetailDtoImplCopyWithImpl<$Res>
     Object? preorderPrice = freezed,
     Object? hasDiscount = null,
     Object? discountPercentage = null,
+    Object? imageUrl = null,
+    Object? weight = null,
+    Object? category = null,
+    Object? stock = null,
+    Object? type = null,
     Object? description = freezed,
+    Object? descriptionMl = freezed,
     Object? images = null,
     Object? nutritions = null,
     Object? rating = freezed,
@@ -259,6 +331,10 @@ class __$$ProductDetailDtoImplCopyWithImpl<$Res>
         id: null == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        nameMl: null == nameMl
+            ? _value.nameMl
+            : nameMl // ignore: cast_nullable_to_non_nullable
                   as String,
         name: null == name
             ? _value.name
@@ -296,9 +372,33 @@ class __$$ProductDetailDtoImplCopyWithImpl<$Res>
             ? _value.discountPercentage
             : discountPercentage // ignore: cast_nullable_to_non_nullable
                   as double,
+        imageUrl: null == imageUrl
+            ? _value.imageUrl
+            : imageUrl // ignore: cast_nullable_to_non_nullable
+                  as String,
+        weight: null == weight
+            ? _value.weight
+            : weight // ignore: cast_nullable_to_non_nullable
+                  as String,
+        category: null == category
+            ? _value.category
+            : category // ignore: cast_nullable_to_non_nullable
+                  as String,
+        stock: null == stock
+            ? _value.stock
+            : stock // ignore: cast_nullable_to_non_nullable
+                  as int,
+        type: null == type
+            ? _value.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String,
         description: freezed == description
             ? _value.description
             : description // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        descriptionMl: freezed == descriptionMl
+            ? _value.descriptionMl
+            : descriptionMl // ignore: cast_nullable_to_non_nullable
                   as String?,
         images: null == images
             ? _value._images
@@ -331,16 +431,23 @@ class __$$ProductDetailDtoImplCopyWithImpl<$Res>
 class _$ProductDetailDtoImpl implements _ProductDetailDto {
   const _$ProductDetailDtoImpl({
     @JsonKey(fromJson: stringFromJson) required this.id,
+    @JsonKey(name: 'name_ml') this.nameMl = '',
     @JsonKey(fromJson: stringFromJson) required this.name,
     @JsonKey(fromJson: doubleFromJson) required this.price,
     @JsonKey(fromJson: doubleFromJson) required this.ourPrice,
     @JsonKey(fromJson: doubleFromJson) required this.finalPrice,
     @JsonKey(fromJson: doubleFromJson) required this.displayPrice,
-    required this.preorderAvailable,
+    @JsonKey(fromJson: boolFromJson) required this.preorderAvailable,
     @JsonKey(fromJson: doubleNullableFromJson) this.preorderPrice,
-    required this.hasDiscount,
+    @JsonKey(fromJson: boolFromJson) required this.hasDiscount,
     @JsonKey(fromJson: doubleFromJson) required this.discountPercentage,
+    @JsonKey(fromJson: stringFromJson) this.imageUrl = '',
+    @JsonKey(fromJson: stringFromJson) this.weight = '',
+    @JsonKey(fromJson: stringFromJson) this.category = '',
+    @JsonKey(fromJson: intFromJson) this.stock = 0,
+    @JsonKey(fromJson: stringFromJson) this.type = '',
     this.description,
+    @JsonKey(name: 'description_ml') this.descriptionMl,
     @JsonKey(fromJson: stringListFromJson) final List<String> images = const [],
     @JsonKey(name: 'nutritions', fromJson: dynamicListFromJson)
     final List<dynamic> nutritions = const [],
@@ -359,6 +466,9 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
   @JsonKey(fromJson: stringFromJson)
   final String id;
   @override
+  @JsonKey(name: 'name_ml')
+  final String nameMl;
+  @override
   @JsonKey(fromJson: stringFromJson)
   final String name;
   @override
@@ -374,17 +484,37 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
   @JsonKey(fromJson: doubleFromJson)
   final double displayPrice;
   @override
+  @JsonKey(fromJson: boolFromJson)
   final bool preorderAvailable;
   @override
   @JsonKey(fromJson: doubleNullableFromJson)
   final double? preorderPrice;
   @override
+  @JsonKey(fromJson: boolFromJson)
   final bool hasDiscount;
   @override
   @JsonKey(fromJson: doubleFromJson)
   final double discountPercentage;
   @override
+  @JsonKey(fromJson: stringFromJson)
+  final String imageUrl;
+  @override
+  @JsonKey(fromJson: stringFromJson)
+  final String weight;
+  @override
+  @JsonKey(fromJson: stringFromJson)
+  final String category;
+  @override
+  @JsonKey(fromJson: intFromJson)
+  final int stock;
+  @override
+  @JsonKey(fromJson: stringFromJson)
+  final String type;
+  @override
   final String? description;
+  @override
+  @JsonKey(name: 'description_ml')
+  final String? descriptionMl;
   final List<String> _images;
   @override
   @JsonKey(fromJson: stringListFromJson)
@@ -420,7 +550,7 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
 
   @override
   String toString() {
-    return 'ProductDetailDto(id: $id, name: $name, price: $price, ourPrice: $ourPrice, finalPrice: $finalPrice, displayPrice: $displayPrice, preorderAvailable: $preorderAvailable, preorderPrice: $preorderPrice, hasDiscount: $hasDiscount, discountPercentage: $discountPercentage, description: $description, images: $images, nutritions: $nutritions, rating: $rating, reviewCount: $reviewCount, reviews: $reviews)';
+    return 'ProductDetailDto(id: $id, nameMl: $nameMl, name: $name, price: $price, ourPrice: $ourPrice, finalPrice: $finalPrice, displayPrice: $displayPrice, preorderAvailable: $preorderAvailable, preorderPrice: $preorderPrice, hasDiscount: $hasDiscount, discountPercentage: $discountPercentage, imageUrl: $imageUrl, weight: $weight, category: $category, stock: $stock, type: $type, description: $description, descriptionMl: $descriptionMl, images: $images, nutritions: $nutritions, rating: $rating, reviewCount: $reviewCount, reviews: $reviews)';
   }
 
   @override
@@ -429,6 +559,7 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
         (other.runtimeType == runtimeType &&
             other is _$ProductDetailDtoImpl &&
             (identical(other.id, id) || other.id == id) &&
+            (identical(other.nameMl, nameMl) || other.nameMl == nameMl) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.price, price) || other.price == price) &&
             (identical(other.ourPrice, ourPrice) ||
@@ -445,8 +576,17 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
                 other.hasDiscount == hasDiscount) &&
             (identical(other.discountPercentage, discountPercentage) ||
                 other.discountPercentage == discountPercentage) &&
+            (identical(other.imageUrl, imageUrl) ||
+                other.imageUrl == imageUrl) &&
+            (identical(other.weight, weight) || other.weight == weight) &&
+            (identical(other.category, category) ||
+                other.category == category) &&
+            (identical(other.stock, stock) || other.stock == stock) &&
+            (identical(other.type, type) || other.type == type) &&
             (identical(other.description, description) ||
                 other.description == description) &&
+            (identical(other.descriptionMl, descriptionMl) ||
+                other.descriptionMl == descriptionMl) &&
             const DeepCollectionEquality().equals(other._images, _images) &&
             const DeepCollectionEquality().equals(
               other._nutritions,
@@ -460,9 +600,10 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
+    nameMl,
     name,
     price,
     ourPrice,
@@ -472,13 +613,19 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
     preorderPrice,
     hasDiscount,
     discountPercentage,
+    imageUrl,
+    weight,
+    category,
+    stock,
+    type,
     description,
+    descriptionMl,
     const DeepCollectionEquality().hash(_images),
     const DeepCollectionEquality().hash(_nutritions),
     rating,
     reviewCount,
     const DeepCollectionEquality().hash(_reviews),
-  );
+  ]);
 
   /// Create a copy of ProductDetailDto
   /// with the given fields replaced by the non-null parameter values.
@@ -500,16 +647,23 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
 abstract class _ProductDetailDto implements ProductDetailDto {
   const factory _ProductDetailDto({
     @JsonKey(fromJson: stringFromJson) required final String id,
+    @JsonKey(name: 'name_ml') final String nameMl,
     @JsonKey(fromJson: stringFromJson) required final String name,
     @JsonKey(fromJson: doubleFromJson) required final double price,
     @JsonKey(fromJson: doubleFromJson) required final double ourPrice,
     @JsonKey(fromJson: doubleFromJson) required final double finalPrice,
     @JsonKey(fromJson: doubleFromJson) required final double displayPrice,
-    required final bool preorderAvailable,
+    @JsonKey(fromJson: boolFromJson) required final bool preorderAvailable,
     @JsonKey(fromJson: doubleNullableFromJson) final double? preorderPrice,
-    required final bool hasDiscount,
+    @JsonKey(fromJson: boolFromJson) required final bool hasDiscount,
     @JsonKey(fromJson: doubleFromJson) required final double discountPercentage,
+    @JsonKey(fromJson: stringFromJson) final String imageUrl,
+    @JsonKey(fromJson: stringFromJson) final String weight,
+    @JsonKey(fromJson: stringFromJson) final String category,
+    @JsonKey(fromJson: intFromJson) final int stock,
+    @JsonKey(fromJson: stringFromJson) final String type,
     final String? description,
+    @JsonKey(name: 'description_ml') final String? descriptionMl,
     @JsonKey(fromJson: stringListFromJson) final List<String> images,
     @JsonKey(name: 'nutritions', fromJson: dynamicListFromJson)
     final List<dynamic> nutritions,
@@ -524,6 +678,9 @@ abstract class _ProductDetailDto implements ProductDetailDto {
   @override
   @JsonKey(fromJson: stringFromJson)
   String get id;
+  @override
+  @JsonKey(name: 'name_ml')
+  String get nameMl;
   @override
   @JsonKey(fromJson: stringFromJson)
   String get name;
@@ -540,17 +697,37 @@ abstract class _ProductDetailDto implements ProductDetailDto {
   @JsonKey(fromJson: doubleFromJson)
   double get displayPrice;
   @override
+  @JsonKey(fromJson: boolFromJson)
   bool get preorderAvailable;
   @override
   @JsonKey(fromJson: doubleNullableFromJson)
   double? get preorderPrice;
   @override
+  @JsonKey(fromJson: boolFromJson)
   bool get hasDiscount;
   @override
   @JsonKey(fromJson: doubleFromJson)
   double get discountPercentage;
   @override
+  @JsonKey(fromJson: stringFromJson)
+  String get imageUrl;
+  @override
+  @JsonKey(fromJson: stringFromJson)
+  String get weight;
+  @override
+  @JsonKey(fromJson: stringFromJson)
+  String get category;
+  @override
+  @JsonKey(fromJson: intFromJson)
+  int get stock;
+  @override
+  @JsonKey(fromJson: stringFromJson)
+  String get type;
+  @override
   String? get description;
+  @override
+  @JsonKey(name: 'description_ml')
+  String? get descriptionMl;
   @override
   @JsonKey(fromJson: stringListFromJson)
   List<String> get images;

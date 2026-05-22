@@ -2,6 +2,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../safe_json_parse.dart';
 import 'json_converters.dart';
 
 part 'banner_item.freezed.dart';
@@ -18,7 +19,7 @@ class BannerItem with _$BannerItem {
   }) = _BannerItem;
 
   factory BannerItem.fromJson(Map<String, dynamic> json) =>
-      _$BannerItemFromJson(json);
+      bannerItemFromJsonLoose(json);
 }
 
 @freezed
@@ -29,5 +30,5 @@ class BannerListResponse with _$BannerListResponse {
   }) = _BannerListResponse;
 
   factory BannerListResponse.fromJson(Map<String, dynamic> json) =>
-      _$BannerListResponseFromJson(json);
+      bannerListResponseFromJsonLoose(json);
 }

@@ -1,18 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/models/orders/orders_models.dart';
+import '../../core/providers/app_refresh_providers.dart';
 import '../../core/routes/app_router.dart';
 
-class OrderSuccessScreen extends StatelessWidget {
+class OrderSuccessScreen extends ConsumerStatefulWidget {
   const OrderSuccessScreen({super.key, this.result});
 
   final PlaceOrderResponse? result;
 
   @override
+  ConsumerState<OrderSuccessScreen> createState() => _OrderSuccessScreenState();
+}
+
+class _OrderSuccessScreenState extends ConsumerState<OrderSuccessScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      refreshAfterCheckout(ref);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final result = widget.result;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Container(
@@ -36,7 +54,7 @@ class OrderSuccessScreen extends StatelessWidget {
             if (result != null) ...[
               const SizedBox(height: 12),
               Text(
-                result!.orderNumber,
+                result.orderNumber,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
@@ -44,11 +62,11 @@ class OrderSuccessScreen extends StatelessWidget {
                   color: Colors.grey.shade800,
                 ),
               ),
-              if (result!.eta.isNotEmpty)
+              if (result.eta.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
-                    'ETA: ${result!.eta}',
+                    'ETA: ${result.eta}',
                     textAlign: TextAlign.center,
                     style: AppTextStyles.orderSuccessDescription,
                   ),
@@ -63,9 +81,9 @@ class OrderSuccessScreen extends StatelessWidget {
             const Spacer(flex: 3),
             ElevatedButton(
               onPressed: () {
-                final r = result;
-                if (r != null) {
-                  context.push(AppRouter.orderStatusPath(r.orderId));
+                refreshAfterCheckout(ref);
+                if (result != null) {
+                  context.push(AppRouter.orderStatusPath(result.orderId));
                 } else {
                   context.push(AppRouter.ordersList);
                 }
@@ -89,7 +107,10 @@ class OrderSuccessScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             TextButton(
-              onPressed: () => context.go(AppRouter.mainNav),
+              onPressed: () {
+                refreshAfterCheckout(ref);
+                context.go(AppRouter.mainNav);
+              },
               style: TextButton.styleFrom(
                 minimumSize: const Size(double.infinity, 60),
               ),

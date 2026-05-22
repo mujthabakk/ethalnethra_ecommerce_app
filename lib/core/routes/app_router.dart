@@ -17,7 +17,6 @@ import '../../views/cart/order_status_screen.dart';
 import '../../views/cart/orders_list_screen.dart';
 import '../../views/cart/order_history_screen.dart';
 import '../../views/account/edit_profile_screen.dart';
-import '../../views/account/notifications_screen.dart';
 import '../../views/account/delivery_address_screen.dart';
 import '../../views/account/promo_code_screen.dart';
 import '../../views/account/select_delivery_location_screen.dart';
@@ -70,7 +69,6 @@ class AppRouter {
   static String orderStatusPath(String orderId) => '$orderStatus/$orderId';
   static const String orderHistory = '/order-history';
   static const String editProfile = '/edit-profile';
-  static const String notifications = '/notifications';
   static const String deliveryAddress = '/delivery-address';
   static const String promoCode = '/promo-code';
   static const String selectLocation = '/select-location';
@@ -205,11 +203,6 @@ class AppRouter {
         path: editProfile,
         name: 'editProfile',
         builder: (context, state) => const EditProfileScreen(),
-      ),
-      GoRoute(
-        path: notifications,
-        name: 'notifications',
-        builder: (context, state) => const NotificationsScreen(),
       ),
       GoRoute(
         path: deliveryAddress,

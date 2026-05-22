@@ -3,6 +3,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../catalog/json_converters.dart';
+import '../safe_json_parse.dart';
 
 part 'zone_item.freezed.dart';
 part 'zone_item.g.dart';
@@ -16,7 +17,7 @@ class ZoneItem with _$ZoneItem {
   }) = _ZoneItem;
 
   factory ZoneItem.fromJson(Map<String, dynamic> json) =>
-      _$ZoneItemFromJson(json);
+      zoneItemFromJsonLoose(json);
 }
 
 @freezed
@@ -27,5 +28,5 @@ class ZonesListResponse with _$ZonesListResponse {
   }) = _ZonesListResponse;
 
   factory ZonesListResponse.fromJson(Map<String, dynamic> json) =>
-      _$ZonesListResponseFromJson(json);
+      ZonesListResponse(zones: zonesFromJsonLoose(json));
 }

@@ -23,6 +23,8 @@ FavoriteProductDto _$FavoriteProductDtoFromJson(Map<String, dynamic> json) {
 mixin _$FavoriteProductDto {
   @JsonKey(fromJson: stringFromJson)
   String get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'name_ml')
+  String get nameMl => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   @JsonKey(fromJson: doubleFromJson)
   double get price => throw _privateConstructorUsedError;
@@ -47,6 +49,7 @@ abstract class $FavoriteProductDtoCopyWith<$Res> {
   @useResult
   $Res call({
     @JsonKey(fromJson: stringFromJson) String id,
+    @JsonKey(name: 'name_ml') String nameMl,
     String name,
     @JsonKey(fromJson: doubleFromJson) double price,
     String imageUrl,
@@ -69,6 +72,7 @@ class _$FavoriteProductDtoCopyWithImpl<$Res, $Val extends FavoriteProductDto>
   @override
   $Res call({
     Object? id = null,
+    Object? nameMl = null,
     Object? name = null,
     Object? price = null,
     Object? imageUrl = null,
@@ -78,6 +82,10 @@ class _$FavoriteProductDtoCopyWithImpl<$Res, $Val extends FavoriteProductDto>
             id: null == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            nameMl: null == nameMl
+                ? _value.nameMl
+                : nameMl // ignore: cast_nullable_to_non_nullable
                       as String,
             name: null == name
                 ? _value.name
@@ -108,6 +116,7 @@ abstract class _$$FavoriteProductDtoImplCopyWith<$Res>
   @useResult
   $Res call({
     @JsonKey(fromJson: stringFromJson) String id,
+    @JsonKey(name: 'name_ml') String nameMl,
     String name,
     @JsonKey(fromJson: doubleFromJson) double price,
     String imageUrl,
@@ -129,6 +138,7 @@ class __$$FavoriteProductDtoImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
+    Object? nameMl = null,
     Object? name = null,
     Object? price = null,
     Object? imageUrl = null,
@@ -138,6 +148,10 @@ class __$$FavoriteProductDtoImplCopyWithImpl<$Res>
         id: null == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        nameMl: null == nameMl
+            ? _value.nameMl
+            : nameMl // ignore: cast_nullable_to_non_nullable
                   as String,
         name: null == name
             ? _value.name
@@ -162,6 +176,7 @@ class __$$FavoriteProductDtoImplCopyWithImpl<$Res>
 class _$FavoriteProductDtoImpl implements _FavoriteProductDto {
   const _$FavoriteProductDtoImpl({
     @JsonKey(fromJson: stringFromJson) required this.id,
+    @JsonKey(name: 'name_ml') this.nameMl = '',
     required this.name,
     @JsonKey(fromJson: doubleFromJson) required this.price,
     required this.imageUrl,
@@ -174,6 +189,9 @@ class _$FavoriteProductDtoImpl implements _FavoriteProductDto {
   @JsonKey(fromJson: stringFromJson)
   final String id;
   @override
+  @JsonKey(name: 'name_ml')
+  final String nameMl;
+  @override
   final String name;
   @override
   @JsonKey(fromJson: doubleFromJson)
@@ -183,7 +201,7 @@ class _$FavoriteProductDtoImpl implements _FavoriteProductDto {
 
   @override
   String toString() {
-    return 'FavoriteProductDto(id: $id, name: $name, price: $price, imageUrl: $imageUrl)';
+    return 'FavoriteProductDto(id: $id, nameMl: $nameMl, name: $name, price: $price, imageUrl: $imageUrl)';
   }
 
   @override
@@ -192,6 +210,7 @@ class _$FavoriteProductDtoImpl implements _FavoriteProductDto {
         (other.runtimeType == runtimeType &&
             other is _$FavoriteProductDtoImpl &&
             (identical(other.id, id) || other.id == id) &&
+            (identical(other.nameMl, nameMl) || other.nameMl == nameMl) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.price, price) || other.price == price) &&
             (identical(other.imageUrl, imageUrl) ||
@@ -200,7 +219,8 @@ class _$FavoriteProductDtoImpl implements _FavoriteProductDto {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, price, imageUrl);
+  int get hashCode =>
+      Object.hash(runtimeType, id, nameMl, name, price, imageUrl);
 
   /// Create a copy of FavoriteProductDto
   /// with the given fields replaced by the non-null parameter values.
@@ -222,6 +242,7 @@ class _$FavoriteProductDtoImpl implements _FavoriteProductDto {
 abstract class _FavoriteProductDto implements FavoriteProductDto {
   const factory _FavoriteProductDto({
     @JsonKey(fromJson: stringFromJson) required final String id,
+    @JsonKey(name: 'name_ml') final String nameMl,
     required final String name,
     @JsonKey(fromJson: doubleFromJson) required final double price,
     required final String imageUrl,
@@ -233,6 +254,9 @@ abstract class _FavoriteProductDto implements FavoriteProductDto {
   @override
   @JsonKey(fromJson: stringFromJson)
   String get id;
+  @override
+  @JsonKey(name: 'name_ml')
+  String get nameMl;
   @override
   String get name;
   @override

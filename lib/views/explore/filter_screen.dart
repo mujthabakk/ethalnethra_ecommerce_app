@@ -94,60 +94,77 @@ class _FilterScreenState extends ConsumerState<FilterScreen> {
           final brandSel =
               brands.isEmpty ? null : _effectiveChoice(_pickedBrand, brands);
 
-          return Container(
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
+          return Column(
+            children: [
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                  ),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 25,
+                      vertical: 30,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Categories',
+                          style: AppTextStyles.filterSectionTitle,
+                        ),
+                        const SizedBox(height: 20),
+                        if (categories.isEmpty)
+                          Text(
+                            'No categories available.',
+                            style: TextStyle(color: Colors.grey.shade700),
+                          )
+                        else
+                          ...categories.map(
+                            (cat) => _buildFilterItem(
+                              cat,
+                              categorySel == cat,
+                              () => setState(() => _pickedCategory = cat),
+                            ),
+                          ),
+                        const SizedBox(height: 40),
+                        Text('Brand', style: AppTextStyles.filterSectionTitle),
+                        const SizedBox(height: 20),
+                        if (brands.isEmpty)
+                          Text(
+                            'No brands available.',
+                            style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontSize: 15,
+                            ),
+                          )
+                        else
+                          ...brands.map(
+                            (brand) => _buildFilterItem(
+                              brand,
+                              brandSel == brand,
+                              () => setState(() => _pickedBrand = brand),
+                            ),
+                          ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 25.0, vertical: 30),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Categories', style: AppTextStyles.filterSectionTitle),
-                  const SizedBox(height: 20),
-                  if (categories.isEmpty)
-                    Text(
-                      'No categories available.',
-                      style: TextStyle(color: Colors.grey.shade700),
-                    )
-                  else
-                    ...categories.map(
-                      (cat) => _buildFilterItem(
-                        cat,
-                        categorySel == cat,
-                        () => setState(() => _pickedCategory = cat),
-                      ),
-                    ),
-                  const SizedBox(height: 40),
-                  Text('Brand', style: AppTextStyles.filterSectionTitle),
-                  const SizedBox(height: 20),
-                  if (brands.isEmpty)
-                    Text(
-                      'No brands available.',
-                      style: TextStyle(
-                        color: Colors.grey.shade700,
-                        fontSize: 15,
-                      ),
-                    )
-                  else
-                    ...brands.map(
-                      (brand) => _buildFilterItem(
-                        brand,
-                        brandSel == brand,
-                        () => setState(() => _pickedBrand = brand),
-                      ),
-                    ),
-                  const Spacer(),
-                  ElevatedButton(
-                    onPressed: categories.isEmpty
-                        ? null
-                        : () => _applyAndPop(data),
+              Container(
+                color: Colors.white,
+                padding: const EdgeInsets.fromLTRB(25, 0, 25, 24),
+                child: SafeArea(
+                  top: false,
+                  child: ElevatedButton(
+                    onPressed:
+                        categories.isEmpty ? null : () => _applyAndPop(data),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       disabledBackgroundColor: const Color(0xFFE2E2E2),
@@ -157,13 +174,14 @@ class _FilterScreenState extends ConsumerState<FilterScreen> {
                       ),
                       elevation: 0,
                     ),
-                    child:
-                        Text('Apply Filter', style: AppTextStyles.filterButton),
+                    child: Text(
+                      'Apply Filter',
+                      style: AppTextStyles.filterButton,
+                    ),
                   ),
-                  const SizedBox(height: 20),
-                ],
+                ),
               ),
-            ),
+            ],
           );
         },
       ),

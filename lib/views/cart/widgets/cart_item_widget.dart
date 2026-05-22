@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/models/commerce/cart_dtos.dart';
+import '../../../core/models/commerce/cart_line_extensions.dart';
 import '../../../core/widgets/app_network_image.dart';
 
 class CartItemWidget extends StatelessWidget {
@@ -22,18 +23,24 @@ class CartItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final qty = line.quantity.round();
-    return Container(
+    final accepted = line.isAccept;
+    final content = Container(
       padding: const EdgeInsets.symmetric(vertical: 25.0),
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: Color(0xFFE2E2E2), width: 1)),
       ),
       child: Row(
         children: [
-          AppImage(
-            path: 'asstes/images/grocery.png',
-            width: 70,
-            height: 70,
-            fit: BoxFit.contain,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: AppImage(
+              path: line.imageUrl.isNotEmpty
+                  ? line.imageUrl
+                  : 'asstes/images/grocery.png',
+              width: 70,
+              height: 70,
+              fit: BoxFit.cover,
+            ),
           ),
           const SizedBox(width: 25),
           Expanded(
@@ -45,7 +52,7 @@ class CartItemWidget extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        line.name,
+                        line.displayName,
                         style: AppTextStyles.cartItemTitle,
                       ),
                     ),
@@ -67,7 +74,10 @@ class CartItemWidget extends StatelessWidget {
                 const SizedBox(height: 20),
                 Row(
                   children: [
-                    _buildQuantityButton(Icons.remove, onDecrement),
+                    _buildQuantityButton(
+                      Icons.remove,
+                      accepted ? onDecrement : () {},
+                    ),
                     const SizedBox(width: 15),
                     SizedBox(
                       width: 30,
@@ -85,7 +95,7 @@ class CartItemWidget extends StatelessWidget {
                     const SizedBox(width: 15),
                     _buildQuantityButton(
                       Icons.add,
-                      onIncrement,
+                      accepted ? onIncrement : () {},
                       isPrimary: true,
                     ),
                     const Spacer(),
@@ -101,6 +111,9 @@ class CartItemWidget extends StatelessWidget {
         ],
       ),
     );
+
+    if (accepted) return content;
+    return Opacity(opacity: 0.45, child: content);
   }
 
   Widget _buildQuantityButton(

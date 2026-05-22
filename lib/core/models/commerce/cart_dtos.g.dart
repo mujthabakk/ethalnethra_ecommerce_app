@@ -6,26 +6,35 @@ part of 'cart_dtos.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$CartLineDtoImpl _$$CartLineDtoImplFromJson(Map<String, dynamic> json) =>
-    _$CartLineDtoImpl(
-      id: stringFromJson(json['id']),
-      productId: stringFromJson(json['product_id']),
-      name: json['name'] as String,
-      price: doubleFromJson(json['price']),
-      quantity: doubleFromJson(json['quantity']),
-      subtotal: doubleFromJson(json['subtotal']),
-      isPreorder: json['is_preorder'] as bool? ?? false,
-    );
+_$CartLineDtoImpl _$$CartLineDtoImplFromJson(
+  Map<String, dynamic> json,
+) => _$CartLineDtoImpl(
+  id: stringFromJson(json['id']),
+  productId: stringFromJson(json['product_id']),
+  nameMl: json['name_ml'] as String? ?? '',
+  name: stringFromJson(json['name']),
+  price: doubleFromJson(json['price']),
+  quantity: doubleFromJson(json['quantity']),
+  imageUrl: json['image_url'] == null ? '' : stringFromJson(json['image_url']),
+  subtotal: doubleFromJson(json['subtotal']),
+  isPreorder: json['is_preorder'] == null
+      ? false
+      : boolFromJson(json['is_preorder']),
+  isAccept: json['is_accept'] == null ? true : boolFromJson(json['is_accept']),
+);
 
 Map<String, dynamic> _$$CartLineDtoImplToJson(_$CartLineDtoImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'product_id': instance.productId,
+      'name_ml': instance.nameMl,
       'name': instance.name,
       'price': instance.price,
       'quantity': instance.quantity,
+      'image_url': instance.imageUrl,
       'subtotal': instance.subtotal,
       'is_preorder': instance.isPreorder,
+      'is_accept': instance.isAccept,
     };
 
 _$CartResponseImpl _$$CartResponseImplFromJson(Map<String, dynamic> json) =>

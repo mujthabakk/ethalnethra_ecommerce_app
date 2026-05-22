@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/commerce/cart_dtos.dart';
 import '../repositories/cart_repository.dart';
+import 'app_refresh_providers.dart';
 import 'auth_providers.dart';
 
 final cartRepositoryProvider = Provider<CartRepository>((ref) {
@@ -32,7 +33,7 @@ class CartNotifier extends AutoDisposeAsyncNotifier<CartResponse> {
       quantity: quantity,
       isPreorder: preorder,
     );
-    state = AsyncValue.data(await _repo.fetchCart());
+    await _reloadCartAndRefreshApp();
   }
 
   Future<void> setLineQuantity(String lineId, int newQuantity) async {
@@ -41,11 +42,17 @@ class CartNotifier extends AutoDisposeAsyncNotifier<CartResponse> {
       return;
     }
     await _repo.updateLineQuantity(lineId, quantity: newQuantity);
-    state = AsyncValue.data(await _repo.fetchCart());
+    await _reloadCartAndRefreshApp();
   }
 
   Future<void> removeLine(String lineId) async {
     await _repo.removeLine(lineId);
-    state = AsyncValue.data(await _repo.fetchCart());
+    await _reloadCartAndRefreshApp();
+  }
+
+  Future<void> _reloadCartAndRefreshApp() async {
+    final cart = await _repo.fetchCart();
+    state = AsyncValue.data(cart);
+    refreshAfterCartChange(ref, invalidateCart: false);
   }
 }

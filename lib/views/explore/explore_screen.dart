@@ -61,13 +61,6 @@ class ExploreScreen extends ConsumerWidget {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () => context.push(AppRouter.notifications),
-            icon: const Icon(
-              Icons.notifications_none,
-              color: AppColors.darkBackground,
-            ),
-          ),
-          IconButton(
             onPressed: () => context.push(AppRouter.editProfile),
             icon: const Icon(
               Icons.person_outline,

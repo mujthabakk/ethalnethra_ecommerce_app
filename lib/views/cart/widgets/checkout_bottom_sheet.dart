@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/models/user/user_address_models.dart';
+import '../../../core/providers/app_refresh_providers.dart';
 import '../../../core/providers/location_user_providers.dart';
 import '../../../core/providers/orders_action_providers.dart';
 import '../../../core/routes/app_router.dart';
@@ -28,6 +29,15 @@ class CheckoutBottomSheet extends ConsumerStatefulWidget {
 
 class _CheckoutBottomSheetState extends ConsumerState<CheckoutBottomSheet> {
   int? _selectedAddressId;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      refreshCheckoutSheetData(ref);
+    });
+  }
 
   String get _deliveryLabel =>
       widget.isInstantCart ? 'Instant delivery' : 'Pre-order delivery';
@@ -59,6 +69,7 @@ class _CheckoutBottomSheetState extends ConsumerState<CheckoutBottomSheet> {
     if (!mounted) return;
 
     if (res != null) {
+      refreshAfterCheckout(ref);
       Navigator.of(context).pop();
       context.push(AppRouter.orderSuccess, extra: res);
       ref.invalidate(placeOrderNotifierProvider);
@@ -91,7 +102,8 @@ class _CheckoutBottomSheetState extends ConsumerState<CheckoutBottomSheet> {
       if (!valid) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          setState(() => _selectedAddressId = list.first.id);
+          final preferred = list.where((a) => a.isDefault).firstOrNull ?? list.first;
+          setState(() => _selectedAddressId = preferred.id);
         });
       }
     });
@@ -213,7 +225,7 @@ class _CheckoutBottomSheetState extends ConsumerState<CheckoutBottomSheet> {
                                   groupValue: _selectedAddressId,
                                   activeColor: AppColors.primary,
                                   title: Text(
-                                    a.label,
+                                    a.isDefault ? '${a.label} (Default)' : a.label,
                                     style: AppTextStyles.checkoutValueLabel,
                                   ),
                                   subtitle: Text(

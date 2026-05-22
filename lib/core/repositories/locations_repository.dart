@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../api/api_endpoints.dart';
 import '../models/location/area_item.dart';
+import '../models/location/pincode_item.dart';
 import '../models/location/zone_item.dart';
 
 class LocationsRepository {
@@ -25,5 +26,15 @@ class LocationsRepository {
     final data = response.data;
     if (data == null) throw Exception('Empty areas response');
     return AreasListResponse.fromJson(data).areas;
+  }
+
+  Future<List<PincodeItem>> fetchPincodes({required int areaId}) async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      ApiEndpoints.locationsPincodes,
+      queryParameters: {'area_id': areaId},
+    );
+    final data = response.data;
+    if (data == null) throw Exception('Empty pincodes response');
+    return pincodeItemsFromApi(data['pincodes'] ?? data);
   }
 }

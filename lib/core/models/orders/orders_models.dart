@@ -3,6 +3,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../catalog/json_converters.dart';
+import '../safe_json_parse.dart';
 
 part 'orders_models.freezed.dart';
 part 'orders_models.g.dart';
@@ -20,7 +21,7 @@ class OrderListItem with _$OrderListItem {
   }) = _OrderListItem;
 
   factory OrderListItem.fromJson(Map<String, dynamic> json) =>
-      _$OrderListItemFromJson(json);
+      orderListItemFromJsonLoose(json);
 }
 
 @freezed
@@ -33,7 +34,7 @@ class OrdersListResponse with _$OrdersListResponse {
   }) = _OrdersListResponse;
 
   factory OrdersListResponse.fromJson(Map<String, dynamic> json) =>
-      _$OrdersListResponseFromJson(json);
+      ordersListResponseFromJsonLoose(json);
 }
 
 @freezed
@@ -52,7 +53,7 @@ class PlaceOrderResponse with _$PlaceOrderResponse {
   }) = _PlaceOrderResponse;
 
   factory PlaceOrderResponse.fromJson(Map<String, dynamic> json) =>
-      _$PlaceOrderResponseFromJson(json);
+      placeOrderResponseFromJsonLoose(json);
 }
 
 @freezed
@@ -65,7 +66,7 @@ class OrderTrackResponse with _$OrderTrackResponse {
   }) = _OrderTrackResponse;
 
   factory OrderTrackResponse.fromJson(Map<String, dynamic> json) =>
-      _$OrderTrackResponseFromJson(json);
+      orderTrackResponseFromJsonLoose(json);
 }
 
 @freezed
@@ -74,7 +75,7 @@ class CancelOrderResponse with _$CancelOrderResponse {
       _CancelOrderResponse;
 
   factory CancelOrderResponse.fromJson(Map<String, dynamic> json) =>
-      _$CancelOrderResponseFromJson(json);
+      cancelOrderResponseFromJsonLoose(json);
 }
 
 /// UI-friendly summary for [OrderStatusScreen] from list item or place-order response.

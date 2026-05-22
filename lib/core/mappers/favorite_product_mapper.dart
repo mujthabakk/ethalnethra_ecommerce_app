@@ -6,11 +6,16 @@ extension FavoriteProductMapper on FavoriteProductDto {
     return ProductModel(
       id: id,
       name: name,
+      nameMl: nameMl,
       description: 'Tap to view details',
       imagePath: imageUrl,
       price: price,
       unit: '',
       isPreOrder: false,
+      listPrice: price,
+      ourPrice: price,
+      finalPrice: price,
+      displayPrice: price,
     );
   }
 }

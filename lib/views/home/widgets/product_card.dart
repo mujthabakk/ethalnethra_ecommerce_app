@@ -46,7 +46,7 @@ class ProductCard extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              product.name,
+              product.displayName,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.productCardTitle,
@@ -94,7 +94,9 @@ class ProductCard extends ConsumerWidget {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('${product.name} added to cart!'),
+                            content: Text(
+                              '${product.displayName} added to cart!',
+                            ),
                             duration: const Duration(seconds: 1),
                             behavior: SnackBarBehavior.floating,
                           ),

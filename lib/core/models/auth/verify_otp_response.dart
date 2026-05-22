@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../safe_json_parse.dart';
 import 'auth_user.dart';
 
 part 'verify_otp_response.freezed.dart';
@@ -15,5 +16,5 @@ class VerifyOtpResponse with _$VerifyOtpResponse {
   }) = _VerifyOtpResponse;
 
   factory VerifyOtpResponse.fromJson(Map<String, dynamic> json) =>
-      _$VerifyOtpResponseFromJson(json);
+      verifyOtpResponseFromJsonLoose(json);
 }

@@ -144,7 +144,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              merged.name,
+                              merged.displayName,
                               style: AppTextStyles.productDetailTitle,
                             ),
                           ),
@@ -281,7 +281,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                '${merged.name} added to instant basket!',
+                                '${merged.displayName} added to instant basket!',
                               ),
                               duration: const Duration(seconds: 1),
                               behavior: SnackBarBehavior.floating,
@@ -331,7 +331,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  '${merged.name} added to pre-order basket!',
+                                  '${merged.displayName} added to pre-order basket!',
                                 ),
                                 duration: const Duration(seconds: 1),
                                 behavior: SnackBarBehavior.floating,

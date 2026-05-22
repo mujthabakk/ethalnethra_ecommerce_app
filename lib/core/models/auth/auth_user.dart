@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../safe_json_parse.dart';
+
 part 'auth_user.freezed.dart';
 part 'auth_user.g.dart';
 
@@ -17,5 +19,5 @@ class AuthUser with _$AuthUser {
   }) = _AuthUser;
 
   factory AuthUser.fromJson(Map<String, dynamic> json) =>
-      _$AuthUserFromJson(json);
+      authUserFromJsonLoose(json);
 }

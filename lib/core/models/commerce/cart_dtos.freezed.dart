@@ -25,14 +25,22 @@ mixin _$CartLineDto {
   String get id => throw _privateConstructorUsedError;
   @JsonKey(fromJson: stringFromJson)
   String get productId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'name_ml')
+  String get nameMl => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: stringFromJson)
   String get name => throw _privateConstructorUsedError;
   @JsonKey(fromJson: doubleFromJson)
   double get price => throw _privateConstructorUsedError;
   @JsonKey(fromJson: doubleFromJson)
   double get quantity => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: stringFromJson)
+  String get imageUrl => throw _privateConstructorUsedError;
   @JsonKey(fromJson: doubleFromJson)
   double get subtotal => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: boolFromJson)
   bool get isPreorder => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_accept', fromJson: boolFromJson)
+  bool get isAccept => throw _privateConstructorUsedError;
 
   /// Serializes this CartLineDto to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -54,11 +62,14 @@ abstract class $CartLineDtoCopyWith<$Res> {
   $Res call({
     @JsonKey(fromJson: stringFromJson) String id,
     @JsonKey(fromJson: stringFromJson) String productId,
-    String name,
+    @JsonKey(name: 'name_ml') String nameMl,
+    @JsonKey(fromJson: stringFromJson) String name,
     @JsonKey(fromJson: doubleFromJson) double price,
     @JsonKey(fromJson: doubleFromJson) double quantity,
+    @JsonKey(fromJson: stringFromJson) String imageUrl,
     @JsonKey(fromJson: doubleFromJson) double subtotal,
-    bool isPreorder,
+    @JsonKey(fromJson: boolFromJson) bool isPreorder,
+    @JsonKey(name: 'is_accept', fromJson: boolFromJson) bool isAccept,
   });
 }
 
@@ -79,11 +90,14 @@ class _$CartLineDtoCopyWithImpl<$Res, $Val extends CartLineDto>
   $Res call({
     Object? id = null,
     Object? productId = null,
+    Object? nameMl = null,
     Object? name = null,
     Object? price = null,
     Object? quantity = null,
+    Object? imageUrl = null,
     Object? subtotal = null,
     Object? isPreorder = null,
+    Object? isAccept = null,
   }) {
     return _then(
       _value.copyWith(
@@ -94,6 +108,10 @@ class _$CartLineDtoCopyWithImpl<$Res, $Val extends CartLineDto>
             productId: null == productId
                 ? _value.productId
                 : productId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            nameMl: null == nameMl
+                ? _value.nameMl
+                : nameMl // ignore: cast_nullable_to_non_nullable
                       as String,
             name: null == name
                 ? _value.name
@@ -107,6 +125,10 @@ class _$CartLineDtoCopyWithImpl<$Res, $Val extends CartLineDto>
                 ? _value.quantity
                 : quantity // ignore: cast_nullable_to_non_nullable
                       as double,
+            imageUrl: null == imageUrl
+                ? _value.imageUrl
+                : imageUrl // ignore: cast_nullable_to_non_nullable
+                      as String,
             subtotal: null == subtotal
                 ? _value.subtotal
                 : subtotal // ignore: cast_nullable_to_non_nullable
@@ -114,6 +136,10 @@ class _$CartLineDtoCopyWithImpl<$Res, $Val extends CartLineDto>
             isPreorder: null == isPreorder
                 ? _value.isPreorder
                 : isPreorder // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            isAccept: null == isAccept
+                ? _value.isAccept
+                : isAccept // ignore: cast_nullable_to_non_nullable
                       as bool,
           )
           as $Val,
@@ -133,11 +159,14 @@ abstract class _$$CartLineDtoImplCopyWith<$Res>
   $Res call({
     @JsonKey(fromJson: stringFromJson) String id,
     @JsonKey(fromJson: stringFromJson) String productId,
-    String name,
+    @JsonKey(name: 'name_ml') String nameMl,
+    @JsonKey(fromJson: stringFromJson) String name,
     @JsonKey(fromJson: doubleFromJson) double price,
     @JsonKey(fromJson: doubleFromJson) double quantity,
+    @JsonKey(fromJson: stringFromJson) String imageUrl,
     @JsonKey(fromJson: doubleFromJson) double subtotal,
-    bool isPreorder,
+    @JsonKey(fromJson: boolFromJson) bool isPreorder,
+    @JsonKey(name: 'is_accept', fromJson: boolFromJson) bool isAccept,
   });
 }
 
@@ -157,11 +186,14 @@ class __$$CartLineDtoImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? productId = null,
+    Object? nameMl = null,
     Object? name = null,
     Object? price = null,
     Object? quantity = null,
+    Object? imageUrl = null,
     Object? subtotal = null,
     Object? isPreorder = null,
+    Object? isAccept = null,
   }) {
     return _then(
       _$CartLineDtoImpl(
@@ -172,6 +204,10 @@ class __$$CartLineDtoImplCopyWithImpl<$Res>
         productId: null == productId
             ? _value.productId
             : productId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        nameMl: null == nameMl
+            ? _value.nameMl
+            : nameMl // ignore: cast_nullable_to_non_nullable
                   as String,
         name: null == name
             ? _value.name
@@ -185,6 +221,10 @@ class __$$CartLineDtoImplCopyWithImpl<$Res>
             ? _value.quantity
             : quantity // ignore: cast_nullable_to_non_nullable
                   as double,
+        imageUrl: null == imageUrl
+            ? _value.imageUrl
+            : imageUrl // ignore: cast_nullable_to_non_nullable
+                  as String,
         subtotal: null == subtotal
             ? _value.subtotal
             : subtotal // ignore: cast_nullable_to_non_nullable
@@ -192,6 +232,10 @@ class __$$CartLineDtoImplCopyWithImpl<$Res>
         isPreorder: null == isPreorder
             ? _value.isPreorder
             : isPreorder // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        isAccept: null == isAccept
+            ? _value.isAccept
+            : isAccept // ignore: cast_nullable_to_non_nullable
                   as bool,
       ),
     );
@@ -205,11 +249,14 @@ class _$CartLineDtoImpl implements _CartLineDto {
   const _$CartLineDtoImpl({
     @JsonKey(fromJson: stringFromJson) required this.id,
     @JsonKey(fromJson: stringFromJson) required this.productId,
-    required this.name,
+    @JsonKey(name: 'name_ml') this.nameMl = '',
+    @JsonKey(fromJson: stringFromJson) required this.name,
     @JsonKey(fromJson: doubleFromJson) required this.price,
     @JsonKey(fromJson: doubleFromJson) required this.quantity,
+    @JsonKey(fromJson: stringFromJson) this.imageUrl = '',
     @JsonKey(fromJson: doubleFromJson) required this.subtotal,
-    this.isPreorder = false,
+    @JsonKey(fromJson: boolFromJson) this.isPreorder = false,
+    @JsonKey(name: 'is_accept', fromJson: boolFromJson) this.isAccept = true,
   });
 
   factory _$CartLineDtoImpl.fromJson(Map<String, dynamic> json) =>
@@ -222,6 +269,10 @@ class _$CartLineDtoImpl implements _CartLineDto {
   @JsonKey(fromJson: stringFromJson)
   final String productId;
   @override
+  @JsonKey(name: 'name_ml')
+  final String nameMl;
+  @override
+  @JsonKey(fromJson: stringFromJson)
   final String name;
   @override
   @JsonKey(fromJson: doubleFromJson)
@@ -230,15 +281,21 @@ class _$CartLineDtoImpl implements _CartLineDto {
   @JsonKey(fromJson: doubleFromJson)
   final double quantity;
   @override
+  @JsonKey(fromJson: stringFromJson)
+  final String imageUrl;
+  @override
   @JsonKey(fromJson: doubleFromJson)
   final double subtotal;
   @override
-  @JsonKey()
+  @JsonKey(fromJson: boolFromJson)
   final bool isPreorder;
+  @override
+  @JsonKey(name: 'is_accept', fromJson: boolFromJson)
+  final bool isAccept;
 
   @override
   String toString() {
-    return 'CartLineDto(id: $id, productId: $productId, name: $name, price: $price, quantity: $quantity, subtotal: $subtotal, isPreorder: $isPreorder)';
+    return 'CartLineDto(id: $id, productId: $productId, nameMl: $nameMl, name: $name, price: $price, quantity: $quantity, imageUrl: $imageUrl, subtotal: $subtotal, isPreorder: $isPreorder, isAccept: $isAccept)';
   }
 
   @override
@@ -249,14 +306,19 @@ class _$CartLineDtoImpl implements _CartLineDto {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.productId, productId) ||
                 other.productId == productId) &&
+            (identical(other.nameMl, nameMl) || other.nameMl == nameMl) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.price, price) || other.price == price) &&
             (identical(other.quantity, quantity) ||
                 other.quantity == quantity) &&
+            (identical(other.imageUrl, imageUrl) ||
+                other.imageUrl == imageUrl) &&
             (identical(other.subtotal, subtotal) ||
                 other.subtotal == subtotal) &&
             (identical(other.isPreorder, isPreorder) ||
-                other.isPreorder == isPreorder));
+                other.isPreorder == isPreorder) &&
+            (identical(other.isAccept, isAccept) ||
+                other.isAccept == isAccept));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -265,11 +327,14 @@ class _$CartLineDtoImpl implements _CartLineDto {
     runtimeType,
     id,
     productId,
+    nameMl,
     name,
     price,
     quantity,
+    imageUrl,
     subtotal,
     isPreorder,
+    isAccept,
   );
 
   /// Create a copy of CartLineDto
@@ -290,11 +355,14 @@ abstract class _CartLineDto implements CartLineDto {
   const factory _CartLineDto({
     @JsonKey(fromJson: stringFromJson) required final String id,
     @JsonKey(fromJson: stringFromJson) required final String productId,
-    required final String name,
+    @JsonKey(name: 'name_ml') final String nameMl,
+    @JsonKey(fromJson: stringFromJson) required final String name,
     @JsonKey(fromJson: doubleFromJson) required final double price,
     @JsonKey(fromJson: doubleFromJson) required final double quantity,
+    @JsonKey(fromJson: stringFromJson) final String imageUrl,
     @JsonKey(fromJson: doubleFromJson) required final double subtotal,
-    final bool isPreorder,
+    @JsonKey(fromJson: boolFromJson) final bool isPreorder,
+    @JsonKey(name: 'is_accept', fromJson: boolFromJson) final bool isAccept,
   }) = _$CartLineDtoImpl;
 
   factory _CartLineDto.fromJson(Map<String, dynamic> json) =
@@ -307,6 +375,10 @@ abstract class _CartLineDto implements CartLineDto {
   @JsonKey(fromJson: stringFromJson)
   String get productId;
   @override
+  @JsonKey(name: 'name_ml')
+  String get nameMl;
+  @override
+  @JsonKey(fromJson: stringFromJson)
   String get name;
   @override
   @JsonKey(fromJson: doubleFromJson)
@@ -315,10 +387,17 @@ abstract class _CartLineDto implements CartLineDto {
   @JsonKey(fromJson: doubleFromJson)
   double get quantity;
   @override
+  @JsonKey(fromJson: stringFromJson)
+  String get imageUrl;
+  @override
   @JsonKey(fromJson: doubleFromJson)
   double get subtotal;
   @override
+  @JsonKey(fromJson: boolFromJson)
   bool get isPreorder;
+  @override
+  @JsonKey(name: 'is_accept', fromJson: boolFromJson)
+  bool get isAccept;
 
   /// Create a copy of CartLineDto
   /// with the given fields replaced by the non-null parameter values.

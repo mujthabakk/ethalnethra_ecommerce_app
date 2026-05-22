@@ -26,7 +26,7 @@ final homeCategoriesProvider =
 final homeProductsProvider =
     FutureProvider.autoDispose<List<CatalogProduct>>((ref) async {
   final res = await ref.watch(catalogRepositoryProvider).fetchProducts(
-        limit: 20,
+        limit: 50,
         page: 1,
       );
   return res.products;

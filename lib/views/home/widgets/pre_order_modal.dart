@@ -67,7 +67,7 @@ class PreOrderModal extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      product.name,
+                      product.displayName,
                       style: AppTextStyles.productCardTitle,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -104,7 +104,7 @@ class PreOrderModal extends ConsumerWidget {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          '${product.name} added to pre-order basket!',
+                          '${product.displayName} added to pre-order basket!',
                         ),
                         duration: const Duration(seconds: 1),
                         behavior: SnackBarBehavior.floating,

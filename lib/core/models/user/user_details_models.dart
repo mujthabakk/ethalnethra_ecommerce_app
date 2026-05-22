@@ -3,6 +3,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../catalog/json_converters.dart';
+import '../safe_json_parse.dart';
 
 part 'user_details_models.freezed.dart';
 part 'user_details_models.g.dart';
@@ -21,7 +22,7 @@ class UserDetails with _$UserDetails {
   }) = _UserDetails;
 
   factory UserDetails.fromJson(Map<String, dynamic> json) =>
-      _$UserDetailsFromJson(json);
+      userDetailsFromJsonLoose(json);
 }
 
 extension UserDetailsX on UserDetails {
@@ -43,5 +44,5 @@ class UpdateUserDetailsResponse with _$UpdateUserDetailsResponse {
   }) = _UpdateUserDetailsResponse;
 
   factory UpdateUserDetailsResponse.fromJson(Map<String, dynamic> json) =>
-      _$UpdateUserDetailsResponseFromJson(json);
+      updateUserDetailsResponseFromJsonLoose(json);
 }

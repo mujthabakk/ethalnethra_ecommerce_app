@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/location/area_item.dart';
+import '../models/location/pincode_item.dart';
 import '../models/location/zone_item.dart';
 import '../models/user/user_details_models.dart';
 import '../models/orders/orders_models.dart';
@@ -46,6 +47,11 @@ final areasForZoneProvider =
   return ref.watch(locationsRepositoryProvider).fetchAreas(zoneId: zoneId);
 });
 
+final pincodesForAreaProvider = FutureProvider.autoDispose
+    .family<List<PincodeItem>, int>((ref, areaId) async {
+  return ref.watch(locationsRepositoryProvider).fetchPincodes(areaId: areaId);
+});
+
 final userDetailsProvider =
     FutureProvider.autoDispose<UserDetails>((ref) async {
   return ref.watch(userProfileRepositoryProvider).fetchUserDetails();
@@ -81,7 +87,7 @@ class SaveAddressNotifier extends Notifier<SaveAddressUiState> {
     required int zoneId,
     required int areaId,
     required String addressLine,
-    required String pincode,
+    required String pincodeId,
   }) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
@@ -90,7 +96,7 @@ class SaveAddressNotifier extends Notifier<SaveAddressUiState> {
             zoneId: zoneId,
             areaId: areaId,
             addressLine: addressLine,
-            pincode: pincode,
+            pincodeId: pincodeId,
           );
       ref.invalidate(userAddressesProvider);
       state = const SaveAddressUiState();

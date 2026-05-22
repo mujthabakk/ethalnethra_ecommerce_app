@@ -8,6 +8,7 @@ class CustomDropdown extends StatelessWidget {
   final String? value;
   final String hint;
   final List<String> items;
+  final Map<String, String>? itemLabels;
   final ValueChanged<String?>? onChanged;
 
   const CustomDropdown({
@@ -16,6 +17,7 @@ class CustomDropdown extends StatelessWidget {
     this.value,
     required this.hint,
     required this.items,
+    this.itemLabels,
     this.onChanged,
   });
 
@@ -74,10 +76,11 @@ class CustomDropdown extends StatelessWidget {
             ),
           ),
           items: items.map((item) {
+            final label = itemLabels?[item] ?? item;
             return DropdownMenuItem<String>(
               value: item,
               child: Text(
-                item,
+                label,
                 style: const TextStyle(
                   fontFamily: 'Gilroy',
                   fontSize: 18,

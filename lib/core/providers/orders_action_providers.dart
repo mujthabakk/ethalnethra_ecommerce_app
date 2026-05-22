@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/orders/orders_models.dart';
-import 'cart_providers.dart';
+import 'app_refresh_providers.dart';
 import 'location_user_providers.dart';
 
 /// One-shot place order; [autoDispose] clears state when checkout sheet closes.
@@ -27,7 +27,7 @@ class PlaceOrderNotifier extends AutoDisposeAsyncNotifier<PlaceOrderResponse?> {
             paymentMethod: 'cod',
             addressId: addressId,
           );
-      ref.invalidate(cartNotifierProvider);
+      refreshAfterCheckout(ref);
       state = AsyncValue.data(res);
       return res;
     } catch (e, st) {
