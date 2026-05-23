@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
+import '../../core/constants/commerce_constants.dart';
 import '../../core/models/commerce/cart_dtos.dart';
 import '../../core/providers/app_refresh_providers.dart';
 import '../../core/providers/cart_providers.dart';
@@ -26,8 +27,11 @@ class _CartScreenState extends ConsumerState<CartScreen> {
         .fold<double>(0, (a, b) => a + b.subtotal);
   }
 
-  bool _canCheckout(List<CartLineDto> lines) {
-    return lines.isNotEmpty && lines.every((l) => l.isAccept);
+  List<CartLineDto> _acceptedLines(List<CartLineDto> lines) =>
+      lines.where((l) => l.isAccept).toList();
+
+  bool _canCheckout(List<CartLineDto> lines, double total) {
+    return _acceptedLines(lines).isNotEmpty && total >= minOrderAmount;
   }
 
   @override
@@ -84,7 +88,10 @@ class _CartScreenState extends ConsumerState<CartScreen> {
           final cartItems =
               _isInstantCart ? cart.instant : cart.preorder;
           final total = _tabTotal(cartItems);
-          final canCheckout = _canCheckout(cartItems);
+          final acceptedLines = _acceptedLines(cartItems);
+          final canCheckout = _canCheckout(cartItems, total);
+          final belowMinimum =
+              acceptedLines.isNotEmpty && total < minOrderAmount;
           final notifier = ref.read(cartNotifierProvider.notifier);
 
           return Column(
@@ -170,7 +177,23 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                       bottom: 25,
                       left: 20,
                       right: 20,
-                      child: ElevatedButton(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (belowMinimum)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: Text(
+                                'Minimum order amount is ₹${minOrderAmount.toStringAsFixed(0)}',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.orange.shade800,
+                                ),
+                              ),
+                            ),
+                          ElevatedButton(
                         onPressed: !canCheckout
                             ? null
                             : () async {
@@ -184,6 +207,9 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                     return CheckoutBottomSheet(
                                       totalPrice: total,
                                       isInstantCart: _isInstantCart,
+                                      acceptedLineIds: acceptedLines
+                                          .map((l) => l.id)
+                                          .toList(),
                                     );
                                   },
                                 );
@@ -228,6 +254,8 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                             ),
                           ],
                         ),
+                      ),
+                        ],
                       ),
                     ),
                   ],

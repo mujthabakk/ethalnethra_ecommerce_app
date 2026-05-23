@@ -37,6 +37,8 @@ mixin _$ProductDetailDto {
   double get displayPrice => throw _privateConstructorUsedError;
   @JsonKey(fromJson: boolFromJson)
   bool get preorderAvailable => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: boolFromJson)
+  bool get instantOrderAvailable => throw _privateConstructorUsedError;
   @JsonKey(fromJson: doubleNullableFromJson)
   double? get preorderPrice => throw _privateConstructorUsedError;
   @JsonKey(fromJson: boolFromJson)
@@ -93,6 +95,7 @@ abstract class $ProductDetailDtoCopyWith<$Res> {
     @JsonKey(fromJson: doubleFromJson) double finalPrice,
     @JsonKey(fromJson: doubleFromJson) double displayPrice,
     @JsonKey(fromJson: boolFromJson) bool preorderAvailable,
+    @JsonKey(fromJson: boolFromJson) bool instantOrderAvailable,
     @JsonKey(fromJson: doubleNullableFromJson) double? preorderPrice,
     @JsonKey(fromJson: boolFromJson) bool hasDiscount,
     @JsonKey(fromJson: doubleFromJson) double discountPercentage,
@@ -135,6 +138,7 @@ class _$ProductDetailDtoCopyWithImpl<$Res, $Val extends ProductDetailDto>
     Object? finalPrice = null,
     Object? displayPrice = null,
     Object? preorderAvailable = null,
+    Object? instantOrderAvailable = null,
     Object? preorderPrice = freezed,
     Object? hasDiscount = null,
     Object? discountPercentage = null,
@@ -184,6 +188,10 @@ class _$ProductDetailDtoCopyWithImpl<$Res, $Val extends ProductDetailDto>
             preorderAvailable: null == preorderAvailable
                 ? _value.preorderAvailable
                 : preorderAvailable // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            instantOrderAvailable: null == instantOrderAvailable
+                ? _value.instantOrderAvailable
+                : instantOrderAvailable // ignore: cast_nullable_to_non_nullable
                       as bool,
             preorderPrice: freezed == preorderPrice
                 ? _value.preorderPrice
@@ -269,6 +277,7 @@ abstract class _$$ProductDetailDtoImplCopyWith<$Res>
     @JsonKey(fromJson: doubleFromJson) double finalPrice,
     @JsonKey(fromJson: doubleFromJson) double displayPrice,
     @JsonKey(fromJson: boolFromJson) bool preorderAvailable,
+    @JsonKey(fromJson: boolFromJson) bool instantOrderAvailable,
     @JsonKey(fromJson: doubleNullableFromJson) double? preorderPrice,
     @JsonKey(fromJson: boolFromJson) bool hasDiscount,
     @JsonKey(fromJson: doubleFromJson) double discountPercentage,
@@ -310,6 +319,7 @@ class __$$ProductDetailDtoImplCopyWithImpl<$Res>
     Object? finalPrice = null,
     Object? displayPrice = null,
     Object? preorderAvailable = null,
+    Object? instantOrderAvailable = null,
     Object? preorderPrice = freezed,
     Object? hasDiscount = null,
     Object? discountPercentage = null,
@@ -359,6 +369,10 @@ class __$$ProductDetailDtoImplCopyWithImpl<$Res>
         preorderAvailable: null == preorderAvailable
             ? _value.preorderAvailable
             : preorderAvailable // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        instantOrderAvailable: null == instantOrderAvailable
+            ? _value.instantOrderAvailable
+            : instantOrderAvailable // ignore: cast_nullable_to_non_nullable
                   as bool,
         preorderPrice: freezed == preorderPrice
             ? _value.preorderPrice
@@ -438,6 +452,7 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
     @JsonKey(fromJson: doubleFromJson) required this.finalPrice,
     @JsonKey(fromJson: doubleFromJson) required this.displayPrice,
     @JsonKey(fromJson: boolFromJson) required this.preorderAvailable,
+    @JsonKey(fromJson: boolFromJson) this.instantOrderAvailable = false,
     @JsonKey(fromJson: doubleNullableFromJson) this.preorderPrice,
     @JsonKey(fromJson: boolFromJson) required this.hasDiscount,
     @JsonKey(fromJson: doubleFromJson) required this.discountPercentage,
@@ -486,6 +501,9 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
   @override
   @JsonKey(fromJson: boolFromJson)
   final bool preorderAvailable;
+  @override
+  @JsonKey(fromJson: boolFromJson)
+  final bool instantOrderAvailable;
   @override
   @JsonKey(fromJson: doubleNullableFromJson)
   final double? preorderPrice;
@@ -550,7 +568,7 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
 
   @override
   String toString() {
-    return 'ProductDetailDto(id: $id, nameMl: $nameMl, name: $name, price: $price, ourPrice: $ourPrice, finalPrice: $finalPrice, displayPrice: $displayPrice, preorderAvailable: $preorderAvailable, preorderPrice: $preorderPrice, hasDiscount: $hasDiscount, discountPercentage: $discountPercentage, imageUrl: $imageUrl, weight: $weight, category: $category, stock: $stock, type: $type, description: $description, descriptionMl: $descriptionMl, images: $images, nutritions: $nutritions, rating: $rating, reviewCount: $reviewCount, reviews: $reviews)';
+    return 'ProductDetailDto(id: $id, nameMl: $nameMl, name: $name, price: $price, ourPrice: $ourPrice, finalPrice: $finalPrice, displayPrice: $displayPrice, preorderAvailable: $preorderAvailable, instantOrderAvailable: $instantOrderAvailable, preorderPrice: $preorderPrice, hasDiscount: $hasDiscount, discountPercentage: $discountPercentage, imageUrl: $imageUrl, weight: $weight, category: $category, stock: $stock, type: $type, description: $description, descriptionMl: $descriptionMl, images: $images, nutritions: $nutritions, rating: $rating, reviewCount: $reviewCount, reviews: $reviews)';
   }
 
   @override
@@ -570,6 +588,8 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
                 other.displayPrice == displayPrice) &&
             (identical(other.preorderAvailable, preorderAvailable) ||
                 other.preorderAvailable == preorderAvailable) &&
+            (identical(other.instantOrderAvailable, instantOrderAvailable) ||
+                other.instantOrderAvailable == instantOrderAvailable) &&
             (identical(other.preorderPrice, preorderPrice) ||
                 other.preorderPrice == preorderPrice) &&
             (identical(other.hasDiscount, hasDiscount) ||
@@ -610,6 +630,7 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
     finalPrice,
     displayPrice,
     preorderAvailable,
+    instantOrderAvailable,
     preorderPrice,
     hasDiscount,
     discountPercentage,
@@ -654,6 +675,7 @@ abstract class _ProductDetailDto implements ProductDetailDto {
     @JsonKey(fromJson: doubleFromJson) required final double finalPrice,
     @JsonKey(fromJson: doubleFromJson) required final double displayPrice,
     @JsonKey(fromJson: boolFromJson) required final bool preorderAvailable,
+    @JsonKey(fromJson: boolFromJson) final bool instantOrderAvailable,
     @JsonKey(fromJson: doubleNullableFromJson) final double? preorderPrice,
     @JsonKey(fromJson: boolFromJson) required final bool hasDiscount,
     @JsonKey(fromJson: doubleFromJson) required final double discountPercentage,
@@ -699,6 +721,9 @@ abstract class _ProductDetailDto implements ProductDetailDto {
   @override
   @JsonKey(fromJson: boolFromJson)
   bool get preorderAvailable;
+  @override
+  @JsonKey(fromJson: boolFromJson)
+  bool get instantOrderAvailable;
   @override
   @JsonKey(fromJson: doubleNullableFromJson)
   double? get preorderPrice;

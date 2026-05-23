@@ -41,7 +41,7 @@ class ExploreCategoryCard extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: Text(
-                  category.name,
+                  category.displayName,
                   textAlign: TextAlign.center,
                   style: AppTextStyles.exploreCategoryTitle,
                 ),

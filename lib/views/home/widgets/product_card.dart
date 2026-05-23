@@ -18,7 +18,8 @@ class ProductCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final showPreOrder = product.isPreOrder;
+    final showPreOrder = product.preorderAvailable;
+    final showInstant = product.instantOrderAvailable;
 
     return InkWell(
       onTap: () {
@@ -83,10 +84,11 @@ class ProductCard extends ConsumerWidget {
                       PreOrderModal.show(context, product);
                     },
                   ),
-                  const SizedBox(width: 8),
+                  if (showInstant) const SizedBox(width: 8),
                 ],
-                _InstantBasketButton(
-                  onTap: () async {
+                if (showInstant)
+                  _InstantBasketButton(
+                    onTap: () async {
                     try {
                       await ref
                           .read(cartNotifierProvider.notifier)
@@ -113,7 +115,7 @@ class ProductCard extends ConsumerWidget {
                       }
                     }
                   },
-                ),
+                  ),
               ],
             ),
           ],

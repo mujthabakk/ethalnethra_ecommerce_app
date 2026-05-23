@@ -29,7 +29,7 @@ class CategoryCard extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              category.name,
+              category.displayName,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(

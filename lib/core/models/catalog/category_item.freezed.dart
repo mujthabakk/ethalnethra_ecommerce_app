@@ -23,6 +23,8 @@ CategoryItem _$CategoryItemFromJson(Map<String, dynamic> json) {
 mixin _$CategoryItem {
   @JsonKey(fromJson: stringFromJson)
   String get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'name_ml')
+  String get nameMl => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   String? get imageUrl => throw _privateConstructorUsedError;
 
@@ -45,6 +47,7 @@ abstract class $CategoryItemCopyWith<$Res> {
   @useResult
   $Res call({
     @JsonKey(fromJson: stringFromJson) String id,
+    @JsonKey(name: 'name_ml') String nameMl,
     String name,
     String? imageUrl,
   });
@@ -66,6 +69,7 @@ class _$CategoryItemCopyWithImpl<$Res, $Val extends CategoryItem>
   @override
   $Res call({
     Object? id = null,
+    Object? nameMl = null,
     Object? name = null,
     Object? imageUrl = freezed,
   }) {
@@ -74,6 +78,10 @@ class _$CategoryItemCopyWithImpl<$Res, $Val extends CategoryItem>
             id: null == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            nameMl: null == nameMl
+                ? _value.nameMl
+                : nameMl // ignore: cast_nullable_to_non_nullable
                       as String,
             name: null == name
                 ? _value.name
@@ -100,6 +108,7 @@ abstract class _$$CategoryItemImplCopyWith<$Res>
   @useResult
   $Res call({
     @JsonKey(fromJson: stringFromJson) String id,
+    @JsonKey(name: 'name_ml') String nameMl,
     String name,
     String? imageUrl,
   });
@@ -120,6 +129,7 @@ class __$$CategoryItemImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
+    Object? nameMl = null,
     Object? name = null,
     Object? imageUrl = freezed,
   }) {
@@ -128,6 +138,10 @@ class __$$CategoryItemImplCopyWithImpl<$Res>
         id: null == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        nameMl: null == nameMl
+            ? _value.nameMl
+            : nameMl // ignore: cast_nullable_to_non_nullable
                   as String,
         name: null == name
             ? _value.name
@@ -148,6 +162,7 @@ class __$$CategoryItemImplCopyWithImpl<$Res>
 class _$CategoryItemImpl implements _CategoryItem {
   const _$CategoryItemImpl({
     @JsonKey(fromJson: stringFromJson) required this.id,
+    @JsonKey(name: 'name_ml') this.nameMl = '',
     required this.name,
     this.imageUrl,
   });
@@ -159,13 +174,16 @@ class _$CategoryItemImpl implements _CategoryItem {
   @JsonKey(fromJson: stringFromJson)
   final String id;
   @override
+  @JsonKey(name: 'name_ml')
+  final String nameMl;
+  @override
   final String name;
   @override
   final String? imageUrl;
 
   @override
   String toString() {
-    return 'CategoryItem(id: $id, name: $name, imageUrl: $imageUrl)';
+    return 'CategoryItem(id: $id, nameMl: $nameMl, name: $name, imageUrl: $imageUrl)';
   }
 
   @override
@@ -174,6 +192,7 @@ class _$CategoryItemImpl implements _CategoryItem {
         (other.runtimeType == runtimeType &&
             other is _$CategoryItemImpl &&
             (identical(other.id, id) || other.id == id) &&
+            (identical(other.nameMl, nameMl) || other.nameMl == nameMl) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.imageUrl, imageUrl) ||
                 other.imageUrl == imageUrl));
@@ -181,7 +200,7 @@ class _$CategoryItemImpl implements _CategoryItem {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, imageUrl);
+  int get hashCode => Object.hash(runtimeType, id, nameMl, name, imageUrl);
 
   /// Create a copy of CategoryItem
   /// with the given fields replaced by the non-null parameter values.
@@ -200,6 +219,7 @@ class _$CategoryItemImpl implements _CategoryItem {
 abstract class _CategoryItem implements CategoryItem {
   const factory _CategoryItem({
     @JsonKey(fromJson: stringFromJson) required final String id,
+    @JsonKey(name: 'name_ml') final String nameMl,
     required final String name,
     final String? imageUrl,
   }) = _$CategoryItemImpl;
@@ -210,6 +230,9 @@ abstract class _CategoryItem implements CategoryItem {
   @override
   @JsonKey(fromJson: stringFromJson)
   String get id;
+  @override
+  @JsonKey(name: 'name_ml')
+  String get nameMl;
   @override
   String get name;
   @override

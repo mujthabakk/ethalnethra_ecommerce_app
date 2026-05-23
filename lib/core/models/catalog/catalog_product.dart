@@ -19,6 +19,7 @@ class CatalogProduct with _$CatalogProduct {
     @JsonKey(fromJson: doubleFromJson) required double finalPrice,
     @JsonKey(fromJson: doubleFromJson) required double displayPrice,
     @JsonKey(fromJson: boolFromJson) required bool preorderAvailable,
+    @JsonKey(fromJson: boolFromJson) @Default(false) bool instantOrderAvailable,
     @JsonKey(fromJson: doubleNullableFromJson) double? preorderPrice,
     @JsonKey(fromJson: boolFromJson) required bool hasDiscount,
     @JsonKey(fromJson: doubleFromJson) required double discountPercentage,
@@ -44,6 +45,9 @@ CatalogProduct catalogProductFromJsonLoose(Map<String, dynamic> json) {
     displayPrice: doubleFromJson(json['display_price'] ?? json['displayPrice']),
     preorderAvailable:
         boolFromJson(json['preorder_available'] ?? json['preorderAvailable']),
+    instantOrderAvailable: boolFromJson(
+      json['instant_order_available'] ?? json['instantOrderAvailable'],
+    ),
     preorderPrice:
         doubleNullableFromJson(json['preorder_price'] ?? json['preorderPrice']),
     hasDiscount: boolFromJson(json['has_discount'] ?? json['hasDiscount']),

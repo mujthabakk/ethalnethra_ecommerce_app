@@ -17,6 +17,9 @@ _$ProductDetailDtoImpl _$$ProductDetailDtoImplFromJson(
   finalPrice: doubleFromJson(json['final_price']),
   displayPrice: doubleFromJson(json['display_price']),
   preorderAvailable: boolFromJson(json['preorder_available']),
+  instantOrderAvailable: json['instant_order_available'] == null
+      ? false
+      : boolFromJson(json['instant_order_available']),
   preorderPrice: doubleNullableFromJson(json['preorder_price']),
   hasDiscount: boolFromJson(json['has_discount']),
   discountPercentage: doubleFromJson(json['discount_percentage']),
@@ -53,6 +56,7 @@ Map<String, dynamic> _$$ProductDetailDtoImplToJson(
   'final_price': instance.finalPrice,
   'display_price': instance.displayPrice,
   'preorder_available': instance.preorderAvailable,
+  'instant_order_available': instance.instantOrderAvailable,
   'preorder_price': instance.preorderPrice,
   'has_discount': instance.hasDiscount,
   'discount_percentage': instance.discountPercentage,

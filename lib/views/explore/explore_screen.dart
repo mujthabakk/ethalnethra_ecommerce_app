@@ -112,6 +112,7 @@ class ExploreScreen extends ConsumerWidget {
                             final model = CategoryModel(
                               id: match?.id ?? title,
                               name: title,
+                              nameMl: match?.nameMl ?? '',
                               imagePath: imagePath,
                               backgroundColor: _exploreCategoryColors[
                                   index % _exploreCategoryColors.length],

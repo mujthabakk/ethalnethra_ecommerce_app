@@ -37,6 +37,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         ? detail.toProductModel(widget.product)
         : widget.product;
 
+    final showInstant = merged.instantOrderAvailable;
+    final showPreorder = merged.preorderAvailable;
+    final bottomButtonCount =
+        (showInstant ? 1 : 0) + (showPreorder ? 1 : 0);
+
     final productImages = _imageUrls(detail, merged.imagePath);
 
     final favList = ref.watch(favoritesNotifierProvider).valueOrNull ?? [];
@@ -250,122 +255,130 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       const _CustomDivider(),
                       _buildReviewSection(detail),
                       SizedBox(
-                          height: merged.isPreOrder ? 200 : 120),
+                        height: bottomButtonCount == 2
+                            ? 200
+                            : bottomButtonCount == 1
+                                ? 120
+                                : 40,
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-          Positioned(
-            bottom: 30,
-            left: 25,
-            right: 25,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: 67,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      try {
-                        await ref
-                            .read(cartNotifierProvider.notifier)
-                            .addToCart(
-                              merged.id,
-                              quantity: quantity,
-                              preorder: false,
-                            );
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                '${merged.displayName} added to instant basket!',
-                              ),
-                              duration: const Duration(seconds: 1),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('$e'),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        }
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(19),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'Add To Instant Basket',
-                      style: AppTextStyles.productDetailButton,
-                    ),
-                  ),
-                ),
-                if (merged.isPreOrder) ...[
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 67,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        try {
-                          await ref
-                              .read(cartNotifierProvider.notifier)
-                              .addToCart(
-                                merged.id,
-                                quantity: quantity,
-                                preorder: true,
-                              );
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  '${merged.displayName} added to pre-order basket!',
+          if (bottomButtonCount > 0)
+            Positioned(
+              bottom: 30,
+              left: 25,
+              right: 25,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (showInstant) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      height: 67,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          try {
+                            await ref
+                                .read(cartNotifierProvider.notifier)
+                                .addToCart(
+                                  merged.id,
+                                  quantity: quantity,
+                                  preorder: false,
+                                );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    '${merged.displayName} added to instant basket!',
+                                  ),
+                                  duration: const Duration(seconds: 1),
+                                  behavior: SnackBarBehavior.floating,
                                 ),
-                                duration: const Duration(seconds: 1),
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('$e'),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
                           }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('$e'),
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                          }
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.preOrderOrange,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(19),
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(19),
+                          ),
+                          elevation: 0,
                         ),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        'Add To Pre-order Basket',
-                        style: AppTextStyles.productDetailButton,
+                        child: Text(
+                          'Add To Instant Basket',
+                          style: AppTextStyles.productDetailButton,
+                        ),
                       ),
                     ),
-                  ),
+                  ],
+                  if (showInstant && showPreorder) const SizedBox(height: 12),
+                  if (showPreorder) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      height: 67,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          try {
+                            await ref
+                                .read(cartNotifierProvider.notifier)
+                                .addToCart(
+                                  merged.id,
+                                  quantity: quantity,
+                                  preorder: true,
+                                );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    '${merged.displayName} added to pre-order basket!',
+                                  ),
+                                  duration: const Duration(seconds: 1),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('$e'),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.preOrderOrange,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(19),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'Add To Pre-order Basket',
+                          style: AppTextStyles.productDetailButton,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
         ],
       ),
     );

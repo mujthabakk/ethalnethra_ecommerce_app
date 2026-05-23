@@ -20,6 +20,7 @@ class OrdersRepository {
     required String deliveryMethod,
     required String paymentMethod,
     required int addressId,
+    List<String>? cartItemIds,
   }) async {
     final response = await _dio.post<Map<String, dynamic>>(
       ApiEndpoints.ordersPlace,
@@ -27,6 +28,8 @@ class OrdersRepository {
         'delivery_method': deliveryMethod,
         'payment_method': paymentMethod,
         'address_id': addressId,
+        if (cartItemIds != null && cartItemIds.isNotEmpty)
+          'cart_item_ids': cartItemIds,
       },
     );
     final data = response.data;

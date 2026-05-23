@@ -26,7 +26,9 @@ extension ProductDetailDtoMapper on ProductDetailDto {
       imagePath: primary,
       price: _effectiveDisplayPrice,
       unit: unitLabel,
-      isPreOrder: preorderAvailable,
+      preorderAvailable: preorderAvailable || listing.preorderAvailable,
+      instantOrderAvailable:
+          instantOrderAvailable || listing.instantOrderAvailable,
       listPrice: price,
       ourPrice: ourPrice,
       finalPrice: finalPrice,

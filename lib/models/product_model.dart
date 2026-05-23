@@ -12,7 +12,11 @@ class ProductModel {
   final String imagePath;
   final double price;
   final String unit;
-  final bool isPreOrder;
+  final bool preorderAvailable;
+  final bool instantOrderAvailable;
+
+  /// Back-compat alias for [preorderAvailable].
+  bool get isPreOrder => preorderAvailable;
 
   final double listPrice;
   final double ourPrice;
@@ -35,7 +39,9 @@ class ProductModel {
     required this.imagePath,
     required this.price,
     required this.unit,
-    this.isPreOrder = false,
+    bool isPreOrder = false,
+    bool? preorderAvailable,
+    this.instantOrderAvailable = false,
     double? listPrice,
     double? ourPrice,
     double? finalPrice,
@@ -46,7 +52,8 @@ class ProductModel {
     this.stock = 0,
     this.category = '',
     this.type = '',
-  })  : listPrice = listPrice ?? price,
+  })  : preorderAvailable = preorderAvailable ?? isPreOrder,
+        listPrice = listPrice ?? price,
         ourPrice = ourPrice ?? price,
         finalPrice = finalPrice ?? price,
         displayPrice = displayPrice ?? price;

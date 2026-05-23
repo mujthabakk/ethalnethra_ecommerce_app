@@ -19,6 +19,7 @@ class PlaceOrderNotifier extends AutoDisposeAsyncNotifier<PlaceOrderResponse?> {
   Future<PlaceOrderResponse?> submit({
     required bool isInstantCart,
     required int addressId,
+    List<String>? cartItemIds,
   }) async {
     state = const AsyncValue.loading();
     try {
@@ -26,6 +27,7 @@ class PlaceOrderNotifier extends AutoDisposeAsyncNotifier<PlaceOrderResponse?> {
             deliveryMethod: isInstantCart ? 'standard' : 'preorder',
             paymentMethod: 'cod',
             addressId: addressId,
+            cartItemIds: cartItemIds,
           );
       refreshAfterCheckout(ref);
       state = AsyncValue.data(res);

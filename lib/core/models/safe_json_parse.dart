@@ -37,6 +37,7 @@ BannerListResponse bannerListResponseFromJsonLoose(Map<String, dynamic> json) =>
 
 CategoryItem categoryItemFromJsonLoose(Map<String, dynamic> json) => CategoryItem(
       id: stringFromJson(json['id']),
+      nameMl: stringFromJson(json['name_ml'] ?? json['nameMl']),
       name: stringFromJson(json['name']),
       imageUrl: json['image_url']?.toString() ?? json['imageUrl']?.toString(),
     );

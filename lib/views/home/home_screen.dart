@@ -42,6 +42,7 @@ CategoryModel _categoryModelFromApi(CategoryItem c, int index) {
   return CategoryModel(
     id: c.id,
     name: c.name,
+    nameMl: c.nameMl,
     imagePath: categoryDisplayImagePath(c),
     backgroundColor: _categoryBgColors[index % _categoryBgColors.length],
   );

@@ -15,12 +15,16 @@ class CheckoutBottomSheet extends ConsumerStatefulWidget {
     super.key,
     required this.totalPrice,
     required this.isInstantCart,
+    required this.acceptedLineIds,
   });
 
   final double totalPrice;
 
   /// Matches cart tab: instant vs pre-order.
   final bool isInstantCart;
+
+  /// Cart line ids with `is_accept: true` only — not sent for rejected lines.
+  final List<String> acceptedLineIds;
 
   @override
   ConsumerState<CheckoutBottomSheet> createState() =>
@@ -62,9 +66,11 @@ class _CheckoutBottomSheetState extends ConsumerState<CheckoutBottomSheet> {
       return;
     }
 
-    final res = await ref
-        .read(placeOrderNotifierProvider.notifier)
-        .submit(isInstantCart: widget.isInstantCart, addressId: id);
+    final res = await ref.read(placeOrderNotifierProvider.notifier).submit(
+          isInstantCart: widget.isInstantCart,
+          addressId: id,
+          cartItemIds: widget.acceptedLineIds,
+        );
 
     if (!mounted) return;
 

@@ -13,6 +13,7 @@ class CategoryItem with _$CategoryItem {
   @JsonSerializable(fieldRename: FieldRename.snake)
   const factory CategoryItem({
     @JsonKey(fromJson: stringFromJson) required String id,
+    @JsonKey(name: 'name_ml') @Default('') String nameMl,
     required String name,
     String? imageUrl,
   }) = _CategoryItem;

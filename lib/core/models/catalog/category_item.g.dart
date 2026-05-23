@@ -9,6 +9,7 @@ part of 'category_item.dart';
 _$CategoryItemImpl _$$CategoryItemImplFromJson(Map<String, dynamic> json) =>
     _$CategoryItemImpl(
       id: stringFromJson(json['id']),
+      nameMl: json['name_ml'] as String? ?? '',
       name: json['name'] as String,
       imageUrl: json['image_url'] as String?,
     );
@@ -16,6 +17,7 @@ _$CategoryItemImpl _$$CategoryItemImplFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$$CategoryItemImplToJson(_$CategoryItemImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'name_ml': instance.nameMl,
       'name': instance.name,
       'image_url': instance.imageUrl,
     };
