@@ -45,31 +45,95 @@ class UserProfileRepository {
     return UpdateUserDetailsResponse.fromJson(data);
   }
 
+  Map<String, dynamic> _addressPayload({
+    required String label,
+    required int zoneId,
+    required int areaId,
+    required String addressLine,
+    required String pincodeId,
+    bool isDefault = false,
+  }) {
+    final parsedPincode = int.tryParse(pincodeId);
+    if (parsedPincode == null) {
+      throw ApiException('Invalid pincode selection');
+    }
+    return {
+      'label': label,
+      'zone_id': zoneId,
+      'area_id': areaId,
+      'address_line': addressLine,
+      'pincode': parsedPincode,
+      if (isDefault) 'is_default': true,
+    };
+  }
+
   Future<String> createAddress({
     required String label,
     required int zoneId,
     required int areaId,
     required String addressLine,
     required String pincodeId,
+    bool isDefault = false,
   }) async {
-    final parsedPincodeId = int.tryParse(pincodeId);
-    if (parsedPincodeId == null) {
-      throw ApiException('Invalid pincode selection');
-    }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.userAddresses,
-        data: {
-          'label': label,
-          'zone_id': zoneId,
-          'area_id': areaId,
-          'address_line': addressLine,
-          'pincode_id': parsedPincodeId,
-        },
+        data: _addressPayload(
+          label: label,
+          zoneId: zoneId,
+          areaId: areaId,
+          addressLine: addressLine,
+          pincodeId: pincodeId,
+          isDefault: isDefault,
+        ),
       );
       final data = response.data;
       if (data == null) throw ApiException('Empty address response');
       return CreateAddressResponse.fromJson(data).id;
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
+  Future<void> updateAddress({
+    required int addressId,
+    required String label,
+    required int zoneId,
+    required int areaId,
+    required String addressLine,
+    required String pincodeId,
+  }) async {
+    try {
+      await _dio.put<Map<String, dynamic>>(
+        ApiEndpoints.userAddressById(addressId),
+        data: _addressPayload(
+          label: label,
+          zoneId: zoneId,
+          areaId: areaId,
+          addressLine: addressLine,
+          pincodeId: pincodeId,
+        ),
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
+  Future<void> deleteAddress(int addressId) async {
+    try {
+      await _dio.delete<Map<String, dynamic>>(
+        ApiEndpoints.userAddressById(addressId),
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
+  Future<void> setDefaultAddress(int addressId) async {
+    try {
+      await _dio.post<Map<String, dynamic>>(
+        ApiEndpoints.userAddressDefault(addressId),
+      );
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

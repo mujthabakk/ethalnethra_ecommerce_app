@@ -26,4 +26,17 @@ class FavoritesRepository {
   Future<void> removeFavorite(String productId) async {
     await _dio.delete<void>(ApiEndpoints.favoritesRemove(productId));
   }
+
+  /// Adds every favorite to the cart.
+  Future<void> addAllFavoritesToCart() async {
+    await _dio.post<void>(ApiEndpoints.favoritesAddToCart);
+  }
+
+  /// Moves only the given products from favorites to cart.
+  Future<void> moveFavoritesToCart(List<int> productIds) async {
+    await _dio.post<void>(
+      ApiEndpoints.favoritesMoveToCart,
+      data: {'product_ids': productIds},
+    );
+  }
 }

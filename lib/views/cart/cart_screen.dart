@@ -111,7 +111,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                       child: _CartTab(
                         label: 'Instant cart (${cart.instant.length})',
                         isSelected: _isInstantCart,
-                        activeColor: AppColors.preOrderOrange,
+                        activeColor: AppColors.primary,
                         onTap: () => setState(() => _isInstantCart = true),
                       ),
                     ),
@@ -120,7 +120,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                       child: _CartTab(
                         label: 'Pre-order (${cart.preorder.length})',
                         isSelected: !_isInstantCart,
-                        activeColor: AppColors.primary,
+                        activeColor: AppColors.preOrderOrange,
                         onTap: () => setState(() => _isInstantCart = false),
                       ),
                     ),
@@ -207,9 +207,6 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                     return CheckoutBottomSheet(
                                       totalPrice: total,
                                       isInstantCart: _isInstantCart,
-                                      acceptedLineIds: acceptedLines
-                                          .map((l) => l.id)
-                                          .toList(),
                                     );
                                   },
                                 );

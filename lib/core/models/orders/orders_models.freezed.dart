@@ -25,12 +25,21 @@ mixin _$OrderListItem {
   String get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'order_number')
   String get orderNumber => throw _privateConstructorUsedError;
+  String get status => throw _privateConstructorUsedError;
+  @JsonKey(name: 'order_type')
+  String get orderType => throw _privateConstructorUsedError;
+  @JsonKey(name: 'created_at')
   String get date => throw _privateConstructorUsedError;
+  @JsonKey(name: 'dispatch_date')
+  String get dispatchDate => throw _privateConstructorUsedError;
+  @JsonKey()
+  String get notes => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: doubleFromJson)
+  double get subtotal => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: doubleFromJson)
+  double get discount => throw _privateConstructorUsedError;
   @JsonKey(fromJson: doubleFromJson)
   double get total => throw _privateConstructorUsedError;
-  String get status => throw _privateConstructorUsedError;
-  @JsonKey(name: 'items_count', fromJson: intFromJson)
-  int get itemsCount => throw _privateConstructorUsedError;
 
   /// Serializes this OrderListItem to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -52,10 +61,14 @@ abstract class $OrderListItemCopyWith<$Res> {
   $Res call({
     @JsonKey(fromJson: stringFromJson) String id,
     @JsonKey(name: 'order_number') String orderNumber,
-    String date,
-    @JsonKey(fromJson: doubleFromJson) double total,
     String status,
-    @JsonKey(name: 'items_count', fromJson: intFromJson) int itemsCount,
+    @JsonKey(name: 'order_type') String orderType,
+    @JsonKey(name: 'created_at') String date,
+    @JsonKey(name: 'dispatch_date') String dispatchDate,
+    @JsonKey() String notes,
+    @JsonKey(fromJson: doubleFromJson) double subtotal,
+    @JsonKey(fromJson: doubleFromJson) double discount,
+    @JsonKey(fromJson: doubleFromJson) double total,
   });
 }
 
@@ -76,10 +89,14 @@ class _$OrderListItemCopyWithImpl<$Res, $Val extends OrderListItem>
   $Res call({
     Object? id = null,
     Object? orderNumber = null,
-    Object? date = null,
-    Object? total = null,
     Object? status = null,
-    Object? itemsCount = null,
+    Object? orderType = null,
+    Object? date = null,
+    Object? dispatchDate = null,
+    Object? notes = null,
+    Object? subtotal = null,
+    Object? discount = null,
+    Object? total = null,
   }) {
     return _then(
       _value.copyWith(
@@ -91,22 +108,38 @@ class _$OrderListItemCopyWithImpl<$Res, $Val extends OrderListItem>
                 ? _value.orderNumber
                 : orderNumber // ignore: cast_nullable_to_non_nullable
                       as String,
-            date: null == date
-                ? _value.date
-                : date // ignore: cast_nullable_to_non_nullable
-                      as String,
-            total: null == total
-                ? _value.total
-                : total // ignore: cast_nullable_to_non_nullable
-                      as double,
             status: null == status
                 ? _value.status
                 : status // ignore: cast_nullable_to_non_nullable
                       as String,
-            itemsCount: null == itemsCount
-                ? _value.itemsCount
-                : itemsCount // ignore: cast_nullable_to_non_nullable
-                      as int,
+            orderType: null == orderType
+                ? _value.orderType
+                : orderType // ignore: cast_nullable_to_non_nullable
+                      as String,
+            date: null == date
+                ? _value.date
+                : date // ignore: cast_nullable_to_non_nullable
+                      as String,
+            dispatchDate: null == dispatchDate
+                ? _value.dispatchDate
+                : dispatchDate // ignore: cast_nullable_to_non_nullable
+                      as String,
+            notes: null == notes
+                ? _value.notes
+                : notes // ignore: cast_nullable_to_non_nullable
+                      as String,
+            subtotal: null == subtotal
+                ? _value.subtotal
+                : subtotal // ignore: cast_nullable_to_non_nullable
+                      as double,
+            discount: null == discount
+                ? _value.discount
+                : discount // ignore: cast_nullable_to_non_nullable
+                      as double,
+            total: null == total
+                ? _value.total
+                : total // ignore: cast_nullable_to_non_nullable
+                      as double,
           )
           as $Val,
     );
@@ -125,10 +158,14 @@ abstract class _$$OrderListItemImplCopyWith<$Res>
   $Res call({
     @JsonKey(fromJson: stringFromJson) String id,
     @JsonKey(name: 'order_number') String orderNumber,
-    String date,
-    @JsonKey(fromJson: doubleFromJson) double total,
     String status,
-    @JsonKey(name: 'items_count', fromJson: intFromJson) int itemsCount,
+    @JsonKey(name: 'order_type') String orderType,
+    @JsonKey(name: 'created_at') String date,
+    @JsonKey(name: 'dispatch_date') String dispatchDate,
+    @JsonKey() String notes,
+    @JsonKey(fromJson: doubleFromJson) double subtotal,
+    @JsonKey(fromJson: doubleFromJson) double discount,
+    @JsonKey(fromJson: doubleFromJson) double total,
   });
 }
 
@@ -148,10 +185,14 @@ class __$$OrderListItemImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? orderNumber = null,
-    Object? date = null,
-    Object? total = null,
     Object? status = null,
-    Object? itemsCount = null,
+    Object? orderType = null,
+    Object? date = null,
+    Object? dispatchDate = null,
+    Object? notes = null,
+    Object? subtotal = null,
+    Object? discount = null,
+    Object? total = null,
   }) {
     return _then(
       _$OrderListItemImpl(
@@ -163,22 +204,38 @@ class __$$OrderListItemImplCopyWithImpl<$Res>
             ? _value.orderNumber
             : orderNumber // ignore: cast_nullable_to_non_nullable
                   as String,
-        date: null == date
-            ? _value.date
-            : date // ignore: cast_nullable_to_non_nullable
-                  as String,
-        total: null == total
-            ? _value.total
-            : total // ignore: cast_nullable_to_non_nullable
-                  as double,
         status: null == status
             ? _value.status
             : status // ignore: cast_nullable_to_non_nullable
                   as String,
-        itemsCount: null == itemsCount
-            ? _value.itemsCount
-            : itemsCount // ignore: cast_nullable_to_non_nullable
-                  as int,
+        orderType: null == orderType
+            ? _value.orderType
+            : orderType // ignore: cast_nullable_to_non_nullable
+                  as String,
+        date: null == date
+            ? _value.date
+            : date // ignore: cast_nullable_to_non_nullable
+                  as String,
+        dispatchDate: null == dispatchDate
+            ? _value.dispatchDate
+            : dispatchDate // ignore: cast_nullable_to_non_nullable
+                  as String,
+        notes: null == notes
+            ? _value.notes
+            : notes // ignore: cast_nullable_to_non_nullable
+                  as String,
+        subtotal: null == subtotal
+            ? _value.subtotal
+            : subtotal // ignore: cast_nullable_to_non_nullable
+                  as double,
+        discount: null == discount
+            ? _value.discount
+            : discount // ignore: cast_nullable_to_non_nullable
+                  as double,
+        total: null == total
+            ? _value.total
+            : total // ignore: cast_nullable_to_non_nullable
+                  as double,
       ),
     );
   }
@@ -191,11 +248,14 @@ class _$OrderListItemImpl implements _OrderListItem {
   const _$OrderListItemImpl({
     @JsonKey(fromJson: stringFromJson) required this.id,
     @JsonKey(name: 'order_number') required this.orderNumber,
-    required this.date,
-    @JsonKey(fromJson: doubleFromJson) required this.total,
     required this.status,
-    @JsonKey(name: 'items_count', fromJson: intFromJson)
-    required this.itemsCount,
+    @JsonKey(name: 'order_type') this.orderType = '',
+    @JsonKey(name: 'created_at') this.date = '',
+    @JsonKey(name: 'dispatch_date') this.dispatchDate = '',
+    @JsonKey() this.notes = '',
+    @JsonKey(fromJson: doubleFromJson) this.subtotal = 0,
+    @JsonKey(fromJson: doubleFromJson) this.discount = 0,
+    @JsonKey(fromJson: doubleFromJson) required this.total,
   });
 
   factory _$OrderListItemImpl.fromJson(Map<String, dynamic> json) =>
@@ -208,19 +268,32 @@ class _$OrderListItemImpl implements _OrderListItem {
   @JsonKey(name: 'order_number')
   final String orderNumber;
   @override
+  final String status;
+  @override
+  @JsonKey(name: 'order_type')
+  final String orderType;
+  @override
+  @JsonKey(name: 'created_at')
   final String date;
+  @override
+  @JsonKey(name: 'dispatch_date')
+  final String dispatchDate;
+  @override
+  @JsonKey()
+  final String notes;
+  @override
+  @JsonKey(fromJson: doubleFromJson)
+  final double subtotal;
+  @override
+  @JsonKey(fromJson: doubleFromJson)
+  final double discount;
   @override
   @JsonKey(fromJson: doubleFromJson)
   final double total;
-  @override
-  final String status;
-  @override
-  @JsonKey(name: 'items_count', fromJson: intFromJson)
-  final int itemsCount;
 
   @override
   String toString() {
-    return 'OrderListItem(id: $id, orderNumber: $orderNumber, date: $date, total: $total, status: $status, itemsCount: $itemsCount)';
+    return 'OrderListItem(id: $id, orderNumber: $orderNumber, status: $status, orderType: $orderType, date: $date, dispatchDate: $dispatchDate, notes: $notes, subtotal: $subtotal, discount: $discount, total: $total)';
   }
 
   @override
@@ -231,11 +304,18 @@ class _$OrderListItemImpl implements _OrderListItem {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.orderNumber, orderNumber) ||
                 other.orderNumber == orderNumber) &&
-            (identical(other.date, date) || other.date == date) &&
-            (identical(other.total, total) || other.total == total) &&
             (identical(other.status, status) || other.status == status) &&
-            (identical(other.itemsCount, itemsCount) ||
-                other.itemsCount == itemsCount));
+            (identical(other.orderType, orderType) ||
+                other.orderType == orderType) &&
+            (identical(other.date, date) || other.date == date) &&
+            (identical(other.dispatchDate, dispatchDate) ||
+                other.dispatchDate == dispatchDate) &&
+            (identical(other.notes, notes) || other.notes == notes) &&
+            (identical(other.subtotal, subtotal) ||
+                other.subtotal == subtotal) &&
+            (identical(other.discount, discount) ||
+                other.discount == discount) &&
+            (identical(other.total, total) || other.total == total));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -244,10 +324,14 @@ class _$OrderListItemImpl implements _OrderListItem {
     runtimeType,
     id,
     orderNumber,
-    date,
-    total,
     status,
-    itemsCount,
+    orderType,
+    date,
+    dispatchDate,
+    notes,
+    subtotal,
+    discount,
+    total,
   );
 
   /// Create a copy of OrderListItem
@@ -268,11 +352,14 @@ abstract class _OrderListItem implements OrderListItem {
   const factory _OrderListItem({
     @JsonKey(fromJson: stringFromJson) required final String id,
     @JsonKey(name: 'order_number') required final String orderNumber,
-    required final String date,
-    @JsonKey(fromJson: doubleFromJson) required final double total,
     required final String status,
-    @JsonKey(name: 'items_count', fromJson: intFromJson)
-    required final int itemsCount,
+    @JsonKey(name: 'order_type') final String orderType,
+    @JsonKey(name: 'created_at') final String date,
+    @JsonKey(name: 'dispatch_date') final String dispatchDate,
+    @JsonKey() final String notes,
+    @JsonKey(fromJson: doubleFromJson) final double subtotal,
+    @JsonKey(fromJson: doubleFromJson) final double discount,
+    @JsonKey(fromJson: doubleFromJson) required final double total,
   }) = _$OrderListItemImpl;
 
   factory _OrderListItem.fromJson(Map<String, dynamic> json) =
@@ -285,15 +372,28 @@ abstract class _OrderListItem implements OrderListItem {
   @JsonKey(name: 'order_number')
   String get orderNumber;
   @override
+  String get status;
+  @override
+  @JsonKey(name: 'order_type')
+  String get orderType;
+  @override
+  @JsonKey(name: 'created_at')
   String get date;
+  @override
+  @JsonKey(name: 'dispatch_date')
+  String get dispatchDate;
+  @override
+  @JsonKey()
+  String get notes;
+  @override
+  @JsonKey(fromJson: doubleFromJson)
+  double get subtotal;
+  @override
+  @JsonKey(fromJson: doubleFromJson)
+  double get discount;
   @override
   @JsonKey(fromJson: doubleFromJson)
   double get total;
-  @override
-  String get status;
-  @override
-  @JsonKey(name: 'items_count', fromJson: intFromJson)
-  int get itemsCount;
 
   /// Create a copy of OrderListItem
   /// with the given fields replaced by the non-null parameter values.
@@ -310,10 +410,12 @@ OrdersListResponse _$OrdersListResponseFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$OrdersListResponse {
   List<OrderListItem> get orders => throw _privateConstructorUsedError;
-  @JsonKey(fromJson: doubleFromJson)
-  double get total => throw _privateConstructorUsedError;
-  @JsonKey(fromJson: doubleFromJson)
-  double get pages => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: intFromJson)
+  int get totalCount => throw _privateConstructorUsedError;
+  @JsonKey(name: 'current_page', fromJson: intFromJson)
+  int get currentPage => throw _privateConstructorUsedError;
+  @JsonKey(name: 'last_page', fromJson: intFromJson)
+  int get lastPage => throw _privateConstructorUsedError;
 
   /// Serializes this OrdersListResponse to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -334,8 +436,9 @@ abstract class $OrdersListResponseCopyWith<$Res> {
   @useResult
   $Res call({
     List<OrderListItem> orders,
-    @JsonKey(fromJson: doubleFromJson) double total,
-    @JsonKey(fromJson: doubleFromJson) double pages,
+    @JsonKey(fromJson: intFromJson) int totalCount,
+    @JsonKey(name: 'current_page', fromJson: intFromJson) int currentPage,
+    @JsonKey(name: 'last_page', fromJson: intFromJson) int lastPage,
   });
 }
 
@@ -355,8 +458,9 @@ class _$OrdersListResponseCopyWithImpl<$Res, $Val extends OrdersListResponse>
   @override
   $Res call({
     Object? orders = null,
-    Object? total = null,
-    Object? pages = null,
+    Object? totalCount = null,
+    Object? currentPage = null,
+    Object? lastPage = null,
   }) {
     return _then(
       _value.copyWith(
@@ -364,14 +468,18 @@ class _$OrdersListResponseCopyWithImpl<$Res, $Val extends OrdersListResponse>
                 ? _value.orders
                 : orders // ignore: cast_nullable_to_non_nullable
                       as List<OrderListItem>,
-            total: null == total
-                ? _value.total
-                : total // ignore: cast_nullable_to_non_nullable
-                      as double,
-            pages: null == pages
-                ? _value.pages
-                : pages // ignore: cast_nullable_to_non_nullable
-                      as double,
+            totalCount: null == totalCount
+                ? _value.totalCount
+                : totalCount // ignore: cast_nullable_to_non_nullable
+                      as int,
+            currentPage: null == currentPage
+                ? _value.currentPage
+                : currentPage // ignore: cast_nullable_to_non_nullable
+                      as int,
+            lastPage: null == lastPage
+                ? _value.lastPage
+                : lastPage // ignore: cast_nullable_to_non_nullable
+                      as int,
           )
           as $Val,
     );
@@ -389,8 +497,9 @@ abstract class _$$OrdersListResponseImplCopyWith<$Res>
   @useResult
   $Res call({
     List<OrderListItem> orders,
-    @JsonKey(fromJson: doubleFromJson) double total,
-    @JsonKey(fromJson: doubleFromJson) double pages,
+    @JsonKey(fromJson: intFromJson) int totalCount,
+    @JsonKey(name: 'current_page', fromJson: intFromJson) int currentPage,
+    @JsonKey(name: 'last_page', fromJson: intFromJson) int lastPage,
   });
 }
 
@@ -409,8 +518,9 @@ class __$$OrdersListResponseImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? orders = null,
-    Object? total = null,
-    Object? pages = null,
+    Object? totalCount = null,
+    Object? currentPage = null,
+    Object? lastPage = null,
   }) {
     return _then(
       _$OrdersListResponseImpl(
@@ -418,14 +528,18 @@ class __$$OrdersListResponseImplCopyWithImpl<$Res>
             ? _value._orders
             : orders // ignore: cast_nullable_to_non_nullable
                   as List<OrderListItem>,
-        total: null == total
-            ? _value.total
-            : total // ignore: cast_nullable_to_non_nullable
-                  as double,
-        pages: null == pages
-            ? _value.pages
-            : pages // ignore: cast_nullable_to_non_nullable
-                  as double,
+        totalCount: null == totalCount
+            ? _value.totalCount
+            : totalCount // ignore: cast_nullable_to_non_nullable
+                  as int,
+        currentPage: null == currentPage
+            ? _value.currentPage
+            : currentPage // ignore: cast_nullable_to_non_nullable
+                  as int,
+        lastPage: null == lastPage
+            ? _value.lastPage
+            : lastPage // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -437,8 +551,9 @@ class __$$OrdersListResponseImplCopyWithImpl<$Res>
 class _$OrdersListResponseImpl implements _OrdersListResponse {
   const _$OrdersListResponseImpl({
     required final List<OrderListItem> orders,
-    @JsonKey(fromJson: doubleFromJson) required this.total,
-    @JsonKey(fromJson: doubleFromJson) required this.pages,
+    @JsonKey(fromJson: intFromJson) this.totalCount = 0,
+    @JsonKey(name: 'current_page', fromJson: intFromJson) this.currentPage = 1,
+    @JsonKey(name: 'last_page', fromJson: intFromJson) this.lastPage = 1,
   }) : _orders = orders;
 
   factory _$OrdersListResponseImpl.fromJson(Map<String, dynamic> json) =>
@@ -453,15 +568,18 @@ class _$OrdersListResponseImpl implements _OrdersListResponse {
   }
 
   @override
-  @JsonKey(fromJson: doubleFromJson)
-  final double total;
+  @JsonKey(fromJson: intFromJson)
+  final int totalCount;
   @override
-  @JsonKey(fromJson: doubleFromJson)
-  final double pages;
+  @JsonKey(name: 'current_page', fromJson: intFromJson)
+  final int currentPage;
+  @override
+  @JsonKey(name: 'last_page', fromJson: intFromJson)
+  final int lastPage;
 
   @override
   String toString() {
-    return 'OrdersListResponse(orders: $orders, total: $total, pages: $pages)';
+    return 'OrdersListResponse(orders: $orders, totalCount: $totalCount, currentPage: $currentPage, lastPage: $lastPage)';
   }
 
   @override
@@ -470,8 +588,12 @@ class _$OrdersListResponseImpl implements _OrdersListResponse {
         (other.runtimeType == runtimeType &&
             other is _$OrdersListResponseImpl &&
             const DeepCollectionEquality().equals(other._orders, _orders) &&
-            (identical(other.total, total) || other.total == total) &&
-            (identical(other.pages, pages) || other.pages == pages));
+            (identical(other.totalCount, totalCount) ||
+                other.totalCount == totalCount) &&
+            (identical(other.currentPage, currentPage) ||
+                other.currentPage == currentPage) &&
+            (identical(other.lastPage, lastPage) ||
+                other.lastPage == lastPage));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -479,8 +601,9 @@ class _$OrdersListResponseImpl implements _OrdersListResponse {
   int get hashCode => Object.hash(
     runtimeType,
     const DeepCollectionEquality().hash(_orders),
-    total,
-    pages,
+    totalCount,
+    currentPage,
+    lastPage,
   );
 
   /// Create a copy of OrdersListResponse
@@ -503,8 +626,9 @@ class _$OrdersListResponseImpl implements _OrdersListResponse {
 abstract class _OrdersListResponse implements OrdersListResponse {
   const factory _OrdersListResponse({
     required final List<OrderListItem> orders,
-    @JsonKey(fromJson: doubleFromJson) required final double total,
-    @JsonKey(fromJson: doubleFromJson) required final double pages,
+    @JsonKey(fromJson: intFromJson) final int totalCount,
+    @JsonKey(name: 'current_page', fromJson: intFromJson) final int currentPage,
+    @JsonKey(name: 'last_page', fromJson: intFromJson) final int lastPage,
   }) = _$OrdersListResponseImpl;
 
   factory _OrdersListResponse.fromJson(Map<String, dynamic> json) =
@@ -513,11 +637,14 @@ abstract class _OrdersListResponse implements OrdersListResponse {
   @override
   List<OrderListItem> get orders;
   @override
-  @JsonKey(fromJson: doubleFromJson)
-  double get total;
+  @JsonKey(fromJson: intFromJson)
+  int get totalCount;
   @override
-  @JsonKey(fromJson: doubleFromJson)
-  double get pages;
+  @JsonKey(name: 'current_page', fromJson: intFromJson)
+  int get currentPage;
+  @override
+  @JsonKey(name: 'last_page', fromJson: intFromJson)
+  int get lastPage;
 
   /// Create a copy of OrdersListResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -540,6 +667,12 @@ mixin _$PlaceOrderResponse {
   String get status => throw _privateConstructorUsedError;
   @JsonKey(name: 'tracking_url')
   String get trackingUrl => throw _privateConstructorUsedError;
+  @JsonKey(name: 'dispatch_date')
+  String get dispatchDate => throw _privateConstructorUsedError;
+  @JsonKey()
+  String get notes => throw _privateConstructorUsedError;
+  @JsonKey(name: 'delivery_charge', fromJson: doubleFromJson)
+  double get deliveryCharge => throw _privateConstructorUsedError;
   @JsonKey(fromJson: doubleFromJson)
   double get total => throw _privateConstructorUsedError;
   @JsonKey(fromJson: doubleFromJson)
@@ -572,6 +705,10 @@ abstract class $PlaceOrderResponseCopyWith<$Res> {
     @JsonKey(name: 'order_number') String orderNumber,
     String status,
     @JsonKey(name: 'tracking_url') String trackingUrl,
+    @JsonKey(name: 'dispatch_date') String dispatchDate,
+    @JsonKey() String notes,
+    @JsonKey(name: 'delivery_charge', fromJson: doubleFromJson)
+    double deliveryCharge,
     @JsonKey(fromJson: doubleFromJson) double total,
     @JsonKey(fromJson: doubleFromJson) double discount,
     @JsonKey(fromJson: dynamicListFromJson) List<dynamic> discounts,
@@ -599,6 +736,9 @@ class _$PlaceOrderResponseCopyWithImpl<$Res, $Val extends PlaceOrderResponse>
     Object? orderNumber = null,
     Object? status = null,
     Object? trackingUrl = null,
+    Object? dispatchDate = null,
+    Object? notes = null,
+    Object? deliveryCharge = null,
     Object? total = null,
     Object? discount = null,
     Object? discounts = null,
@@ -623,6 +763,18 @@ class _$PlaceOrderResponseCopyWithImpl<$Res, $Val extends PlaceOrderResponse>
                 ? _value.trackingUrl
                 : trackingUrl // ignore: cast_nullable_to_non_nullable
                       as String,
+            dispatchDate: null == dispatchDate
+                ? _value.dispatchDate
+                : dispatchDate // ignore: cast_nullable_to_non_nullable
+                      as String,
+            notes: null == notes
+                ? _value.notes
+                : notes // ignore: cast_nullable_to_non_nullable
+                      as String,
+            deliveryCharge: null == deliveryCharge
+                ? _value.deliveryCharge
+                : deliveryCharge // ignore: cast_nullable_to_non_nullable
+                      as double,
             total: null == total
                 ? _value.total
                 : total // ignore: cast_nullable_to_non_nullable
@@ -663,6 +815,10 @@ abstract class _$$PlaceOrderResponseImplCopyWith<$Res>
     @JsonKey(name: 'order_number') String orderNumber,
     String status,
     @JsonKey(name: 'tracking_url') String trackingUrl,
+    @JsonKey(name: 'dispatch_date') String dispatchDate,
+    @JsonKey() String notes,
+    @JsonKey(name: 'delivery_charge', fromJson: doubleFromJson)
+    double deliveryCharge,
     @JsonKey(fromJson: doubleFromJson) double total,
     @JsonKey(fromJson: doubleFromJson) double discount,
     @JsonKey(fromJson: dynamicListFromJson) List<dynamic> discounts,
@@ -689,6 +845,9 @@ class __$$PlaceOrderResponseImplCopyWithImpl<$Res>
     Object? orderNumber = null,
     Object? status = null,
     Object? trackingUrl = null,
+    Object? dispatchDate = null,
+    Object? notes = null,
+    Object? deliveryCharge = null,
     Object? total = null,
     Object? discount = null,
     Object? discounts = null,
@@ -713,6 +872,18 @@ class __$$PlaceOrderResponseImplCopyWithImpl<$Res>
             ? _value.trackingUrl
             : trackingUrl // ignore: cast_nullable_to_non_nullable
                   as String,
+        dispatchDate: null == dispatchDate
+            ? _value.dispatchDate
+            : dispatchDate // ignore: cast_nullable_to_non_nullable
+                  as String,
+        notes: null == notes
+            ? _value.notes
+            : notes // ignore: cast_nullable_to_non_nullable
+                  as String,
+        deliveryCharge: null == deliveryCharge
+            ? _value.deliveryCharge
+            : deliveryCharge // ignore: cast_nullable_to_non_nullable
+                  as double,
         total: null == total
             ? _value.total
             : total // ignore: cast_nullable_to_non_nullable
@@ -746,7 +917,11 @@ class _$PlaceOrderResponseImpl implements _PlaceOrderResponse {
     @JsonKey(name: 'order_id', fromJson: stringFromJson) required this.orderId,
     @JsonKey(name: 'order_number') required this.orderNumber,
     required this.status,
-    @JsonKey(name: 'tracking_url') required this.trackingUrl,
+    @JsonKey(name: 'tracking_url') this.trackingUrl = '',
+    @JsonKey(name: 'dispatch_date') this.dispatchDate = '',
+    @JsonKey() this.notes = '',
+    @JsonKey(name: 'delivery_charge', fromJson: doubleFromJson)
+    this.deliveryCharge = 0,
     @JsonKey(fromJson: doubleFromJson) required this.total,
     @JsonKey(fromJson: doubleFromJson) required this.discount,
     @JsonKey(fromJson: dynamicListFromJson)
@@ -770,6 +945,15 @@ class _$PlaceOrderResponseImpl implements _PlaceOrderResponse {
   @JsonKey(name: 'tracking_url')
   final String trackingUrl;
   @override
+  @JsonKey(name: 'dispatch_date')
+  final String dispatchDate;
+  @override
+  @JsonKey()
+  final String notes;
+  @override
+  @JsonKey(name: 'delivery_charge', fromJson: doubleFromJson)
+  final double deliveryCharge;
+  @override
   @JsonKey(fromJson: doubleFromJson)
   final double total;
   @override
@@ -792,7 +976,7 @@ class _$PlaceOrderResponseImpl implements _PlaceOrderResponse {
 
   @override
   String toString() {
-    return 'PlaceOrderResponse(orderId: $orderId, orderNumber: $orderNumber, status: $status, trackingUrl: $trackingUrl, total: $total, discount: $discount, discounts: $discounts, loyaltyApplied: $loyaltyApplied, eta: $eta)';
+    return 'PlaceOrderResponse(orderId: $orderId, orderNumber: $orderNumber, status: $status, trackingUrl: $trackingUrl, dispatchDate: $dispatchDate, notes: $notes, deliveryCharge: $deliveryCharge, total: $total, discount: $discount, discounts: $discounts, loyaltyApplied: $loyaltyApplied, eta: $eta)';
   }
 
   @override
@@ -806,6 +990,11 @@ class _$PlaceOrderResponseImpl implements _PlaceOrderResponse {
             (identical(other.status, status) || other.status == status) &&
             (identical(other.trackingUrl, trackingUrl) ||
                 other.trackingUrl == trackingUrl) &&
+            (identical(other.dispatchDate, dispatchDate) ||
+                other.dispatchDate == dispatchDate) &&
+            (identical(other.notes, notes) || other.notes == notes) &&
+            (identical(other.deliveryCharge, deliveryCharge) ||
+                other.deliveryCharge == deliveryCharge) &&
             (identical(other.total, total) || other.total == total) &&
             (identical(other.discount, discount) ||
                 other.discount == discount) &&
@@ -826,6 +1015,9 @@ class _$PlaceOrderResponseImpl implements _PlaceOrderResponse {
     orderNumber,
     status,
     trackingUrl,
+    dispatchDate,
+    notes,
+    deliveryCharge,
     total,
     discount,
     const DeepCollectionEquality().hash(_discounts),
@@ -856,7 +1048,11 @@ abstract class _PlaceOrderResponse implements PlaceOrderResponse {
     required final String orderId,
     @JsonKey(name: 'order_number') required final String orderNumber,
     required final String status,
-    @JsonKey(name: 'tracking_url') required final String trackingUrl,
+    @JsonKey(name: 'tracking_url') final String trackingUrl,
+    @JsonKey(name: 'dispatch_date') final String dispatchDate,
+    @JsonKey() final String notes,
+    @JsonKey(name: 'delivery_charge', fromJson: doubleFromJson)
+    final double deliveryCharge,
     @JsonKey(fromJson: doubleFromJson) required final double total,
     @JsonKey(fromJson: doubleFromJson) required final double discount,
     @JsonKey(fromJson: dynamicListFromJson) final List<dynamic> discounts,
@@ -878,6 +1074,15 @@ abstract class _PlaceOrderResponse implements PlaceOrderResponse {
   @override
   @JsonKey(name: 'tracking_url')
   String get trackingUrl;
+  @override
+  @JsonKey(name: 'dispatch_date')
+  String get dispatchDate;
+  @override
+  @JsonKey()
+  String get notes;
+  @override
+  @JsonKey(name: 'delivery_charge', fromJson: doubleFromJson)
+  double get deliveryCharge;
   @override
   @JsonKey(fromJson: doubleFromJson)
   double get total;
@@ -1265,5 +1470,832 @@ abstract class _CancelOrderResponse implements CancelOrderResponse {
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$CancelOrderResponseImplCopyWith<_$CancelOrderResponseImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+OrderDetailItem _$OrderDetailItemFromJson(Map<String, dynamic> json) {
+  return _OrderDetailItem.fromJson(json);
+}
+
+/// @nodoc
+mixin _$OrderDetailItem {
+  @JsonKey(fromJson: stringFromJson)
+  String get productId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'name_ml')
+  String get nameMl => throw _privateConstructorUsedError;
+  @JsonKey()
+  String get name => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: doubleFromJson)
+  double get quantity => throw _privateConstructorUsedError;
+  @JsonKey()
+  String get unit => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: doubleFromJson)
+  double get price => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: doubleFromJson)
+  double get subtotal => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: stringFromJson)
+  String get imageUrl => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: boolFromJson)
+  bool get isPreorder => throw _privateConstructorUsedError;
+
+  /// Serializes this OrderDetailItem to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of OrderDetailItem
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $OrderDetailItemCopyWith<OrderDetailItem> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $OrderDetailItemCopyWith<$Res> {
+  factory $OrderDetailItemCopyWith(
+    OrderDetailItem value,
+    $Res Function(OrderDetailItem) then,
+  ) = _$OrderDetailItemCopyWithImpl<$Res, OrderDetailItem>;
+  @useResult
+  $Res call({
+    @JsonKey(fromJson: stringFromJson) String productId,
+    @JsonKey(name: 'name_ml') String nameMl,
+    @JsonKey() String name,
+    @JsonKey(fromJson: doubleFromJson) double quantity,
+    @JsonKey() String unit,
+    @JsonKey(fromJson: doubleFromJson) double price,
+    @JsonKey(fromJson: doubleFromJson) double subtotal,
+    @JsonKey(fromJson: stringFromJson) String imageUrl,
+    @JsonKey(fromJson: boolFromJson) bool isPreorder,
+  });
+}
+
+/// @nodoc
+class _$OrderDetailItemCopyWithImpl<$Res, $Val extends OrderDetailItem>
+    implements $OrderDetailItemCopyWith<$Res> {
+  _$OrderDetailItemCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of OrderDetailItem
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? productId = null,
+    Object? nameMl = null,
+    Object? name = null,
+    Object? quantity = null,
+    Object? unit = null,
+    Object? price = null,
+    Object? subtotal = null,
+    Object? imageUrl = null,
+    Object? isPreorder = null,
+  }) {
+    return _then(
+      _value.copyWith(
+            productId: null == productId
+                ? _value.productId
+                : productId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            nameMl: null == nameMl
+                ? _value.nameMl
+                : nameMl // ignore: cast_nullable_to_non_nullable
+                      as String,
+            name: null == name
+                ? _value.name
+                : name // ignore: cast_nullable_to_non_nullable
+                      as String,
+            quantity: null == quantity
+                ? _value.quantity
+                : quantity // ignore: cast_nullable_to_non_nullable
+                      as double,
+            unit: null == unit
+                ? _value.unit
+                : unit // ignore: cast_nullable_to_non_nullable
+                      as String,
+            price: null == price
+                ? _value.price
+                : price // ignore: cast_nullable_to_non_nullable
+                      as double,
+            subtotal: null == subtotal
+                ? _value.subtotal
+                : subtotal // ignore: cast_nullable_to_non_nullable
+                      as double,
+            imageUrl: null == imageUrl
+                ? _value.imageUrl
+                : imageUrl // ignore: cast_nullable_to_non_nullable
+                      as String,
+            isPreorder: null == isPreorder
+                ? _value.isPreorder
+                : isPreorder // ignore: cast_nullable_to_non_nullable
+                      as bool,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$OrderDetailItemImplCopyWith<$Res>
+    implements $OrderDetailItemCopyWith<$Res> {
+  factory _$$OrderDetailItemImplCopyWith(
+    _$OrderDetailItemImpl value,
+    $Res Function(_$OrderDetailItemImpl) then,
+  ) = __$$OrderDetailItemImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    @JsonKey(fromJson: stringFromJson) String productId,
+    @JsonKey(name: 'name_ml') String nameMl,
+    @JsonKey() String name,
+    @JsonKey(fromJson: doubleFromJson) double quantity,
+    @JsonKey() String unit,
+    @JsonKey(fromJson: doubleFromJson) double price,
+    @JsonKey(fromJson: doubleFromJson) double subtotal,
+    @JsonKey(fromJson: stringFromJson) String imageUrl,
+    @JsonKey(fromJson: boolFromJson) bool isPreorder,
+  });
+}
+
+/// @nodoc
+class __$$OrderDetailItemImplCopyWithImpl<$Res>
+    extends _$OrderDetailItemCopyWithImpl<$Res, _$OrderDetailItemImpl>
+    implements _$$OrderDetailItemImplCopyWith<$Res> {
+  __$$OrderDetailItemImplCopyWithImpl(
+    _$OrderDetailItemImpl _value,
+    $Res Function(_$OrderDetailItemImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of OrderDetailItem
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? productId = null,
+    Object? nameMl = null,
+    Object? name = null,
+    Object? quantity = null,
+    Object? unit = null,
+    Object? price = null,
+    Object? subtotal = null,
+    Object? imageUrl = null,
+    Object? isPreorder = null,
+  }) {
+    return _then(
+      _$OrderDetailItemImpl(
+        productId: null == productId
+            ? _value.productId
+            : productId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        nameMl: null == nameMl
+            ? _value.nameMl
+            : nameMl // ignore: cast_nullable_to_non_nullable
+                  as String,
+        name: null == name
+            ? _value.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        quantity: null == quantity
+            ? _value.quantity
+            : quantity // ignore: cast_nullable_to_non_nullable
+                  as double,
+        unit: null == unit
+            ? _value.unit
+            : unit // ignore: cast_nullable_to_non_nullable
+                  as String,
+        price: null == price
+            ? _value.price
+            : price // ignore: cast_nullable_to_non_nullable
+                  as double,
+        subtotal: null == subtotal
+            ? _value.subtotal
+            : subtotal // ignore: cast_nullable_to_non_nullable
+                  as double,
+        imageUrl: null == imageUrl
+            ? _value.imageUrl
+            : imageUrl // ignore: cast_nullable_to_non_nullable
+                  as String,
+        isPreorder: null == isPreorder
+            ? _value.isPreorder
+            : isPreorder // ignore: cast_nullable_to_non_nullable
+                  as bool,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+
+@JsonSerializable(fieldRename: FieldRename.snake)
+class _$OrderDetailItemImpl implements _OrderDetailItem {
+  const _$OrderDetailItemImpl({
+    @JsonKey(fromJson: stringFromJson) this.productId = '',
+    @JsonKey(name: 'name_ml') this.nameMl = '',
+    @JsonKey() this.name = '',
+    @JsonKey(fromJson: doubleFromJson) this.quantity = 1,
+    @JsonKey() this.unit = '',
+    @JsonKey(fromJson: doubleFromJson) this.price = 0,
+    @JsonKey(fromJson: doubleFromJson) this.subtotal = 0,
+    @JsonKey(fromJson: stringFromJson) this.imageUrl = '',
+    @JsonKey(fromJson: boolFromJson) this.isPreorder = false,
+  });
+
+  factory _$OrderDetailItemImpl.fromJson(Map<String, dynamic> json) =>
+      _$$OrderDetailItemImplFromJson(json);
+
+  @override
+  @JsonKey(fromJson: stringFromJson)
+  final String productId;
+  @override
+  @JsonKey(name: 'name_ml')
+  final String nameMl;
+  @override
+  @JsonKey()
+  final String name;
+  @override
+  @JsonKey(fromJson: doubleFromJson)
+  final double quantity;
+  @override
+  @JsonKey()
+  final String unit;
+  @override
+  @JsonKey(fromJson: doubleFromJson)
+  final double price;
+  @override
+  @JsonKey(fromJson: doubleFromJson)
+  final double subtotal;
+  @override
+  @JsonKey(fromJson: stringFromJson)
+  final String imageUrl;
+  @override
+  @JsonKey(fromJson: boolFromJson)
+  final bool isPreorder;
+
+  @override
+  String toString() {
+    return 'OrderDetailItem(productId: $productId, nameMl: $nameMl, name: $name, quantity: $quantity, unit: $unit, price: $price, subtotal: $subtotal, imageUrl: $imageUrl, isPreorder: $isPreorder)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$OrderDetailItemImpl &&
+            (identical(other.productId, productId) ||
+                other.productId == productId) &&
+            (identical(other.nameMl, nameMl) || other.nameMl == nameMl) &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.quantity, quantity) ||
+                other.quantity == quantity) &&
+            (identical(other.unit, unit) || other.unit == unit) &&
+            (identical(other.price, price) || other.price == price) &&
+            (identical(other.subtotal, subtotal) ||
+                other.subtotal == subtotal) &&
+            (identical(other.imageUrl, imageUrl) ||
+                other.imageUrl == imageUrl) &&
+            (identical(other.isPreorder, isPreorder) ||
+                other.isPreorder == isPreorder));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    productId,
+    nameMl,
+    name,
+    quantity,
+    unit,
+    price,
+    subtotal,
+    imageUrl,
+    isPreorder,
+  );
+
+  /// Create a copy of OrderDetailItem
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$OrderDetailItemImplCopyWith<_$OrderDetailItemImpl> get copyWith =>
+      __$$OrderDetailItemImplCopyWithImpl<_$OrderDetailItemImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$OrderDetailItemImplToJson(this);
+  }
+}
+
+abstract class _OrderDetailItem implements OrderDetailItem {
+  const factory _OrderDetailItem({
+    @JsonKey(fromJson: stringFromJson) final String productId,
+    @JsonKey(name: 'name_ml') final String nameMl,
+    @JsonKey() final String name,
+    @JsonKey(fromJson: doubleFromJson) final double quantity,
+    @JsonKey() final String unit,
+    @JsonKey(fromJson: doubleFromJson) final double price,
+    @JsonKey(fromJson: doubleFromJson) final double subtotal,
+    @JsonKey(fromJson: stringFromJson) final String imageUrl,
+    @JsonKey(fromJson: boolFromJson) final bool isPreorder,
+  }) = _$OrderDetailItemImpl;
+
+  factory _OrderDetailItem.fromJson(Map<String, dynamic> json) =
+      _$OrderDetailItemImpl.fromJson;
+
+  @override
+  @JsonKey(fromJson: stringFromJson)
+  String get productId;
+  @override
+  @JsonKey(name: 'name_ml')
+  String get nameMl;
+  @override
+  @JsonKey()
+  String get name;
+  @override
+  @JsonKey(fromJson: doubleFromJson)
+  double get quantity;
+  @override
+  @JsonKey()
+  String get unit;
+  @override
+  @JsonKey(fromJson: doubleFromJson)
+  double get price;
+  @override
+  @JsonKey(fromJson: doubleFromJson)
+  double get subtotal;
+  @override
+  @JsonKey(fromJson: stringFromJson)
+  String get imageUrl;
+  @override
+  @JsonKey(fromJson: boolFromJson)
+  bool get isPreorder;
+
+  /// Create a copy of OrderDetailItem
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$OrderDetailItemImplCopyWith<_$OrderDetailItemImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+OrderDetailResponse _$OrderDetailResponseFromJson(Map<String, dynamic> json) {
+  return _OrderDetailResponse.fromJson(json);
+}
+
+/// @nodoc
+mixin _$OrderDetailResponse {
+  @JsonKey(fromJson: stringFromJson)
+  String get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'order_number')
+  String get orderNumber => throw _privateConstructorUsedError;
+  String get status => throw _privateConstructorUsedError;
+  @JsonKey(name: 'order_type')
+  String get orderType => throw _privateConstructorUsedError;
+  @JsonKey(name: 'created_at')
+  String get date => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: doubleFromJson)
+  double get subtotal => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: doubleFromJson)
+  double get discount => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: doubleFromJson)
+  double get total => throw _privateConstructorUsedError;
+  @JsonKey(name: 'delivery_charge', fromJson: doubleFromJson)
+  double get deliveryCharge => throw _privateConstructorUsedError;
+  @JsonKey()
+  String get notes => throw _privateConstructorUsedError;
+  List<OrderDetailItem> get items => throw _privateConstructorUsedError;
+  @JsonKey(name: 'order_history')
+  List<OrderDetailItem> get historyItems => throw _privateConstructorUsedError;
+
+  /// Serializes this OrderDetailResponse to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of OrderDetailResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $OrderDetailResponseCopyWith<OrderDetailResponse> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $OrderDetailResponseCopyWith<$Res> {
+  factory $OrderDetailResponseCopyWith(
+    OrderDetailResponse value,
+    $Res Function(OrderDetailResponse) then,
+  ) = _$OrderDetailResponseCopyWithImpl<$Res, OrderDetailResponse>;
+  @useResult
+  $Res call({
+    @JsonKey(fromJson: stringFromJson) String id,
+    @JsonKey(name: 'order_number') String orderNumber,
+    String status,
+    @JsonKey(name: 'order_type') String orderType,
+    @JsonKey(name: 'created_at') String date,
+    @JsonKey(fromJson: doubleFromJson) double subtotal,
+    @JsonKey(fromJson: doubleFromJson) double discount,
+    @JsonKey(fromJson: doubleFromJson) double total,
+    @JsonKey(name: 'delivery_charge', fromJson: doubleFromJson)
+    double deliveryCharge,
+    @JsonKey() String notes,
+    List<OrderDetailItem> items,
+    @JsonKey(name: 'order_history') List<OrderDetailItem> historyItems,
+  });
+}
+
+/// @nodoc
+class _$OrderDetailResponseCopyWithImpl<$Res, $Val extends OrderDetailResponse>
+    implements $OrderDetailResponseCopyWith<$Res> {
+  _$OrderDetailResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of OrderDetailResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? orderNumber = null,
+    Object? status = null,
+    Object? orderType = null,
+    Object? date = null,
+    Object? subtotal = null,
+    Object? discount = null,
+    Object? total = null,
+    Object? deliveryCharge = null,
+    Object? notes = null,
+    Object? items = null,
+    Object? historyItems = null,
+  }) {
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            orderNumber: null == orderNumber
+                ? _value.orderNumber
+                : orderNumber // ignore: cast_nullable_to_non_nullable
+                      as String,
+            status: null == status
+                ? _value.status
+                : status // ignore: cast_nullable_to_non_nullable
+                      as String,
+            orderType: null == orderType
+                ? _value.orderType
+                : orderType // ignore: cast_nullable_to_non_nullable
+                      as String,
+            date: null == date
+                ? _value.date
+                : date // ignore: cast_nullable_to_non_nullable
+                      as String,
+            subtotal: null == subtotal
+                ? _value.subtotal
+                : subtotal // ignore: cast_nullable_to_non_nullable
+                      as double,
+            discount: null == discount
+                ? _value.discount
+                : discount // ignore: cast_nullable_to_non_nullable
+                      as double,
+            total: null == total
+                ? _value.total
+                : total // ignore: cast_nullable_to_non_nullable
+                      as double,
+            deliveryCharge: null == deliveryCharge
+                ? _value.deliveryCharge
+                : deliveryCharge // ignore: cast_nullable_to_non_nullable
+                      as double,
+            notes: null == notes
+                ? _value.notes
+                : notes // ignore: cast_nullable_to_non_nullable
+                      as String,
+            items: null == items
+                ? _value.items
+                : items // ignore: cast_nullable_to_non_nullable
+                      as List<OrderDetailItem>,
+            historyItems: null == historyItems
+                ? _value.historyItems
+                : historyItems // ignore: cast_nullable_to_non_nullable
+                      as List<OrderDetailItem>,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$OrderDetailResponseImplCopyWith<$Res>
+    implements $OrderDetailResponseCopyWith<$Res> {
+  factory _$$OrderDetailResponseImplCopyWith(
+    _$OrderDetailResponseImpl value,
+    $Res Function(_$OrderDetailResponseImpl) then,
+  ) = __$$OrderDetailResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    @JsonKey(fromJson: stringFromJson) String id,
+    @JsonKey(name: 'order_number') String orderNumber,
+    String status,
+    @JsonKey(name: 'order_type') String orderType,
+    @JsonKey(name: 'created_at') String date,
+    @JsonKey(fromJson: doubleFromJson) double subtotal,
+    @JsonKey(fromJson: doubleFromJson) double discount,
+    @JsonKey(fromJson: doubleFromJson) double total,
+    @JsonKey(name: 'delivery_charge', fromJson: doubleFromJson)
+    double deliveryCharge,
+    @JsonKey() String notes,
+    List<OrderDetailItem> items,
+    @JsonKey(name: 'order_history') List<OrderDetailItem> historyItems,
+  });
+}
+
+/// @nodoc
+class __$$OrderDetailResponseImplCopyWithImpl<$Res>
+    extends _$OrderDetailResponseCopyWithImpl<$Res, _$OrderDetailResponseImpl>
+    implements _$$OrderDetailResponseImplCopyWith<$Res> {
+  __$$OrderDetailResponseImplCopyWithImpl(
+    _$OrderDetailResponseImpl _value,
+    $Res Function(_$OrderDetailResponseImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of OrderDetailResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? orderNumber = null,
+    Object? status = null,
+    Object? orderType = null,
+    Object? date = null,
+    Object? subtotal = null,
+    Object? discount = null,
+    Object? total = null,
+    Object? deliveryCharge = null,
+    Object? notes = null,
+    Object? items = null,
+    Object? historyItems = null,
+  }) {
+    return _then(
+      _$OrderDetailResponseImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        orderNumber: null == orderNumber
+            ? _value.orderNumber
+            : orderNumber // ignore: cast_nullable_to_non_nullable
+                  as String,
+        status: null == status
+            ? _value.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as String,
+        orderType: null == orderType
+            ? _value.orderType
+            : orderType // ignore: cast_nullable_to_non_nullable
+                  as String,
+        date: null == date
+            ? _value.date
+            : date // ignore: cast_nullable_to_non_nullable
+                  as String,
+        subtotal: null == subtotal
+            ? _value.subtotal
+            : subtotal // ignore: cast_nullable_to_non_nullable
+                  as double,
+        discount: null == discount
+            ? _value.discount
+            : discount // ignore: cast_nullable_to_non_nullable
+                  as double,
+        total: null == total
+            ? _value.total
+            : total // ignore: cast_nullable_to_non_nullable
+                  as double,
+        deliveryCharge: null == deliveryCharge
+            ? _value.deliveryCharge
+            : deliveryCharge // ignore: cast_nullable_to_non_nullable
+                  as double,
+        notes: null == notes
+            ? _value.notes
+            : notes // ignore: cast_nullable_to_non_nullable
+                  as String,
+        items: null == items
+            ? _value._items
+            : items // ignore: cast_nullable_to_non_nullable
+                  as List<OrderDetailItem>,
+        historyItems: null == historyItems
+            ? _value._historyItems
+            : historyItems // ignore: cast_nullable_to_non_nullable
+                  as List<OrderDetailItem>,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+
+@JsonSerializable(fieldRename: FieldRename.snake)
+class _$OrderDetailResponseImpl implements _OrderDetailResponse {
+  const _$OrderDetailResponseImpl({
+    @JsonKey(fromJson: stringFromJson) required this.id,
+    @JsonKey(name: 'order_number') required this.orderNumber,
+    required this.status,
+    @JsonKey(name: 'order_type') this.orderType = '',
+    @JsonKey(name: 'created_at') this.date = '',
+    @JsonKey(fromJson: doubleFromJson) this.subtotal = 0,
+    @JsonKey(fromJson: doubleFromJson) this.discount = 0,
+    @JsonKey(fromJson: doubleFromJson) required this.total,
+    @JsonKey(name: 'delivery_charge', fromJson: doubleFromJson)
+    this.deliveryCharge = 0,
+    @JsonKey() this.notes = '',
+    final List<OrderDetailItem> items = const [],
+    @JsonKey(name: 'order_history')
+    final List<OrderDetailItem> historyItems = const [],
+  }) : _items = items,
+       _historyItems = historyItems;
+
+  factory _$OrderDetailResponseImpl.fromJson(Map<String, dynamic> json) =>
+      _$$OrderDetailResponseImplFromJson(json);
+
+  @override
+  @JsonKey(fromJson: stringFromJson)
+  final String id;
+  @override
+  @JsonKey(name: 'order_number')
+  final String orderNumber;
+  @override
+  final String status;
+  @override
+  @JsonKey(name: 'order_type')
+  final String orderType;
+  @override
+  @JsonKey(name: 'created_at')
+  final String date;
+  @override
+  @JsonKey(fromJson: doubleFromJson)
+  final double subtotal;
+  @override
+  @JsonKey(fromJson: doubleFromJson)
+  final double discount;
+  @override
+  @JsonKey(fromJson: doubleFromJson)
+  final double total;
+  @override
+  @JsonKey(name: 'delivery_charge', fromJson: doubleFromJson)
+  final double deliveryCharge;
+  @override
+  @JsonKey()
+  final String notes;
+  final List<OrderDetailItem> _items;
+  @override
+  @JsonKey()
+  List<OrderDetailItem> get items {
+    if (_items is EqualUnmodifiableListView) return _items;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_items);
+  }
+
+  final List<OrderDetailItem> _historyItems;
+  @override
+  @JsonKey(name: 'order_history')
+  List<OrderDetailItem> get historyItems {
+    if (_historyItems is EqualUnmodifiableListView) return _historyItems;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_historyItems);
+  }
+
+  @override
+  String toString() {
+    return 'OrderDetailResponse(id: $id, orderNumber: $orderNumber, status: $status, orderType: $orderType, date: $date, subtotal: $subtotal, discount: $discount, total: $total, deliveryCharge: $deliveryCharge, notes: $notes, items: $items, historyItems: $historyItems)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$OrderDetailResponseImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.orderNumber, orderNumber) ||
+                other.orderNumber == orderNumber) &&
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.orderType, orderType) ||
+                other.orderType == orderType) &&
+            (identical(other.date, date) || other.date == date) &&
+            (identical(other.subtotal, subtotal) ||
+                other.subtotal == subtotal) &&
+            (identical(other.discount, discount) ||
+                other.discount == discount) &&
+            (identical(other.total, total) || other.total == total) &&
+            (identical(other.deliveryCharge, deliveryCharge) ||
+                other.deliveryCharge == deliveryCharge) &&
+            (identical(other.notes, notes) || other.notes == notes) &&
+            const DeepCollectionEquality().equals(other._items, _items) &&
+            const DeepCollectionEquality().equals(
+              other._historyItems,
+              _historyItems,
+            ));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    orderNumber,
+    status,
+    orderType,
+    date,
+    subtotal,
+    discount,
+    total,
+    deliveryCharge,
+    notes,
+    const DeepCollectionEquality().hash(_items),
+    const DeepCollectionEquality().hash(_historyItems),
+  );
+
+  /// Create a copy of OrderDetailResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$OrderDetailResponseImplCopyWith<_$OrderDetailResponseImpl> get copyWith =>
+      __$$OrderDetailResponseImplCopyWithImpl<_$OrderDetailResponseImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$OrderDetailResponseImplToJson(this);
+  }
+}
+
+abstract class _OrderDetailResponse implements OrderDetailResponse {
+  const factory _OrderDetailResponse({
+    @JsonKey(fromJson: stringFromJson) required final String id,
+    @JsonKey(name: 'order_number') required final String orderNumber,
+    required final String status,
+    @JsonKey(name: 'order_type') final String orderType,
+    @JsonKey(name: 'created_at') final String date,
+    @JsonKey(fromJson: doubleFromJson) final double subtotal,
+    @JsonKey(fromJson: doubleFromJson) final double discount,
+    @JsonKey(fromJson: doubleFromJson) required final double total,
+    @JsonKey(name: 'delivery_charge', fromJson: doubleFromJson)
+    final double deliveryCharge,
+    @JsonKey() final String notes,
+    final List<OrderDetailItem> items,
+    @JsonKey(name: 'order_history') final List<OrderDetailItem> historyItems,
+  }) = _$OrderDetailResponseImpl;
+
+  factory _OrderDetailResponse.fromJson(Map<String, dynamic> json) =
+      _$OrderDetailResponseImpl.fromJson;
+
+  @override
+  @JsonKey(fromJson: stringFromJson)
+  String get id;
+  @override
+  @JsonKey(name: 'order_number')
+  String get orderNumber;
+  @override
+  String get status;
+  @override
+  @JsonKey(name: 'order_type')
+  String get orderType;
+  @override
+  @JsonKey(name: 'created_at')
+  String get date;
+  @override
+  @JsonKey(fromJson: doubleFromJson)
+  double get subtotal;
+  @override
+  @JsonKey(fromJson: doubleFromJson)
+  double get discount;
+  @override
+  @JsonKey(fromJson: doubleFromJson)
+  double get total;
+  @override
+  @JsonKey(name: 'delivery_charge', fromJson: doubleFromJson)
+  double get deliveryCharge;
+  @override
+  @JsonKey()
+  String get notes;
+  @override
+  List<OrderDetailItem> get items;
+  @override
+  @JsonKey(name: 'order_history')
+  List<OrderDetailItem> get historyItems;
+
+  /// Create a copy of OrderDetailResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$OrderDetailResponseImplCopyWith<_$OrderDetailResponseImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

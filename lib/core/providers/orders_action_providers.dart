@@ -14,21 +14,17 @@ class PlaceOrderNotifier extends AutoDisposeAsyncNotifier<PlaceOrderResponse?> {
   @override
   Future<PlaceOrderResponse?> build() async => null;
 
-  /// [isInstantCart] → `standard` delivery; pre-order tab → `preorder`.
-  /// Returns the response on success, `null` on failure (see [state] for error).
+  /// Instant cart → [OrdersRepository.placeInstantOrder]; pre-order tab → [placePreorderOrder].
   Future<PlaceOrderResponse?> submit({
     required bool isInstantCart,
     required int addressId,
-    List<String>? cartItemIds,
   }) async {
     state = const AsyncValue.loading();
     try {
-      final res = await ref.read(ordersRepositoryProvider).placeOrder(
-            deliveryMethod: isInstantCart ? 'standard' : 'preorder',
-            paymentMethod: 'cod',
-            addressId: addressId,
-            cartItemIds: cartItemIds,
-          );
+      final repo = ref.read(ordersRepositoryProvider);
+      final res = isInstantCart
+          ? await repo.placeInstantOrder(addressId: addressId)
+          : await repo.placePreorderOrder(addressId: addressId);
       refreshAfterCheckout(ref);
       state = AsyncValue.data(res);
       return res;

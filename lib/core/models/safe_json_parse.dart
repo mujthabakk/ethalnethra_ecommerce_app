@@ -207,23 +207,40 @@ OrderListItem orderListItemFromJsonLoose(Map<String, dynamic> json) =>
     OrderListItem(
       id: stringFromJson(json['id']),
       orderNumber: stringFromJson(json['order_number'] ?? json['orderNumber']),
-      date: stringFromJson(json['date'] ?? json['created_at'] ?? json['createdAt']),
-      total: doubleFromJson(json['total']),
       status: stringFromJson(json['status']),
-      itemsCount: intFromJson(json['items_count'] ?? json['itemsCount']),
+      orderType: stringFromJson(json['order_type'] ?? json['orderType']),
+      date: stringFromJson(
+        json['created_at'] ?? json['createdAt'] ?? json['date'],
+      ),
+      dispatchDate: stringFromJson(json['dispatch_date'] ?? json['dispatchDate']),
+      notes: stringFromJson(json['notes']),
+      subtotal: doubleFromJson(json['subtotal']),
+      discount: doubleFromJson(json['discount'] ?? 0),
+      total: doubleFromJson(json['total']),
     );
 
-OrdersListResponse ordersListResponseFromJsonLoose(Map<String, dynamic> json) =>
-    OrdersListResponse(
-      orders: parseListLoose(
-        json,
-        listKey: 'orders',
-        parse: orderListItemFromJsonLoose,
-        keep: (o) => o.id.isNotEmpty,
-      ),
-      total: doubleFromJson(json['total']),
-      pages: doubleFromJson(json['pages']),
+OrdersListResponse ordersListResponseFromJsonLoose(Map<String, dynamic> json) {
+  var orders = parseListLoose(
+    json,
+    listKey: 'data',
+    parse: orderListItemFromJsonLoose,
+    keep: (o) => o.id.isNotEmpty,
+  );
+  if (orders.isEmpty) {
+    orders = parseListLoose(
+      json,
+      listKey: 'orders',
+      parse: orderListItemFromJsonLoose,
+      keep: (o) => o.id.isNotEmpty,
     );
+  }
+  return OrdersListResponse(
+    orders: orders,
+    totalCount: intFromJson(json['total']),
+    currentPage: intFromJson(json['current_page'] ?? json['currentPage'] ?? 1),
+    lastPage: intFromJson(json['last_page'] ?? json['lastPage'] ?? 1),
+  );
+}
 
 PlaceOrderResponse placeOrderResponseFromJsonLoose(Map<String, dynamic> json) =>
     PlaceOrderResponse(
@@ -232,10 +249,13 @@ PlaceOrderResponse placeOrderResponseFromJsonLoose(Map<String, dynamic> json) =>
       status: stringFromJson(json['status']),
       trackingUrl: stringFromJson(json['tracking_url'] ?? json['trackingUrl']),
       total: doubleFromJson(json['total']),
-      discount: doubleFromJson(json['discount']),
+      discount: doubleFromJson(json['discount'] ?? 0),
       discounts: dynamicListFromJson(json['discounts']),
       loyaltyApplied: boolFromJson(json['loyalty_applied'] ?? json['loyaltyApplied']),
       eta: stringFromJson(json['eta']),
+      dispatchDate: stringFromJson(json['dispatch_date'] ?? json['dispatchDate']),
+      notes: stringFromJson(json['notes']),
+      deliveryCharge: doubleFromJson(json['delivery_charge'] ?? json['deliveryCharge'] ?? 0),
     );
 
 OrderTrackResponse orderTrackResponseFromJsonLoose(Map<String, dynamic> json) =>
@@ -249,6 +269,79 @@ CancelOrderResponse cancelOrderResponseFromJsonLoose(
   Map<String, dynamic> json,
 ) =>
     CancelOrderResponse(message: stringFromJson(json['message']));
+
+OrderDetailItem orderDetailItemFromJsonLoose(Map<String, dynamic> json) =>
+    OrderDetailItem(
+      productId: stringFromJson(json['product_id'] ?? json['productId']),
+      nameMl: stringFromJson(json['name_ml'] ?? json['nameMl']),
+      name: stringFromJson(json['name'] ?? json['product_name'] ?? json['productName']),
+      quantity: doubleFromJson(json['quantity'] ?? 1),
+      unit: stringFromJson(json['unit'] ?? json['weight'] ?? ''),
+      price: doubleFromJson(json['price']),
+      subtotal: doubleFromJson(json['subtotal'] ?? json['line_total'] ?? json['lineTotal']),
+      imageUrl: stringFromJson(json['image_url'] ?? json['imageUrl']),
+      isPreorder: boolFromJson(json['is_preorder'] ?? json['isPreorder']),
+    );
+
+List<OrderDetailItem> _orderDetailItemsFromJson(Map<String, dynamic> json) {
+  for (final key in const [
+    'items',
+    'line_items',
+    'order_items',
+    'products',
+  ]) {
+    final list = parseListLoose(
+      json,
+      listKey: key,
+      parse: orderDetailItemFromJsonLoose,
+      keep: (i) => i.name.isNotEmpty || i.productId.isNotEmpty,
+    );
+    if (list.isNotEmpty) return list;
+  }
+  return const [];
+}
+
+OrderDetailResponse orderDetailResponseFromJsonLoose(Map<String, dynamic> json) {
+  final root = json['order'] is Map
+      ? mapFromJson(json['order'])
+      : json['data'] is Map && (json['data'] as Map).containsKey('id')
+          ? mapFromJson(json['data'])
+          : json;
+
+  var historyItems = parseListLoose(
+    json,
+    listKey: 'order_history',
+    parse: orderDetailItemFromJsonLoose,
+    keep: (i) => i.name.isNotEmpty || i.productId.isNotEmpty,
+  );
+  if (historyItems.isEmpty) {
+    historyItems = parseListLoose(
+      json,
+      listKey: 'history',
+      parse: orderDetailItemFromJsonLoose,
+      keep: (i) => i.name.isNotEmpty || i.productId.isNotEmpty,
+    );
+  }
+
+  return OrderDetailResponse(
+    id: stringFromJson(root['id']),
+    orderNumber: stringFromJson(root['order_number'] ?? root['orderNumber']),
+    status: stringFromJson(root['status']),
+    orderType: stringFromJson(root['order_type'] ?? root['orderType']),
+    date: stringFromJson(
+      root['created_at'] ?? root['createdAt'] ?? root['date'],
+    ),
+    subtotal: doubleFromJson(root['subtotal']),
+    discount: doubleFromJson(root['discount'] ?? 0),
+    total: doubleFromJson(root['total']),
+    deliveryCharge: doubleFromJson(
+      root['delivery_charge'] ?? root['deliveryCharge'] ?? 0,
+    ),
+    notes: stringFromJson(root['notes']),
+    items: _orderDetailItemsFromJson(root),
+    historyItems: historyItems,
+  );
+}
 
 /// Safe parse: returns [fallback] if [parse] throws.
 T parseSafely<T>(

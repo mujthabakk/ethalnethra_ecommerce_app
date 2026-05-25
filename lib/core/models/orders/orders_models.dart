@@ -2,6 +2,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../utils/product_display_name.dart';
 import '../catalog/json_converters.dart';
 import '../safe_json_parse.dart';
 
@@ -14,14 +15,36 @@ class OrderListItem with _$OrderListItem {
   const factory OrderListItem({
     @JsonKey(fromJson: stringFromJson) required String id,
     @JsonKey(name: 'order_number') required String orderNumber,
-    required String date,
-    @JsonKey(fromJson: doubleFromJson) required double total,
     required String status,
-    @JsonKey(name: 'items_count', fromJson: intFromJson) required int itemsCount,
+    @JsonKey(name: 'order_type') @Default('') String orderType,
+    @JsonKey(name: 'created_at') @Default('') String date,
+    @JsonKey(name: 'dispatch_date') @Default('') String dispatchDate,
+    @JsonKey() @Default('') String notes,
+    @JsonKey(fromJson: doubleFromJson) @Default(0) double subtotal,
+    @JsonKey(fromJson: doubleFromJson) @Default(0) double discount,
+    @JsonKey(fromJson: doubleFromJson) required double total,
   }) = _OrderListItem;
 
   factory OrderListItem.fromJson(Map<String, dynamic> json) =>
       orderListItemFromJsonLoose(json);
+}
+
+extension OrderListItemDisplay on OrderListItem {
+  String get orderTypeLabel {
+    switch (orderType.toLowerCase()) {
+      case 'instant':
+        return 'Instant';
+      case 'preorder':
+        return 'Pre-order';
+      default:
+        if (orderType.isEmpty) return '';
+        return orderType[0].toUpperCase() +
+            orderType.substring(1).replaceAll('_', ' ');
+    }
+  }
+
+  bool get isInstantOrder => orderType.toLowerCase() == 'instant';
+  bool get isPreorderOrder => orderType.toLowerCase() == 'preorder';
 }
 
 @freezed
@@ -29,8 +52,11 @@ class OrdersListResponse with _$OrdersListResponse {
   @JsonSerializable(fieldRename: FieldRename.snake)
   const factory OrdersListResponse({
     required List<OrderListItem> orders,
-    @JsonKey(fromJson: doubleFromJson) required double total,
-    @JsonKey(fromJson: doubleFromJson) required double pages,
+    @JsonKey(fromJson: intFromJson) @Default(0) int totalCount,
+    @JsonKey(name: 'current_page', fromJson: intFromJson)
+    @Default(1)
+    int currentPage,
+    @JsonKey(name: 'last_page', fromJson: intFromJson) @Default(1) int lastPage,
   }) = _OrdersListResponse;
 
   factory OrdersListResponse.fromJson(Map<String, dynamic> json) =>
@@ -44,7 +70,12 @@ class PlaceOrderResponse with _$PlaceOrderResponse {
     @JsonKey(name: 'order_id', fromJson: stringFromJson) required String orderId,
     @JsonKey(name: 'order_number') required String orderNumber,
     required String status,
-    @JsonKey(name: 'tracking_url') required String trackingUrl,
+    @JsonKey(name: 'tracking_url') @Default('') String trackingUrl,
+    @JsonKey(name: 'dispatch_date') @Default('') String dispatchDate,
+    @JsonKey() @Default('') String notes,
+    @JsonKey(name: 'delivery_charge', fromJson: doubleFromJson)
+    @Default(0)
+    double deliveryCharge,
     @JsonKey(fromJson: doubleFromJson) required double total,
     @JsonKey(fromJson: doubleFromJson) required double discount,
     @JsonKey(fromJson: dynamicListFromJson) @Default([]) List<dynamic> discounts,
@@ -78,6 +109,66 @@ class CancelOrderResponse with _$CancelOrderResponse {
       cancelOrderResponseFromJsonLoose(json);
 }
 
+@freezed
+class OrderDetailItem with _$OrderDetailItem {
+  @JsonSerializable(fieldRename: FieldRename.snake)
+  const factory OrderDetailItem({
+    @JsonKey(fromJson: stringFromJson) @Default('') String productId,
+    @JsonKey(name: 'name_ml') @Default('') String nameMl,
+    @JsonKey() @Default('') String name,
+    @JsonKey(fromJson: doubleFromJson) @Default(1) double quantity,
+    @JsonKey() @Default('') String unit,
+    @JsonKey(fromJson: doubleFromJson) @Default(0) double price,
+    @JsonKey(fromJson: doubleFromJson) @Default(0) double subtotal,
+    @JsonKey(fromJson: stringFromJson) @Default('') String imageUrl,
+    @JsonKey(fromJson: boolFromJson) @Default(false) bool isPreorder,
+  }) = _OrderDetailItem;
+
+  factory OrderDetailItem.fromJson(Map<String, dynamic> json) =>
+      orderDetailItemFromJsonLoose(json);
+}
+
+extension OrderDetailItemDisplay on OrderDetailItem {
+  String get displayName =>
+      formatProductDisplayName(nameMl: nameMl, nameEn: name);
+
+  String get quantitySubtitle {
+    final qtyStr = quantity == quantity.roundToDouble()
+        ? quantity.toInt().toString()
+        : quantity.toStringAsFixed(1);
+    if (unit.isNotEmpty) return '$qtyStr $unit, Price';
+    return '$qtyStr, Price';
+  }
+
+  String get lineTotalLabel => '₹${(subtotal > 0 ? subtotal : price * quantity).toStringAsFixed(2)}';
+
+  int? get productIdInt => int.tryParse(productId);
+}
+
+@freezed
+class OrderDetailResponse with _$OrderDetailResponse {
+  @JsonSerializable(fieldRename: FieldRename.snake)
+  const factory OrderDetailResponse({
+    @JsonKey(fromJson: stringFromJson) required String id,
+    @JsonKey(name: 'order_number') required String orderNumber,
+    required String status,
+    @JsonKey(name: 'order_type') @Default('') String orderType,
+    @JsonKey(name: 'created_at') @Default('') String date,
+    @JsonKey(fromJson: doubleFromJson) @Default(0) double subtotal,
+    @JsonKey(fromJson: doubleFromJson) @Default(0) double discount,
+    @JsonKey(fromJson: doubleFromJson) required double total,
+    @JsonKey(name: 'delivery_charge', fromJson: doubleFromJson)
+    @Default(0)
+    double deliveryCharge,
+    @JsonKey() @Default('') String notes,
+    @Default([]) List<OrderDetailItem> items,
+    @JsonKey(name: 'order_history') @Default([]) List<OrderDetailItem> historyItems,
+  }) = _OrderDetailResponse;
+
+  factory OrderDetailResponse.fromJson(Map<String, dynamic> json) =>
+      orderDetailResponseFromJsonLoose(json);
+}
+
 /// UI-friendly summary for [OrderStatusScreen] from list item or place-order response.
 class OrderSummaryView {
   const OrderSummaryView({
@@ -86,7 +177,6 @@ class OrderSummaryView {
     required this.status,
     required this.total,
     this.date,
-    this.itemsCount,
     this.eta,
     this.trackingUrl,
   });
@@ -96,7 +186,6 @@ class OrderSummaryView {
   final String status;
   final double total;
   final String? date;
-  final int? itemsCount;
   final String? eta;
   final String? trackingUrl;
 
@@ -107,7 +196,6 @@ class OrderSummaryView {
       status: e.status,
       total: e.total,
       date: e.date,
-      itemsCount: e.itemsCount,
     );
   }
 

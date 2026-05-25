@@ -38,6 +38,11 @@ final orderTrackProvider = FutureProvider.autoDispose
   return ref.watch(ordersRepositoryProvider).fetchOrderTrack(orderId);
 });
 
+final orderDetailProvider = FutureProvider.autoDispose
+    .family<OrderDetailResponse, String>((ref, orderId) async {
+  return ref.watch(ordersRepositoryProvider).fetchOrderDetail(orderId);
+});
+
 final zonesProvider = FutureProvider.autoDispose<List<ZoneItem>>((ref) async {
   return ref.watch(locationsRepositoryProvider).fetchZones();
 });
@@ -88,16 +93,65 @@ class SaveAddressNotifier extends Notifier<SaveAddressUiState> {
     required int areaId,
     required String addressLine,
     required String pincodeId,
+    int? addressId,
+    bool isDefault = false,
   }) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      await ref.read(userProfileRepositoryProvider).createAddress(
-            label: label,
-            zoneId: zoneId,
-            areaId: areaId,
-            addressLine: addressLine,
-            pincodeId: pincodeId,
-          );
+      final repo = ref.read(userProfileRepositoryProvider);
+      if (addressId != null) {
+        await repo.updateAddress(
+          addressId: addressId,
+          label: label,
+          zoneId: zoneId,
+          areaId: areaId,
+          addressLine: addressLine,
+          pincodeId: pincodeId,
+        );
+      } else {
+        await repo.createAddress(
+          label: label,
+          zoneId: zoneId,
+          areaId: areaId,
+          addressLine: addressLine,
+          pincodeId: pincodeId,
+          isDefault: isDefault,
+        );
+      }
+      ref.invalidate(userAddressesProvider);
+      state = const SaveAddressUiState();
+      return true;
+    } catch (e) {
+      state = SaveAddressUiState(
+        isLoading: false,
+        errorMessage: e.toString(),
+      );
+      return false;
+    }
+  }
+
+  Future<bool> deleteAddress(int addressId) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      await ref.read(userProfileRepositoryProvider).deleteAddress(addressId);
+      ref.invalidate(userAddressesProvider);
+      state = const SaveAddressUiState();
+      return true;
+    } catch (e) {
+      state = SaveAddressUiState(
+        isLoading: false,
+        errorMessage: e.toString(),
+      );
+      return false;
+    }
+  }
+
+  Future<bool> setDefaultAddress(int addressId) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      await ref
+          .read(userProfileRepositoryProvider)
+          .setDefaultAddress(addressId);
       ref.invalidate(userAddressesProvider);
       state = const SaveAddressUiState();
       return true;

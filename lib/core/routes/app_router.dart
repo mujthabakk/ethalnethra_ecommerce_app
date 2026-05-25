@@ -68,6 +68,7 @@ class AppRouter {
   static const String orderStatus = '/order-status';
   static String orderStatusPath(String orderId) => '$orderStatus/$orderId';
   static const String orderHistory = '/order-history';
+  static String orderHistoryPath(String orderId) => '$orderHistory/$orderId';
   static const String editProfile = '/edit-profile';
   static const String deliveryAddress = '/delivery-address';
   static const String promoCode = '/promo-code';
@@ -195,9 +196,12 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: orderHistory,
+        path: '$orderHistory/:orderId',
         name: 'orderHistory',
-        builder: (context, state) => const OrderHistoryScreen(),
+        builder: (context, state) {
+          final id = state.pathParameters['orderId'] ?? '';
+          return OrderHistoryScreen(orderId: id);
+        },
       ),
       GoRoute(
         path: editProfile,

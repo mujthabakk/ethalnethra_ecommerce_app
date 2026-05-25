@@ -138,7 +138,7 @@ class _PreOrderButton extends StatelessWidget {
         width: 45,
         height: 45,
         decoration: BoxDecoration(
-          color: AppColors.preOrderOrange,
+          color: AppColors.primary,
           borderRadius: BorderRadius.circular(15),
         ),
         child: const Icon(
@@ -164,7 +164,7 @@ class _InstantBasketButton extends StatelessWidget {
         width: 45,
         height: 45,
         decoration: BoxDecoration(
-          color: AppColors.primary,
+          color: AppColors.preOrderOrange,
           borderRadius: BorderRadius.circular(15),
         ),
         child: const Icon(Icons.add, color: Colors.white, size: 28),

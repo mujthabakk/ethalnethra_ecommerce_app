@@ -16,25 +16,33 @@ class OrdersRepository {
     return OrdersListResponse.fromJson(data);
   }
 
-  Future<PlaceOrderResponse> placeOrder({
-    required String deliveryMethod,
-    required String paymentMethod,
-    required int addressId,
-    List<String>? cartItemIds,
-  }) async {
+  Future<PlaceOrderResponse> placeInstantOrder({required int addressId}) async {
     final response = await _dio.post<Map<String, dynamic>>(
-      ApiEndpoints.ordersPlace,
-      data: {
-        'delivery_method': deliveryMethod,
-        'payment_method': paymentMethod,
-        'address_id': addressId,
-        if (cartItemIds != null && cartItemIds.isNotEmpty)
-          'cart_item_ids': cartItemIds,
-      },
+      ApiEndpoints.ordersPlaceInstant,
+      data: {'address_id': addressId},
     );
     final data = response.data;
-    if (data == null) throw Exception('Empty place order response');
+    if (data == null) throw Exception('Empty place instant order response');
     return PlaceOrderResponse.fromJson(data);
+  }
+
+  Future<PlaceOrderResponse> placePreorderOrder({required int addressId}) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      ApiEndpoints.ordersPlacePreorder,
+      data: {'address_id': addressId},
+    );
+    final data = response.data;
+    if (data == null) throw Exception('Empty place preorder response');
+    return PlaceOrderResponse.fromJson(data);
+  }
+
+  Future<OrderDetailResponse> fetchOrderDetail(String orderId) async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      ApiEndpoints.orderById(orderId),
+    );
+    final data = response.data;
+    if (data == null) throw Exception('Empty order detail response');
+    return OrderDetailResponse.fromJson(data);
   }
 
   Future<OrderTrackResponse> fetchOrderTrack(String orderId) async {
@@ -46,9 +54,13 @@ class OrdersRepository {
     return OrderTrackResponse.fromJson(data);
   }
 
-  Future<CancelOrderResponse> cancelOrder(String orderId) async {
+  Future<CancelOrderResponse> cancelOrder(
+    String orderId, {
+    String reason = 'Changed my mind',
+  }) async {
     final response = await _dio.post<Map<String, dynamic>>(
       '${ApiEndpoints.orders}/$orderId/cancel',
+      data: {'reason': reason},
     );
     final data = response.data;
     if (data == null) throw Exception('Empty cancel order response');

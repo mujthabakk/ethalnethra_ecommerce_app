@@ -15,13 +15,90 @@ class DeliveryAddressScreen extends ConsumerWidget {
   static IconData _iconForLabel(String label) {
     final l = label.toLowerCase();
     if (l.contains('home')) return Icons.home;
-    if (l.contains('work')) return Icons.work;
+    if (l.contains('work') || l.contains('office')) return Icons.work;
     return Icons.place_outlined;
+  }
+
+  void _openFormSheet(BuildContext context, {UserAddressDto? address}) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => _AddressFormSheet(address: address),
+    );
+  }
+
+  Future<void> _setDefault(
+    BuildContext context,
+    WidgetRef ref,
+    UserAddressDto address,
+  ) async {
+    final ok = await ref
+        .read(saveAddressNotifierProvider.notifier)
+        .setDefaultAddress(address.id);
+    if (!context.mounted) return;
+    if (ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Default address updated')),
+      );
+    } else {
+      final err = ref.read(saveAddressNotifierProvider).errorMessage;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(err ?? 'Could not set default address')),
+      );
+    }
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    UserAddressDto address,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete address'),
+        content: Text(
+          'Remove "${address.label}" from your saved addresses?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    final ok = await ref
+        .read(saveAddressNotifierProvider.notifier)
+        .deleteAddress(address.id);
+    if (!context.mounted) return;
+    if (ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Address deleted')),
+      );
+    } else {
+      final err = ref.read(saveAddressNotifierProvider).errorMessage;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(err ?? 'Could not delete address')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final addressesAsync = ref.watch(userAddressesProvider);
+    final actionState = ref.watch(saveAddressNotifierProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -65,8 +142,7 @@ class DeliveryAddressScreen extends ConsumerWidget {
                     Text('$e', textAlign: TextAlign.center),
                     const SizedBox(height: 16),
                     FilledButton(
-                      onPressed: () =>
-                          ref.invalidate(userAddressesProvider),
+                      onPressed: () => ref.invalidate(userAddressesProvider),
                       child: const Text('Retry'),
                     ),
                   ],
@@ -77,46 +153,50 @@ class DeliveryAddressScreen extends ConsumerWidget {
           data: (addresses) {
             return ListView(
               physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 25.0),
-          children: [
-            const SizedBox(height: 10),
-            GestureDetector(
-                  onTap: () => _openAddSheet(context, ref),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 15,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFE2E2E2)),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: [
+              padding: const EdgeInsets.symmetric(horizontal: 25.0),
+              children: [
+                const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: actionState.isLoading
+                      ? null
+                      : () => _openFormSheet(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 15,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFFE2E2E2)),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
                         const Icon(
                           Icons.add,
                           color: Color(0xFFF3603F),
                           size: 24,
                         ),
-                    const SizedBox(width: 10),
-                    Text(
-                      'Add New Address',
-                      style: AppTextStyles.addNewAddressButtonText,
+                        const SizedBox(width: 10),
+                        Text(
+                          'Add New Address',
+                          style: AppTextStyles.addNewAddressButtonText,
+                        ),
+                        const Spacer(),
+                        const Icon(
+                          Icons.arrow_forward,
+                          color: Color(0xFFF3603F),
+                          size: 24,
+                        ),
+                      ],
                     ),
-                    const Spacer(),
-                    const Icon(
-                      Icons.arrow_forward,
-                      color: Color(0xFFF3603F),
-                      size: 24,
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 40),
-                Text('SAVED ADDRESSES',
-                    style: AppTextStyles.addressSectionHeader),
-            const SizedBox(height: 20),
+                const SizedBox(height: 40),
+                Text(
+                  'SAVED ADDRESSES',
+                  style: AppTextStyles.addressSectionHeader,
+                ),
+                const SizedBox(height: 20),
                 if (addresses.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 32),
@@ -132,27 +212,21 @@ class DeliveryAddressScreen extends ConsumerWidget {
                       child: _AddressCard(
                         address: a,
                         icon: _iconForLabel(a.label),
+                        actionsEnabled: !actionState.isLoading,
+                        onEdit: () => _openFormSheet(context, address: a),
+                        onSetDefault: a.isDefault
+                            ? null
+                            : () => _setDefault(context, ref, a),
+                        onDelete: () => _confirmDelete(context, ref, a),
                       ),
                     ),
-            ),
-            const SizedBox(height: 30),
-          ],
+                  ),
+                const SizedBox(height: 30),
+              ],
             );
           },
         ),
       ),
-    );
-  }
-
-  void _openAddSheet(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => const _AddAddressSheet(),
     );
   }
 }
@@ -161,10 +235,18 @@ class _AddressCard extends StatelessWidget {
   const _AddressCard({
     required this.address,
     required this.icon,
+    required this.actionsEnabled,
+    required this.onEdit,
+    required this.onDelete,
+    this.onSetDefault,
   });
 
   final UserAddressDto address;
   final IconData icon;
+  final bool actionsEnabled;
+  final VoidCallback onEdit;
+  final VoidCallback? onSetDefault;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -175,8 +257,11 @@ class _AddressCard extends StatelessWidget {
         border: Border.all(color: AppColors.borderGrey),
         borderRadius: BorderRadius.circular(15),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(icon, color: AppColors.darkBackground, size: 28),
               const SizedBox(width: 15),
@@ -184,38 +269,38 @@ class _AddressCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        address.label.toUpperCase(),
-                        style: AppTextStyles.orderItemTitle,
-                      ),
-                    ),
-                    if (address.isDefault)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Text(
-                          'Default',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            address.label.toUpperCase(),
+                            style: AppTextStyles.orderItemTitle,
                           ),
                         ),
-                      ),
-                  ],
-                ),
+                        if (address.isDefault)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text(
+                              'Default',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                     const SizedBox(height: 5),
                     Text(
-                  address.displayLines,
+                      address.displayLines,
                       style: const TextStyle(
                         fontSize: 16,
                         color: Color(0xFF181725),
@@ -227,23 +312,81 @@ class _AddressCard extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              if (onSetDefault != null)
+                TextButton(
+                  onPressed: actionsEnabled ? onSetDefault : null,
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 32),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text('Set as default'),
+                ),
+              TextButton(
+                onPressed: actionsEnabled ? onEdit : null,
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFF181725),
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(0, 32),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text('Edit'),
+              ),
+              TextButton(
+                onPressed: actionsEnabled ? onDelete : null,
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.red.shade700,
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(0, 32),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _AddAddressSheet extends ConsumerStatefulWidget {
-  const _AddAddressSheet();
+class _AddressFormSheet extends ConsumerStatefulWidget {
+  const _AddressFormSheet({this.address});
+
+  final UserAddressDto? address;
+
+  bool get isEditing => address != null;
 
   @override
-  ConsumerState<_AddAddressSheet> createState() => _AddAddressSheetState();
+  ConsumerState<_AddressFormSheet> createState() => _AddressFormSheetState();
 }
 
-class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
-  final _label = TextEditingController();
-  final _line = TextEditingController();
+class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
+  late final TextEditingController _label;
+  late final TextEditingController _line;
   String? _zoneId;
   String? _areaId;
   String? _pincodeId;
+  bool _isDefault = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final a = widget.address;
+    _label = TextEditingController(text: a?.label ?? '');
+    _line = TextEditingController(text: a?.addressLine ?? '');
+    _zoneId = a?.zoneId;
+    _areaId = a?.areaId;
+    _pincodeId = a?.pincodeId?.toString() ??
+        (int.tryParse(a?.pincode ?? '') != null ? a!.pincode : null);
+    _isDefault = a?.isDefault ?? false;
+  }
 
   @override
   void dispose() {
@@ -280,14 +423,19 @@ class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
           areaId: a,
           addressLine: _line.text.trim(),
           pincodeId: _pincodeId!.trim(),
+          addressId: widget.address?.id,
+          isDefault: widget.isEditing ? false : _isDefault,
         );
 
     if (!mounted) return;
     if (ok) {
       Navigator.of(context).pop();
-      ref.invalidate(userAddressesProvider);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Address saved')),
+        SnackBar(
+          content: Text(
+            widget.isEditing ? 'Address updated' : 'Address saved',
+          ),
+        ),
       );
     } else {
       final err = ref.read(saveAddressNotifierProvider).errorMessage;
@@ -321,9 +469,9 @@ class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
       ),
       child: SingleChildScrollView(
         child: Column(
-              mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+          children: [
             Center(
               child: Container(
                 width: 40,
@@ -336,7 +484,7 @@ class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Add address',
+              widget.isEditing ? 'Edit address' : 'Add address',
               style: AppTextStyles.orderHistoryTitle,
             ),
             const SizedBox(height: 16),
@@ -358,12 +506,18 @@ class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
                     child: DropdownButton<String>(
                       isExpanded: true,
                       hint: const Text('Select zone'),
-                      value: _zoneId,
+                      value: _zoneId != null &&
+                              zones.any((z) => z.id == _zoneId)
+                          ? _zoneId
+                          : null,
                       items: zones
                           .map(
                             (z) => DropdownMenuItem(
                               value: z.id,
-                              child: Text(z.name),
+                              child: Text(
+                                z.name,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           )
                           .toList(),
@@ -400,12 +554,18 @@ class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
                     child: DropdownButton<String>(
                       isExpanded: true,
                       hint: const Text('Select area'),
-                      value: _areaId,
+                      value: _areaId != null &&
+                              areas.any((a) => a.id == _areaId)
+                          ? _areaId
+                          : null,
                       items: areas
                           .map(
                             (a) => DropdownMenuItem(
                               value: a.id,
-                              child: Text(a.name),
+                              child: Text(
+                                a.name,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           )
                           .toList(),
@@ -464,7 +624,10 @@ class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
                     child: DropdownButton<String>(
                       isExpanded: true,
                       hint: const Text('Select pincode'),
-                      value: _pincodeId,
+                      value: _pincodeId != null &&
+                              pincodes.any((p) => p.id == _pincodeId)
+                          ? _pincodeId
+                          : null,
                       items: pincodes
                           .map(
                             (p) => DropdownMenuItem(
@@ -479,6 +642,16 @@ class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
                 );
               },
             ),
+            if (!widget.isEditing) ...[
+              const SizedBox(height: 12),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Set as default address'),
+                value: _isDefault,
+                activeThumbColor: AppColors.primary,
+                onChanged: (v) => setState(() => _isDefault = v),
+              ),
+            ],
             const SizedBox(height: 20),
             FilledButton(
               onPressed: save.isLoading ? null : _save,
@@ -495,7 +668,7 @@ class _AddAddressSheetState extends ConsumerState<_AddAddressSheet> {
                         color: Colors.white,
                       ),
                     )
-                  : const Text('Save address'),
+                  : Text(widget.isEditing ? 'Update address' : 'Save address'),
             ),
           ],
         ),

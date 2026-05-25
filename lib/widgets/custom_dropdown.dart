@@ -38,9 +38,12 @@ class CustomDropdown extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
+          isExpanded: true,
           initialValue: value != null && items.contains(value) ? value : null,
           hint: Text(
             hint,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
             style: const TextStyle(
               fontFamily: 'Gilroy',
               fontSize: 18,
@@ -75,12 +78,35 @@ class CustomDropdown extends StatelessWidget {
               borderSide: BorderSide(color: Color(0xFFE2E2E2), width: 1),
             ),
           ),
+          selectedItemBuilder: (context) {
+            return items.map((item) {
+              final displayLabel = itemLabels?[item] ?? item;
+              return Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  displayLabel,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: const TextStyle(
+                    fontFamily: 'Gilroy',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFF181725),
+                    height: 29 / 18,
+                    letterSpacing: 0,
+                  ),
+                ),
+              );
+            }).toList();
+          },
           items: items.map((item) {
-            final label = itemLabels?[item] ?? item;
+            final displayLabel = itemLabels?[item] ?? item;
             return DropdownMenuItem<String>(
               value: item,
               child: Text(
-                label,
+                displayLabel,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
                 style: const TextStyle(
                   fontFamily: 'Gilroy',
                   fontSize: 18,

@@ -103,13 +103,40 @@ class OrdersListScreen extends ConsumerWidget {
                                   ),
                                 ),
                               ),
+                              if (o.orderTypeLabel.isNotEmpty)
+                                Container(
+                                  margin: const EdgeInsets.only(right: 6),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: (o.isInstantOrder
+                                            ? AppColors.primary
+                                            : AppColors.preOrderOrange)
+                                        .withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    o.orderTypeLabel,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: o.isInstantOrder
+                                          ? AppColors.primary
+                                          : AppColors.preOrderOrange,
+                                    ),
+                                  ),
+                                ),
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 10,
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withOpacity(0.12),
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.12,
+                                  ),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
@@ -123,11 +150,13 @@ class OrdersListScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            o.date,
-                            style: AppTextStyles.orderSuccessDescription,
-                          ),
+                          if (o.date.isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              o.date,
+                              style: AppTextStyles.orderSuccessDescription,
+                            ),
+                          ],
                           const SizedBox(height: 6),
                           Row(
                             children: [
@@ -139,11 +168,19 @@ class OrdersListScreen extends ConsumerWidget {
                                   color: Color(0xFF181725),
                                 ),
                               ),
+                              if (o.discount > 0) ...[
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Disc. ₹${o.discount.toStringAsFixed(2)}',
+                                  style: AppTextStyles.orderSuccessDescription,
+                                ),
+                              ],
                               const Spacer(),
-                              Text(
-                                '${o.itemsCount} items',
-                                style: AppTextStyles.orderSuccessDescription,
-                              ),
+                              if (o.subtotal > 0 && o.subtotal != o.total)
+                                Text(
+                                  'Subtotal ₹${o.subtotal.toStringAsFixed(2)}',
+                                  style: AppTextStyles.orderSuccessDescription,
+                                ),
                             ],
                           ),
                         ],

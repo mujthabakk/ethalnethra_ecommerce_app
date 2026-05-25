@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/commerce/favorites_dtos.dart';
 import '../repositories/favorites_repository.dart';
 import 'auth_providers.dart';
+import 'cart_providers.dart';
 
 final favoritesRepositoryProvider = Provider<FavoritesRepository>((ref) {
   return FavoritesRepository(ref.watch(dioProvider));
@@ -32,6 +33,20 @@ class FavoritesNotifier
     } else {
       await _repo.addFavorite(int.parse(productId));
     }
+    state = AsyncValue.data(await _repo.fetchFavorites());
+  }
+
+  Future<void> addAllToCart() async {
+    await _repo.addAllFavoritesToCart();
+    ref.invalidate(cartNotifierProvider);
+    state = AsyncValue.data(await _repo.fetchFavorites());
+  }
+
+  Future<void> moveSelectedToCart(List<String> productIds) async {
+    if (productIds.isEmpty) return;
+    final ids = productIds.map(int.parse).toList();
+    await _repo.moveFavoritesToCart(ids);
+    ref.invalidate(cartNotifierProvider);
     state = AsyncValue.data(await _repo.fetchFavorites());
   }
 }

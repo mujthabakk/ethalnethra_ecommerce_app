@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/providers/auth_providers.dart';
+import '../../core/providers/location_user_providers.dart';
 import '../../core/routes/app_router.dart';
 import '../../core/utils/phone_utils.dart';
 import '../../widgets/green_fab.dart';
@@ -36,6 +37,24 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
     });
   }
 
+  /// Returning users with a saved delivery address go straight to the dashboard.
+  Future<void> _navigateAfterSuccessfulVerify() async {
+    try {
+      final addresses =
+          await ref.read(userProfileRepositoryProvider).fetchAddresses();
+      if (!mounted) return;
+      if (addresses.isNotEmpty) {
+        ref.invalidate(userAddressesProvider);
+        context.go(AppRouter.mainNav);
+        return;
+      }
+    } catch (_) {
+      // Fall through to location onboarding.
+    }
+    if (!mounted) return;
+    context.go(AppRouter.location);
+  }
+
   Future<void> _verifyAndNavigate({String? otpOverride}) async {
     final otp = otpOverride ?? _otp;
     if (otp.length != 4) {
@@ -59,7 +78,7 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
         .verify(phone: _phone, otp: otp);
     if (!mounted) return;
     if (ok) {
-      context.go(AppRouter.location);
+      await _navigateAfterSuccessfulVerify();
     } else {
       final err = ref.read(verifyOtpNotifierProvider).errorMessage;
       ScaffoldMessenger.of(context).showSnackBar(

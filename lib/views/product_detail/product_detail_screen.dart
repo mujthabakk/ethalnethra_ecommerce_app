@@ -312,7 +312,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: AppColors.preOrderOrange,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(19),
                           ),
@@ -363,7 +363,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.preOrderOrange,
+                          backgroundColor: AppColors.primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(19),
                           ),

@@ -18,6 +18,8 @@ abstract final class ApiEndpoints {
 
   static const String favorites = '/api/favorites';
   static const String favoritesAdd = '/api/favorites/add';
+  static const String favoritesAddToCart = '/api/favorites/add-to-cart';
+  static const String favoritesMoveToCart = '/api/favorites/move-to-cart';
   static String favoritesRemove(String productId) =>
       '/api/favorites/remove/$productId';
 
@@ -25,8 +27,12 @@ abstract final class ApiEndpoints {
   static const String locationsAreas = '/api/locations/areas';
   static const String locationsPincodes = '/api/locations/pincodes';
   static const String userAddresses = '/api/user/addresses';
+  static String userAddressById(int id) => '/api/user/addresses/$id';
+  static String userAddressDefault(int id) => '/api/user/addresses/$id/default';
   static const String userDetails = '/api/user/details';
 
   static const String orders = '/api/orders';
-  static const String ordersPlace = '/api/orders/place';
+  static String orderById(String id) => '/api/orders/$id';
+  static const String ordersPlaceInstant = '/api/orders/place-instant';
+  static const String ordersPlacePreorder = '/api/orders/place-preorder';
 }

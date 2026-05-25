@@ -52,12 +52,49 @@ class _OrderStatusScreenState extends ConsumerState<OrderStatusScreen> {
 
   Future<void> _onCancel(BuildContext context) async {
     if (_cancelling) return;
+
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        final controller = TextEditingController(text: 'Changed my mind');
+        return AlertDialog(
+          title: const Text('Cancel order'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              labelText: 'Reason',
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 2,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Keep order'),
+            ),
+            TextButton(
+              onPressed: () {
+                final text = controller.text.trim();
+                Navigator.pop(
+                  ctx,
+                  text.isEmpty ? 'Changed my mind' : text,
+                );
+              },
+              child: const Text('Cancel order'),
+            ),
+          ],
+        );
+      },
+    );
+    if (reason == null || !context.mounted) return;
+
     setState(() => _cancelling = true);
     try {
       final msg = await ref
           .read(ordersRepositoryProvider)
-          .cancelOrder(widget.orderId);
+          .cancelOrder(widget.orderId, reason: reason);
       ref.invalidate(orderTrackProvider(widget.orderId));
+      ref.invalidate(orderDetailProvider(widget.orderId));
       ref.invalidate(ordersListProvider);
       if (!context.mounted) return;
       ScaffoldMessenger.of(
@@ -246,7 +283,8 @@ class _OrderStatusScreenState extends ConsumerState<OrderStatusScreen> {
                   ),
                 if (_canCancel(track.status)) const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => context.push(AppRouter.orderHistory),
+                  onPressed: () =>
+                      context.push(AppRouter.orderHistoryPath(widget.orderId)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     minimumSize: const Size(double.infinity, 67),
