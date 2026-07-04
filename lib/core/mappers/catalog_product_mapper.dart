@@ -14,6 +14,8 @@ extension CatalogProductMapper on CatalogProduct {
       unit: weight,
       preorderAvailable: preorderAvailable,
       instantOrderAvailable: instantOrderAvailable,
+      isCustomOrder: isCustomOrder,
+      isGramWise: isGramWise,
       listPrice: price,
       ourPrice: ourPrice,
       finalPrice: finalPrice,

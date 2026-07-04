@@ -25,7 +25,7 @@ class CartNotifier extends AutoDisposeAsyncNotifier<CartResponse> {
 
   Future<void> addToCart(
     String productId, {
-    int quantity = 1,
+    num quantity = 1,
     bool preorder = false,
   }) async {
     await _repo.addToCart(
@@ -36,18 +36,29 @@ class CartNotifier extends AutoDisposeAsyncNotifier<CartResponse> {
     await _reloadCartAndRefreshApp();
   }
 
-  Future<void> setLineQuantity(String lineId, int newQuantity) async {
-    if (newQuantity < 1) {
+  Future<void> setLineQuantity(String lineId, num newQuantity) async {
+    // Only treat a non-positive quantity as removal. Minimums (1 kg for kg-wise,
+    // 50 g for gram-wise) are enforced by the caller via CustomOrderQuantity, so
+    // gram-wise lines below 1 kg (e.g. 0.55 kg) must NOT be auto-removed here.
+    if (newQuantity <= 0) {
       await removeLine(lineId);
       return;
     }
     await _repo.updateLineQuantity(lineId, quantity: newQuantity);
-    await _reloadCartAndRefreshApp();
+    await _reloadCartOnly();
   }
 
   Future<void> removeLine(String lineId) async {
     await _repo.removeLine(lineId);
-    await _reloadCartAndRefreshApp();
+    await _reloadCartOnly();
+  }
+
+  /// Reloads only the cart (no catalog/banner/favorites refresh) — used for the
+  /// high-frequency quantity +/- and remove actions so a single cart API call
+  /// runs instead of a burst of unrelated requests.
+  Future<void> _reloadCartOnly() async {
+    final cart = await _repo.fetchCart();
+    state = AsyncValue.data(cart);
   }
 
   Future<void> _reloadCartAndRefreshApp() async {

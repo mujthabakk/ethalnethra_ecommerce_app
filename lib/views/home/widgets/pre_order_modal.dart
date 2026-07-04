@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/providers/cart_providers.dart';
+import '../../../core/utils/custom_order_quantity.dart';
 import '../../../core/widgets/app_network_image.dart';
 import '../../../models/product_model.dart';
 
@@ -78,9 +79,36 @@ class PreOrderModal extends ConsumerWidget {
                       style: AppTextStyles.productCardSubtitle,
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      '₹${product.price.toStringAsFixed(2)}',
-                      style: AppTextStyles.productCardPrice,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: '₹${product.price.toStringAsFixed(2)}',
+                                style: AppTextStyles.productCardPrice,
+                              ),
+                              TextSpan(
+                                text: ' /${product.unitLabel}',
+                                style: AppTextStyles.productCardSubtitle
+                                    .copyWith(fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (product.showDiscount) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            '₹${product.listPrice.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF7C7C7C),
+                              decoration: TextDecoration.lineThrough,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ),
@@ -96,7 +124,11 @@ class PreOrderModal extends ConsumerWidget {
                 try {
                   await ref.read(cartNotifierProvider.notifier).addToCart(
                         product.id,
-                        quantity: 1,
+                        quantity: (product.isCustomOrder || product.isGramWise)
+                            ? CustomOrderQuantity.initial(
+                                isGramWise: product.isGramWise,
+                              )
+                            : 1,
                         preorder: true,
                       );
                   if (context.mounted) {
@@ -116,6 +148,7 @@ class PreOrderModal extends ConsumerWidget {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('$e'),
+                        backgroundColor: Colors.red.shade600,
                         behavior: SnackBarBehavior.floating,
                       ),
                     );

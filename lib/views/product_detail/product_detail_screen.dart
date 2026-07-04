@@ -10,13 +10,17 @@ import '../../core/models/catalog/product_detail_dto.dart';
 import '../../core/providers/cart_providers.dart';
 import '../../core/providers/catalog_providers.dart';
 import '../../core/providers/favorites_providers.dart';
+import '../../core/utils/custom_order_quantity.dart';
 import '../../core/widgets/app_network_image.dart';
 import '../../models/product_model.dart';
 
 class ProductDetailScreen extends ConsumerStatefulWidget {
   final ProductModel product;
 
-  const ProductDetailScreen({super.key, required this.product});
+  const ProductDetailScreen({
+    super.key,
+    required this.product,
+  });
 
   @override
   ConsumerState<ProductDetailScreen> createState() =>
@@ -24,8 +28,43 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
-  int quantity = 1;
+  double _quantity = 1;
   int _currentImageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    final p = widget.product;
+    _quantity = (p.isCustomOrder || p.isGramWise)
+        ? CustomOrderQuantity.initial(isGramWise: p.isGramWise)
+        : 1;
+  }
+
+  void _incrementQuantity(ProductModel product) {
+    final weighted = product.isCustomOrder || product.isGramWise;
+    setState(() {
+      _quantity = weighted
+          ? CustomOrderQuantity.increment(
+              _quantity,
+              isGramWise: product.isGramWise,
+            )
+          : _quantity + 1;
+    });
+  }
+
+  void _decrementQuantity(ProductModel product) {
+    final weighted = product.isCustomOrder || product.isGramWise;
+    if (weighted) {
+      final next = CustomOrderQuantity.decrement(
+        _quantity,
+        isGramWise: product.isGramWise,
+      );
+      if (next == null) return;
+      setState(() => _quantity = next);
+    } else if (_quantity > 1) {
+      setState(() => _quantity = _quantity - 1);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,19 +142,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             });
                           },
                         ),
-                        items: productImages.asMap().entries.map((entry) {
-                          final imagePath = entry.value;
-                          final img = AppImage(
+                        items: productImages.map((imagePath) {
+                          return AppImage(
                             path: imagePath,
                             height: 200,
                             fit: BoxFit.contain,
                           );
-                          return entry.key == 0
-                              ? Hero(
-                                  tag: 'product_${widget.product.id}',
-                                  child: img,
-                                )
-                              : img;
                         }).toList(),
                       ),
                       const SizedBox(height: 30),
@@ -151,6 +183,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             child: Text(
                               merged.displayName,
                               style: AppTextStyles.productDetailTitle,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           IconButton(
@@ -168,6 +202,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                             .showSnackBar(
                                           SnackBar(
                                             content: Text('$e'),
+                                            backgroundColor:
+                                                Colors.red.shade600,
                                             behavior:
                                                 SnackBarBehavior.floating,
                                           ),
@@ -187,10 +223,45 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 5),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Text(
+                            merged.pricePerUnitLabel,
+                            style: AppTextStyles.productDetailSubtitle,
+                          ),
+                          if (merged.discountLabel.isNotEmpty) ...[
+                            const SizedBox(width: 10),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade600,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                merged.discountLabel,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 6),
                       Text(
-                        merged.description,
-                        style: AppTextStyles.productDetailSubtitle,
+                        merged.stockLabel,
+                        style: AppTextStyles.productDetailDescription.copyWith(
+                          color: merged.isInStock
+                              ? const Color(0xFF7C7C7C)
+                              : Colors.red.shade600,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       if (detailAsync.isLoading)
                         const Padding(
@@ -201,15 +272,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       Row(
                         children: [
                           _buildQuantityButton(Icons.remove, () {
-                            if (quantity > 1) {
-                              setState(() {
-                                quantity--;
-                              });
-                            }
+                            _decrementQuantity(merged);
                           }, color: const Color(0xFF7C7C7C)),
                           const SizedBox(width: 20),
                           Container(
-                            width: 45,
+                            constraints: const BoxConstraints(minWidth: 56),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
                             height: 45,
                             decoration: BoxDecoration(
                               border: Border.all(
@@ -219,9 +287,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             ),
                             child: Center(
                               child: Text(
-                                quantity.toString(),
+                                (merged.isCustomOrder || merged.isGramWise)
+                                    ? CustomOrderQuantity.formatLabel(
+                                        _quantity,
+                                        merged.unit,
+                                        isGramWise: merged.isGramWise,
+                                      )
+                                    : _quantity.toInt().toString(),
                                 style: const TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -229,18 +303,31 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           ),
                           const SizedBox(width: 20),
                           _buildQuantityButton(Icons.add, () {
-                            setState(() {
-                              quantity++;
-                            });
+                            _incrementQuantity(merged);
                           }, color: AppColors.primary),
                           const Spacer(),
-                          Text(
-                            '₹${(merged.price * quantity).toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.darkBackground,
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (merged.showDiscount)
+                                Text(
+                                  '₹${(merged.listPrice * _quantity).toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    color: Color(0xFF7C7C7C),
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
+                                ),
+                              Text(
+                                '₹${(merged.price * _quantity).toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.darkBackground,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -286,7 +373,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                 .read(cartNotifierProvider.notifier)
                                 .addToCart(
                                   merged.id,
-                                  quantity: quantity,
+                                  quantity: _quantity,
                                   preorder: false,
                                 );
                             if (context.mounted) {
@@ -305,6 +392,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('$e'),
+                                  backgroundColor: Colors.red.shade600,
                                   behavior: SnackBarBehavior.floating,
                                 ),
                               );
@@ -337,7 +425,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                 .read(cartNotifierProvider.notifier)
                                 .addToCart(
                                   merged.id,
-                                  quantity: quantity,
+                                  quantity: _quantity,
                                   preorder: true,
                                 );
                             if (context.mounted) {
@@ -356,6 +444,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('$e'),
+                                  backgroundColor: Colors.red.shade600,
                                   behavior: SnackBarBehavior.floating,
                                 ),
                               );

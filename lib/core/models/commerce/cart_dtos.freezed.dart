@@ -41,6 +41,10 @@ mixin _$CartLineDto {
   bool get isPreorder => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_accept', fromJson: boolFromJson)
   bool get isAccept => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_custom_order', fromJson: boolFromJson)
+  bool get isCustomOrder => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_gram_wise', fromJson: boolFromJson)
+  bool get isGramWise => throw _privateConstructorUsedError;
 
   /// Serializes this CartLineDto to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -70,6 +74,9 @@ abstract class $CartLineDtoCopyWith<$Res> {
     @JsonKey(fromJson: doubleFromJson) double subtotal,
     @JsonKey(fromJson: boolFromJson) bool isPreorder,
     @JsonKey(name: 'is_accept', fromJson: boolFromJson) bool isAccept,
+    @JsonKey(name: 'is_custom_order', fromJson: boolFromJson)
+    bool isCustomOrder,
+    @JsonKey(name: 'is_gram_wise', fromJson: boolFromJson) bool isGramWise,
   });
 }
 
@@ -98,6 +105,8 @@ class _$CartLineDtoCopyWithImpl<$Res, $Val extends CartLineDto>
     Object? subtotal = null,
     Object? isPreorder = null,
     Object? isAccept = null,
+    Object? isCustomOrder = null,
+    Object? isGramWise = null,
   }) {
     return _then(
       _value.copyWith(
@@ -141,6 +150,14 @@ class _$CartLineDtoCopyWithImpl<$Res, $Val extends CartLineDto>
                 ? _value.isAccept
                 : isAccept // ignore: cast_nullable_to_non_nullable
                       as bool,
+            isCustomOrder: null == isCustomOrder
+                ? _value.isCustomOrder
+                : isCustomOrder // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            isGramWise: null == isGramWise
+                ? _value.isGramWise
+                : isGramWise // ignore: cast_nullable_to_non_nullable
+                      as bool,
           )
           as $Val,
     );
@@ -167,6 +184,9 @@ abstract class _$$CartLineDtoImplCopyWith<$Res>
     @JsonKey(fromJson: doubleFromJson) double subtotal,
     @JsonKey(fromJson: boolFromJson) bool isPreorder,
     @JsonKey(name: 'is_accept', fromJson: boolFromJson) bool isAccept,
+    @JsonKey(name: 'is_custom_order', fromJson: boolFromJson)
+    bool isCustomOrder,
+    @JsonKey(name: 'is_gram_wise', fromJson: boolFromJson) bool isGramWise,
   });
 }
 
@@ -194,6 +214,8 @@ class __$$CartLineDtoImplCopyWithImpl<$Res>
     Object? subtotal = null,
     Object? isPreorder = null,
     Object? isAccept = null,
+    Object? isCustomOrder = null,
+    Object? isGramWise = null,
   }) {
     return _then(
       _$CartLineDtoImpl(
@@ -237,6 +259,14 @@ class __$$CartLineDtoImplCopyWithImpl<$Res>
             ? _value.isAccept
             : isAccept // ignore: cast_nullable_to_non_nullable
                   as bool,
+        isCustomOrder: null == isCustomOrder
+            ? _value.isCustomOrder
+            : isCustomOrder // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        isGramWise: null == isGramWise
+            ? _value.isGramWise
+            : isGramWise // ignore: cast_nullable_to_non_nullable
+                  as bool,
       ),
     );
   }
@@ -257,6 +287,10 @@ class _$CartLineDtoImpl implements _CartLineDto {
     @JsonKey(fromJson: doubleFromJson) required this.subtotal,
     @JsonKey(fromJson: boolFromJson) this.isPreorder = false,
     @JsonKey(name: 'is_accept', fromJson: boolFromJson) this.isAccept = true,
+    @JsonKey(name: 'is_custom_order', fromJson: boolFromJson)
+    this.isCustomOrder = false,
+    @JsonKey(name: 'is_gram_wise', fromJson: boolFromJson)
+    this.isGramWise = false,
   });
 
   factory _$CartLineDtoImpl.fromJson(Map<String, dynamic> json) =>
@@ -292,10 +326,16 @@ class _$CartLineDtoImpl implements _CartLineDto {
   @override
   @JsonKey(name: 'is_accept', fromJson: boolFromJson)
   final bool isAccept;
+  @override
+  @JsonKey(name: 'is_custom_order', fromJson: boolFromJson)
+  final bool isCustomOrder;
+  @override
+  @JsonKey(name: 'is_gram_wise', fromJson: boolFromJson)
+  final bool isGramWise;
 
   @override
   String toString() {
-    return 'CartLineDto(id: $id, productId: $productId, nameMl: $nameMl, name: $name, price: $price, quantity: $quantity, imageUrl: $imageUrl, subtotal: $subtotal, isPreorder: $isPreorder, isAccept: $isAccept)';
+    return 'CartLineDto(id: $id, productId: $productId, nameMl: $nameMl, name: $name, price: $price, quantity: $quantity, imageUrl: $imageUrl, subtotal: $subtotal, isPreorder: $isPreorder, isAccept: $isAccept, isCustomOrder: $isCustomOrder, isGramWise: $isGramWise)';
   }
 
   @override
@@ -318,7 +358,11 @@ class _$CartLineDtoImpl implements _CartLineDto {
             (identical(other.isPreorder, isPreorder) ||
                 other.isPreorder == isPreorder) &&
             (identical(other.isAccept, isAccept) ||
-                other.isAccept == isAccept));
+                other.isAccept == isAccept) &&
+            (identical(other.isCustomOrder, isCustomOrder) ||
+                other.isCustomOrder == isCustomOrder) &&
+            (identical(other.isGramWise, isGramWise) ||
+                other.isGramWise == isGramWise));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -335,6 +379,8 @@ class _$CartLineDtoImpl implements _CartLineDto {
     subtotal,
     isPreorder,
     isAccept,
+    isCustomOrder,
+    isGramWise,
   );
 
   /// Create a copy of CartLineDto
@@ -363,6 +409,10 @@ abstract class _CartLineDto implements CartLineDto {
     @JsonKey(fromJson: doubleFromJson) required final double subtotal,
     @JsonKey(fromJson: boolFromJson) final bool isPreorder,
     @JsonKey(name: 'is_accept', fromJson: boolFromJson) final bool isAccept,
+    @JsonKey(name: 'is_custom_order', fromJson: boolFromJson)
+    final bool isCustomOrder,
+    @JsonKey(name: 'is_gram_wise', fromJson: boolFromJson)
+    final bool isGramWise,
   }) = _$CartLineDtoImpl;
 
   factory _CartLineDto.fromJson(Map<String, dynamic> json) =
@@ -398,6 +448,12 @@ abstract class _CartLineDto implements CartLineDto {
   @override
   @JsonKey(name: 'is_accept', fromJson: boolFromJson)
   bool get isAccept;
+  @override
+  @JsonKey(name: 'is_custom_order', fromJson: boolFromJson)
+  bool get isCustomOrder;
+  @override
+  @JsonKey(name: 'is_gram_wise', fromJson: boolFromJson)
+  bool get isGramWise;
 
   /// Create a copy of CartLineDto
   /// with the given fields replaced by the non-null parameter values.

@@ -20,6 +20,16 @@ class CatalogProduct with _$CatalogProduct {
     @JsonKey(fromJson: doubleFromJson) required double displayPrice,
     @JsonKey(fromJson: boolFromJson) required bool preorderAvailable,
     @JsonKey(fromJson: boolFromJson) @Default(false) bool instantOrderAvailable,
+    @JsonKey(name: 'is_custom_order', fromJson: boolFromJson)
+    @Default(false)
+    bool isCustomOrder,
+    @JsonKey(name: 'is_gram_wise', fromJson: boolFromJson)
+    @Default(false)
+    bool isGramWise,
+    @JsonKey(name: 'preorder_order_start_time') @Default('') String preorderOrderStartTime,
+    @JsonKey(name: 'preorder_order_end_time') @Default('') String preorderOrderEndTime,
+    @JsonKey(name: 'instant_order_start_time') @Default('') String instantOrderStartTime,
+    @JsonKey(name: 'instant_order_end_time') @Default('') String instantOrderEndTime,
     @JsonKey(fromJson: doubleNullableFromJson) double? preorderPrice,
     @JsonKey(fromJson: boolFromJson) required bool hasDiscount,
     @JsonKey(fromJson: doubleFromJson) required double discountPercentage,
@@ -47,6 +57,20 @@ CatalogProduct catalogProductFromJsonLoose(Map<String, dynamic> json) {
         boolFromJson(json['preorder_available'] ?? json['preorderAvailable']),
     instantOrderAvailable: boolFromJson(
       json['instant_order_available'] ?? json['instantOrderAvailable'],
+    ),
+    isCustomOrder: boolFromJson(json['is_custom_order'] ?? json['isCustomOrder']),
+    isGramWise: boolFromJson(json['is_gram_wise'] ?? json['isGramWise']),
+    preorderOrderStartTime: stringFromJson(
+      json['preorder_order_start_time'] ?? json['preorderOrderStartTime'],
+    ),
+    preorderOrderEndTime: stringFromJson(
+      json['preorder_order_end_time'] ?? json['preorderOrderEndTime'],
+    ),
+    instantOrderStartTime: stringFromJson(
+      json['instant_order_start_time'] ?? json['instantOrderStartTime'],
+    ),
+    instantOrderEndTime: stringFromJson(
+      json['instant_order_end_time'] ?? json['instantOrderEndTime'],
     ),
     preorderPrice:
         doubleNullableFromJson(json['preorder_price'] ?? json['preorderPrice']),

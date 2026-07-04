@@ -19,6 +19,17 @@ _$CatalogProductImpl _$$CatalogProductImplFromJson(Map<String, dynamic> json) =>
       instantOrderAvailable: json['instant_order_available'] == null
           ? false
           : boolFromJson(json['instant_order_available']),
+      isCustomOrder: json['is_custom_order'] == null
+          ? false
+          : boolFromJson(json['is_custom_order']),
+      isGramWise: json['is_gram_wise'] == null
+          ? false
+          : boolFromJson(json['is_gram_wise']),
+      preorderOrderStartTime:
+          json['preorder_order_start_time'] as String? ?? '',
+      preorderOrderEndTime: json['preorder_order_end_time'] as String? ?? '',
+      instantOrderStartTime: json['instant_order_start_time'] as String? ?? '',
+      instantOrderEndTime: json['instant_order_end_time'] as String? ?? '',
       preorderPrice: doubleNullableFromJson(json['preorder_price']),
       hasDiscount: boolFromJson(json['has_discount']),
       discountPercentage: doubleFromJson(json['discount_percentage']),
@@ -41,6 +52,12 @@ Map<String, dynamic> _$$CatalogProductImplToJson(
   'display_price': instance.displayPrice,
   'preorder_available': instance.preorderAvailable,
   'instant_order_available': instance.instantOrderAvailable,
+  'is_custom_order': instance.isCustomOrder,
+  'is_gram_wise': instance.isGramWise,
+  'preorder_order_start_time': instance.preorderOrderStartTime,
+  'preorder_order_end_time': instance.preorderOrderEndTime,
+  'instant_order_start_time': instance.instantOrderStartTime,
+  'instant_order_end_time': instance.instantOrderEndTime,
   'preorder_price': instance.preorderPrice,
   'has_discount': instance.hasDiscount,
   'discount_percentage': instance.discountPercentage,

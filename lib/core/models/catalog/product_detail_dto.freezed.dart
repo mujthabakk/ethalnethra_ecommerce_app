@@ -39,6 +39,18 @@ mixin _$ProductDetailDto {
   bool get preorderAvailable => throw _privateConstructorUsedError;
   @JsonKey(fromJson: boolFromJson)
   bool get instantOrderAvailable => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_custom_order', fromJson: boolFromJson)
+  bool get isCustomOrder => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_gram_wise', fromJson: boolFromJson)
+  bool get isGramWise => throw _privateConstructorUsedError;
+  @JsonKey(name: 'preorder_order_start_time')
+  String get preorderOrderStartTime => throw _privateConstructorUsedError;
+  @JsonKey(name: 'preorder_order_end_time')
+  String get preorderOrderEndTime => throw _privateConstructorUsedError;
+  @JsonKey(name: 'instant_order_start_time')
+  String get instantOrderStartTime => throw _privateConstructorUsedError;
+  @JsonKey(name: 'instant_order_end_time')
+  String get instantOrderEndTime => throw _privateConstructorUsedError;
   @JsonKey(fromJson: doubleNullableFromJson)
   double? get preorderPrice => throw _privateConstructorUsedError;
   @JsonKey(fromJson: boolFromJson)
@@ -51,8 +63,8 @@ mixin _$ProductDetailDto {
   String get weight => throw _privateConstructorUsedError;
   @JsonKey(fromJson: stringFromJson)
   String get category => throw _privateConstructorUsedError;
-  @JsonKey(fromJson: intFromJson)
-  int get stock => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: intNullableFromJson)
+  int? get stock => throw _privateConstructorUsedError;
   @JsonKey(fromJson: stringFromJson)
   String get type => throw _privateConstructorUsedError;
   String? get description => throw _privateConstructorUsedError;
@@ -96,13 +108,20 @@ abstract class $ProductDetailDtoCopyWith<$Res> {
     @JsonKey(fromJson: doubleFromJson) double displayPrice,
     @JsonKey(fromJson: boolFromJson) bool preorderAvailable,
     @JsonKey(fromJson: boolFromJson) bool instantOrderAvailable,
+    @JsonKey(name: 'is_custom_order', fromJson: boolFromJson)
+    bool isCustomOrder,
+    @JsonKey(name: 'is_gram_wise', fromJson: boolFromJson) bool isGramWise,
+    @JsonKey(name: 'preorder_order_start_time') String preorderOrderStartTime,
+    @JsonKey(name: 'preorder_order_end_time') String preorderOrderEndTime,
+    @JsonKey(name: 'instant_order_start_time') String instantOrderStartTime,
+    @JsonKey(name: 'instant_order_end_time') String instantOrderEndTime,
     @JsonKey(fromJson: doubleNullableFromJson) double? preorderPrice,
     @JsonKey(fromJson: boolFromJson) bool hasDiscount,
     @JsonKey(fromJson: doubleFromJson) double discountPercentage,
     @JsonKey(fromJson: stringFromJson) String imageUrl,
     @JsonKey(fromJson: stringFromJson) String weight,
     @JsonKey(fromJson: stringFromJson) String category,
-    @JsonKey(fromJson: intFromJson) int stock,
+    @JsonKey(fromJson: intNullableFromJson) int? stock,
     @JsonKey(fromJson: stringFromJson) String type,
     String? description,
     @JsonKey(name: 'description_ml') String? descriptionMl,
@@ -139,13 +158,19 @@ class _$ProductDetailDtoCopyWithImpl<$Res, $Val extends ProductDetailDto>
     Object? displayPrice = null,
     Object? preorderAvailable = null,
     Object? instantOrderAvailable = null,
+    Object? isCustomOrder = null,
+    Object? isGramWise = null,
+    Object? preorderOrderStartTime = null,
+    Object? preorderOrderEndTime = null,
+    Object? instantOrderStartTime = null,
+    Object? instantOrderEndTime = null,
     Object? preorderPrice = freezed,
     Object? hasDiscount = null,
     Object? discountPercentage = null,
     Object? imageUrl = null,
     Object? weight = null,
     Object? category = null,
-    Object? stock = null,
+    Object? stock = freezed,
     Object? type = null,
     Object? description = freezed,
     Object? descriptionMl = freezed,
@@ -193,6 +218,30 @@ class _$ProductDetailDtoCopyWithImpl<$Res, $Val extends ProductDetailDto>
                 ? _value.instantOrderAvailable
                 : instantOrderAvailable // ignore: cast_nullable_to_non_nullable
                       as bool,
+            isCustomOrder: null == isCustomOrder
+                ? _value.isCustomOrder
+                : isCustomOrder // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            isGramWise: null == isGramWise
+                ? _value.isGramWise
+                : isGramWise // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            preorderOrderStartTime: null == preorderOrderStartTime
+                ? _value.preorderOrderStartTime
+                : preorderOrderStartTime // ignore: cast_nullable_to_non_nullable
+                      as String,
+            preorderOrderEndTime: null == preorderOrderEndTime
+                ? _value.preorderOrderEndTime
+                : preorderOrderEndTime // ignore: cast_nullable_to_non_nullable
+                      as String,
+            instantOrderStartTime: null == instantOrderStartTime
+                ? _value.instantOrderStartTime
+                : instantOrderStartTime // ignore: cast_nullable_to_non_nullable
+                      as String,
+            instantOrderEndTime: null == instantOrderEndTime
+                ? _value.instantOrderEndTime
+                : instantOrderEndTime // ignore: cast_nullable_to_non_nullable
+                      as String,
             preorderPrice: freezed == preorderPrice
                 ? _value.preorderPrice
                 : preorderPrice // ignore: cast_nullable_to_non_nullable
@@ -217,10 +266,10 @@ class _$ProductDetailDtoCopyWithImpl<$Res, $Val extends ProductDetailDto>
                 ? _value.category
                 : category // ignore: cast_nullable_to_non_nullable
                       as String,
-            stock: null == stock
+            stock: freezed == stock
                 ? _value.stock
                 : stock // ignore: cast_nullable_to_non_nullable
-                      as int,
+                      as int?,
             type: null == type
                 ? _value.type
                 : type // ignore: cast_nullable_to_non_nullable
@@ -278,13 +327,20 @@ abstract class _$$ProductDetailDtoImplCopyWith<$Res>
     @JsonKey(fromJson: doubleFromJson) double displayPrice,
     @JsonKey(fromJson: boolFromJson) bool preorderAvailable,
     @JsonKey(fromJson: boolFromJson) bool instantOrderAvailable,
+    @JsonKey(name: 'is_custom_order', fromJson: boolFromJson)
+    bool isCustomOrder,
+    @JsonKey(name: 'is_gram_wise', fromJson: boolFromJson) bool isGramWise,
+    @JsonKey(name: 'preorder_order_start_time') String preorderOrderStartTime,
+    @JsonKey(name: 'preorder_order_end_time') String preorderOrderEndTime,
+    @JsonKey(name: 'instant_order_start_time') String instantOrderStartTime,
+    @JsonKey(name: 'instant_order_end_time') String instantOrderEndTime,
     @JsonKey(fromJson: doubleNullableFromJson) double? preorderPrice,
     @JsonKey(fromJson: boolFromJson) bool hasDiscount,
     @JsonKey(fromJson: doubleFromJson) double discountPercentage,
     @JsonKey(fromJson: stringFromJson) String imageUrl,
     @JsonKey(fromJson: stringFromJson) String weight,
     @JsonKey(fromJson: stringFromJson) String category,
-    @JsonKey(fromJson: intFromJson) int stock,
+    @JsonKey(fromJson: intNullableFromJson) int? stock,
     @JsonKey(fromJson: stringFromJson) String type,
     String? description,
     @JsonKey(name: 'description_ml') String? descriptionMl,
@@ -320,13 +376,19 @@ class __$$ProductDetailDtoImplCopyWithImpl<$Res>
     Object? displayPrice = null,
     Object? preorderAvailable = null,
     Object? instantOrderAvailable = null,
+    Object? isCustomOrder = null,
+    Object? isGramWise = null,
+    Object? preorderOrderStartTime = null,
+    Object? preorderOrderEndTime = null,
+    Object? instantOrderStartTime = null,
+    Object? instantOrderEndTime = null,
     Object? preorderPrice = freezed,
     Object? hasDiscount = null,
     Object? discountPercentage = null,
     Object? imageUrl = null,
     Object? weight = null,
     Object? category = null,
-    Object? stock = null,
+    Object? stock = freezed,
     Object? type = null,
     Object? description = freezed,
     Object? descriptionMl = freezed,
@@ -374,6 +436,30 @@ class __$$ProductDetailDtoImplCopyWithImpl<$Res>
             ? _value.instantOrderAvailable
             : instantOrderAvailable // ignore: cast_nullable_to_non_nullable
                   as bool,
+        isCustomOrder: null == isCustomOrder
+            ? _value.isCustomOrder
+            : isCustomOrder // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        isGramWise: null == isGramWise
+            ? _value.isGramWise
+            : isGramWise // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        preorderOrderStartTime: null == preorderOrderStartTime
+            ? _value.preorderOrderStartTime
+            : preorderOrderStartTime // ignore: cast_nullable_to_non_nullable
+                  as String,
+        preorderOrderEndTime: null == preorderOrderEndTime
+            ? _value.preorderOrderEndTime
+            : preorderOrderEndTime // ignore: cast_nullable_to_non_nullable
+                  as String,
+        instantOrderStartTime: null == instantOrderStartTime
+            ? _value.instantOrderStartTime
+            : instantOrderStartTime // ignore: cast_nullable_to_non_nullable
+                  as String,
+        instantOrderEndTime: null == instantOrderEndTime
+            ? _value.instantOrderEndTime
+            : instantOrderEndTime // ignore: cast_nullable_to_non_nullable
+                  as String,
         preorderPrice: freezed == preorderPrice
             ? _value.preorderPrice
             : preorderPrice // ignore: cast_nullable_to_non_nullable
@@ -398,10 +484,10 @@ class __$$ProductDetailDtoImplCopyWithImpl<$Res>
             ? _value.category
             : category // ignore: cast_nullable_to_non_nullable
                   as String,
-        stock: null == stock
+        stock: freezed == stock
             ? _value.stock
             : stock // ignore: cast_nullable_to_non_nullable
-                  as int,
+                  as int?,
         type: null == type
             ? _value.type
             : type // ignore: cast_nullable_to_non_nullable
@@ -453,13 +539,22 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
     @JsonKey(fromJson: doubleFromJson) required this.displayPrice,
     @JsonKey(fromJson: boolFromJson) required this.preorderAvailable,
     @JsonKey(fromJson: boolFromJson) this.instantOrderAvailable = false,
+    @JsonKey(name: 'is_custom_order', fromJson: boolFromJson)
+    this.isCustomOrder = false,
+    @JsonKey(name: 'is_gram_wise', fromJson: boolFromJson)
+    this.isGramWise = false,
+    @JsonKey(name: 'preorder_order_start_time')
+    this.preorderOrderStartTime = '',
+    @JsonKey(name: 'preorder_order_end_time') this.preorderOrderEndTime = '',
+    @JsonKey(name: 'instant_order_start_time') this.instantOrderStartTime = '',
+    @JsonKey(name: 'instant_order_end_time') this.instantOrderEndTime = '',
     @JsonKey(fromJson: doubleNullableFromJson) this.preorderPrice,
     @JsonKey(fromJson: boolFromJson) required this.hasDiscount,
     @JsonKey(fromJson: doubleFromJson) required this.discountPercentage,
     @JsonKey(fromJson: stringFromJson) this.imageUrl = '',
     @JsonKey(fromJson: stringFromJson) this.weight = '',
     @JsonKey(fromJson: stringFromJson) this.category = '',
-    @JsonKey(fromJson: intFromJson) this.stock = 0,
+    @JsonKey(fromJson: intNullableFromJson) this.stock,
     @JsonKey(fromJson: stringFromJson) this.type = '',
     this.description,
     @JsonKey(name: 'description_ml') this.descriptionMl,
@@ -505,6 +600,24 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
   @JsonKey(fromJson: boolFromJson)
   final bool instantOrderAvailable;
   @override
+  @JsonKey(name: 'is_custom_order', fromJson: boolFromJson)
+  final bool isCustomOrder;
+  @override
+  @JsonKey(name: 'is_gram_wise', fromJson: boolFromJson)
+  final bool isGramWise;
+  @override
+  @JsonKey(name: 'preorder_order_start_time')
+  final String preorderOrderStartTime;
+  @override
+  @JsonKey(name: 'preorder_order_end_time')
+  final String preorderOrderEndTime;
+  @override
+  @JsonKey(name: 'instant_order_start_time')
+  final String instantOrderStartTime;
+  @override
+  @JsonKey(name: 'instant_order_end_time')
+  final String instantOrderEndTime;
+  @override
   @JsonKey(fromJson: doubleNullableFromJson)
   final double? preorderPrice;
   @override
@@ -523,8 +636,8 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
   @JsonKey(fromJson: stringFromJson)
   final String category;
   @override
-  @JsonKey(fromJson: intFromJson)
-  final int stock;
+  @JsonKey(fromJson: intNullableFromJson)
+  final int? stock;
   @override
   @JsonKey(fromJson: stringFromJson)
   final String type;
@@ -568,7 +681,7 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
 
   @override
   String toString() {
-    return 'ProductDetailDto(id: $id, nameMl: $nameMl, name: $name, price: $price, ourPrice: $ourPrice, finalPrice: $finalPrice, displayPrice: $displayPrice, preorderAvailable: $preorderAvailable, instantOrderAvailable: $instantOrderAvailable, preorderPrice: $preorderPrice, hasDiscount: $hasDiscount, discountPercentage: $discountPercentage, imageUrl: $imageUrl, weight: $weight, category: $category, stock: $stock, type: $type, description: $description, descriptionMl: $descriptionMl, images: $images, nutritions: $nutritions, rating: $rating, reviewCount: $reviewCount, reviews: $reviews)';
+    return 'ProductDetailDto(id: $id, nameMl: $nameMl, name: $name, price: $price, ourPrice: $ourPrice, finalPrice: $finalPrice, displayPrice: $displayPrice, preorderAvailable: $preorderAvailable, instantOrderAvailable: $instantOrderAvailable, isCustomOrder: $isCustomOrder, isGramWise: $isGramWise, preorderOrderStartTime: $preorderOrderStartTime, preorderOrderEndTime: $preorderOrderEndTime, instantOrderStartTime: $instantOrderStartTime, instantOrderEndTime: $instantOrderEndTime, preorderPrice: $preorderPrice, hasDiscount: $hasDiscount, discountPercentage: $discountPercentage, imageUrl: $imageUrl, weight: $weight, category: $category, stock: $stock, type: $type, description: $description, descriptionMl: $descriptionMl, images: $images, nutritions: $nutritions, rating: $rating, reviewCount: $reviewCount, reviews: $reviews)';
   }
 
   @override
@@ -590,6 +703,18 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
                 other.preorderAvailable == preorderAvailable) &&
             (identical(other.instantOrderAvailable, instantOrderAvailable) ||
                 other.instantOrderAvailable == instantOrderAvailable) &&
+            (identical(other.isCustomOrder, isCustomOrder) ||
+                other.isCustomOrder == isCustomOrder) &&
+            (identical(other.isGramWise, isGramWise) ||
+                other.isGramWise == isGramWise) &&
+            (identical(other.preorderOrderStartTime, preorderOrderStartTime) ||
+                other.preorderOrderStartTime == preorderOrderStartTime) &&
+            (identical(other.preorderOrderEndTime, preorderOrderEndTime) ||
+                other.preorderOrderEndTime == preorderOrderEndTime) &&
+            (identical(other.instantOrderStartTime, instantOrderStartTime) ||
+                other.instantOrderStartTime == instantOrderStartTime) &&
+            (identical(other.instantOrderEndTime, instantOrderEndTime) ||
+                other.instantOrderEndTime == instantOrderEndTime) &&
             (identical(other.preorderPrice, preorderPrice) ||
                 other.preorderPrice == preorderPrice) &&
             (identical(other.hasDiscount, hasDiscount) ||
@@ -631,6 +756,12 @@ class _$ProductDetailDtoImpl implements _ProductDetailDto {
     displayPrice,
     preorderAvailable,
     instantOrderAvailable,
+    isCustomOrder,
+    isGramWise,
+    preorderOrderStartTime,
+    preorderOrderEndTime,
+    instantOrderStartTime,
+    instantOrderEndTime,
     preorderPrice,
     hasDiscount,
     discountPercentage,
@@ -676,13 +807,23 @@ abstract class _ProductDetailDto implements ProductDetailDto {
     @JsonKey(fromJson: doubleFromJson) required final double displayPrice,
     @JsonKey(fromJson: boolFromJson) required final bool preorderAvailable,
     @JsonKey(fromJson: boolFromJson) final bool instantOrderAvailable,
+    @JsonKey(name: 'is_custom_order', fromJson: boolFromJson)
+    final bool isCustomOrder,
+    @JsonKey(name: 'is_gram_wise', fromJson: boolFromJson)
+    final bool isGramWise,
+    @JsonKey(name: 'preorder_order_start_time')
+    final String preorderOrderStartTime,
+    @JsonKey(name: 'preorder_order_end_time') final String preorderOrderEndTime,
+    @JsonKey(name: 'instant_order_start_time')
+    final String instantOrderStartTime,
+    @JsonKey(name: 'instant_order_end_time') final String instantOrderEndTime,
     @JsonKey(fromJson: doubleNullableFromJson) final double? preorderPrice,
     @JsonKey(fromJson: boolFromJson) required final bool hasDiscount,
     @JsonKey(fromJson: doubleFromJson) required final double discountPercentage,
     @JsonKey(fromJson: stringFromJson) final String imageUrl,
     @JsonKey(fromJson: stringFromJson) final String weight,
     @JsonKey(fromJson: stringFromJson) final String category,
-    @JsonKey(fromJson: intFromJson) final int stock,
+    @JsonKey(fromJson: intNullableFromJson) final int? stock,
     @JsonKey(fromJson: stringFromJson) final String type,
     final String? description,
     @JsonKey(name: 'description_ml') final String? descriptionMl,
@@ -725,6 +866,24 @@ abstract class _ProductDetailDto implements ProductDetailDto {
   @JsonKey(fromJson: boolFromJson)
   bool get instantOrderAvailable;
   @override
+  @JsonKey(name: 'is_custom_order', fromJson: boolFromJson)
+  bool get isCustomOrder;
+  @override
+  @JsonKey(name: 'is_gram_wise', fromJson: boolFromJson)
+  bool get isGramWise;
+  @override
+  @JsonKey(name: 'preorder_order_start_time')
+  String get preorderOrderStartTime;
+  @override
+  @JsonKey(name: 'preorder_order_end_time')
+  String get preorderOrderEndTime;
+  @override
+  @JsonKey(name: 'instant_order_start_time')
+  String get instantOrderStartTime;
+  @override
+  @JsonKey(name: 'instant_order_end_time')
+  String get instantOrderEndTime;
+  @override
   @JsonKey(fromJson: doubleNullableFromJson)
   double? get preorderPrice;
   @override
@@ -743,8 +902,8 @@ abstract class _ProductDetailDto implements ProductDetailDto {
   @JsonKey(fromJson: stringFromJson)
   String get category;
   @override
-  @JsonKey(fromJson: intFromJson)
-  int get stock;
+  @JsonKey(fromJson: intNullableFromJson)
+  int? get stock;
   @override
   @JsonKey(fromJson: stringFromJson)
   String get type;

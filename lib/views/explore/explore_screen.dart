@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/app_shimmer.dart';
 import '../../core/mappers/category_image_path.dart';
-import '../../core/models/catalog/category_item.dart';
+import '../../core/models/catalog/category_item_extensions.dart';
 import '../../core/providers/catalog_providers.dart';
 import '../../core/routes/app_router.dart';
 import '../../models/category_model.dart';
@@ -26,26 +26,7 @@ class ExploreScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final filtersAsync = ref.watch(filtersProvider);
     final categoriesAsync = ref.watch(homeCategoriesProvider);
-
-    final categoryItems = categoriesAsync.maybeWhen(
-      data: (list) => list,
-      orElse: () => <CategoryItem>[],
-    );
-
-    final fromCategoryNames =
-        categoryItems.map((c) => c.name).toList();
-
-    final names = filtersAsync.maybeWhen(
-      data: (f) =>
-          f.categories.isNotEmpty ? f.categories : fromCategoryNames,
-      orElse: () => fromCategoryNames,
-    );
-
-    final byName = {
-      for (final c in categoryItems) c.name.toLowerCase(): c,
-    };
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -80,58 +61,61 @@ class ExploreScreen extends ConsumerWidget {
             const HomeStoreSearchBar(),
             const SizedBox(height: 20),
             Expanded(
-              child: filtersAsync.isLoading &&
-                      categoriesAsync.isLoading &&
-                      names.isEmpty
-                  ? const ExploreGridShimmer()
-                  : names.isEmpty
-                      ? Center(
-                          child: Text(
-                            filtersAsync.hasError
-                                ? 'Could not load filters'
-                                : 'No categories',
-                            style: TextStyle(color: Colors.grey.shade700),
-                          ),
-                        )
-                      : GridView.builder(
-                          itemCount: names.length,
-                          padding: const EdgeInsets.only(bottom: 20),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 15,
-                            mainAxisSpacing: 15,
-                            childAspectRatio: 0.85,
-                          ),
-                          itemBuilder: (context, index) {
-                            final title = names[index];
-                            final match = byName[title.toLowerCase()];
-                            final imagePath = match != null
-                                ? categoryDisplayImagePath(match)
-                                : categoryFallbackAssetForName(title);
-                            final model = CategoryModel(
-                              id: match?.id ?? title,
-                              name: title,
-                              nameMl: match?.nameMl ?? '',
-                              imagePath: imagePath,
-                              backgroundColor: _exploreCategoryColors[
-                                  index % _exploreCategoryColors.length],
-                            );
-                            return ExploreCategoryCard(
-                              category: model,
-                              onTap: () {
-                                context.push(
-                                  AppRouter.categoryProducts,
-                                  extra: {
-                                    'title': title,
-                                    'products': const <ProductModel>[],
-                                    'apiCategory': title,
-                                  },
-                                );
-                              },
-                            );
-                          },
-                        ),
+              child: categoriesAsync.when(
+                loading: () => const ExploreGridShimmer(),
+                error: (_, __) => Center(
+                  child: Text(
+                    'Could not load categories',
+                    style: TextStyle(color: Colors.grey.shade700),
+                  ),
+                ),
+                data: (categoryItems) {
+                  if (categoryItems.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No categories',
+                        style: TextStyle(color: Colors.grey.shade700),
+                      ),
+                    );
+                  }
+
+                  return GridView.builder(
+                    itemCount: categoryItems.length,
+                    padding: const EdgeInsets.only(bottom: 20),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 15,
+                      mainAxisSpacing: 15,
+                      childAspectRatio: 0.85,
+                    ),
+                    itemBuilder: (context, index) {
+                      final category = categoryItems[index];
+                      final model = CategoryModel(
+                        id: category.id,
+                        name: category.name,
+                        nameMl: category.nameMl,
+                        imagePath: categoryDisplayImagePath(category),
+                        backgroundColor: _exploreCategoryColors[
+                            index % _exploreCategoryColors.length],
+                      );
+                      return ExploreCategoryCard(
+                        category: model,
+                        onTap: () {
+                          context.push(
+                            AppRouter.categoryProducts,
+                            extra: {
+                              'title': category.displayName,
+                              'products': const <ProductModel>[],
+                              'apiCategory': category.name,
+                            },
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),

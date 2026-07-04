@@ -1,0 +1,160 @@
+[{
+  "version": "1.0",
+  "image": {
+    "name": "upload/f7e176e952a68d2e27b5eac3a5141834163ea38c-p.png[0]",
+    "baseName": "f7e176e952a68d2e27b5eac3a5141834163ea38c-p.png",
+    "format": "PNG",
+    "formatDescription": "PNG",
+    "mimeType": "image/png",
+    "class": "DirectClass",
+    "geometry": {
+      "width": 20,
+      "height": 20,
+      "x": 0,
+      "y": 0
+    },
+    "resolution": {
+      "x": 28.35,
+      "y": 28.35
+    },
+    "printSize": {
+      "x": 0.70547,
+      "y": 0.70547
+    },
+    "units": "PixelsPerCentimeter",
+    "type": "PaletteAlpha",
+    "baseType": "Undefined",
+    "endianness": "Undefined",
+    "colorspace": "sRGB",
+    "depth": 8,
+    "baseDepth": 8,
+    "channelDepth": {
+      "alpha": 8,
+      "red": 8,
+      "green": 8,
+      "blue": 8
+    },
+    "pixels": 1600,
+    "imageStatistics": {
+      "Overall": {
+        "min": 0,
+        "max": 255,
+        "mean": 59.029,
+        "median": 81.75,
+        "standardDeviation": 52.201,
+        "kurtosis": 1.4157,
+        "skewness": 1.6623,
+        "entropy": 0.54571
+      }
+    },
+    "channelStatistics": {
+      "alpha": {
+        "min": 0,
+        "max": 255,
+        "mean": 142.05,
+        "median": 239,
+        "standardDeviation": 122.94,
+        "kurtosis": -1.9047,
+        "skewness": -0.23513,
+        "entropy": 0.48691
+      },
+      "red": {
+        "min": 0,
+        "max": 140,
+        "mean": 29.143,
+        "median": 24,
+        "standardDeviation": 27.033,
+        "kurtosis": 0.027074,
+        "skewness": 0.4208,
+        "entropy": 0.59457
+      },
+      "green": {
+        "min": 0,
+        "max": 140,
+        "mean": 28.755,
+        "median": 24,
+        "standardDeviation": 26.791,
+        "kurtosis": 0.12236,
+        "skewness": 0.44785,
+        "entropy": 0.51945
+      },
+      "blue": {
+        "min": 0,
+        "max": 148,
+        "mean": 36.172,
+        "median": 40,
+        "standardDeviation": 32.042,
+        "kurtosis": -0.90384,
+        "skewness": 0.11667,
+        "entropy": 0.58191
+      }
+    },
+    "alpha": "#00000000",
+    "renderingIntent": "Perceptual",
+    "gamma": 0.45455,
+    "chromaticity": {
+      "redPrimary": {
+        "x": 0.64,
+        "y": 0.33
+      },
+      "greenPrimary": {
+        "x": 0.3,
+        "y": 0.6
+      },
+      "bluePrimary": {
+        "x": 0.15,
+        "y": 0.06
+      },
+      "whitePrimary": {
+        "x": 0.3127,
+        "y": 0.329
+      }
+    },
+    "matteColor": "#BDBDBD",
+    "backgroundColor": "#FFFFFF",
+    "borderColor": "#DFDFDF",
+    "transparentColor": "#00000000",
+    "interlace": "None",
+    "intensity": "Undefined",
+    "compose": "Over",
+    "pageGeometry": {
+      "width": 20,
+      "height": 20,
+      "x": 0,
+      "y": 0
+    },
+    "dispose": "Undefined",
+    "iterations": 0,
+    "compression": "Zip",
+    "orientation": "Undefined",
+    "properties": {
+      "date:create": "2026-06-18T07:46:58+00:00",
+      "date:modify": "2026-06-18T07:46:58+00:00",
+      "date:timestamp": "2026-06-18T07:46:59+00:00",
+      "png:bKGD": "chunk was found (see Background color, above)",
+      "png:cHRM": "chunk was found (see Chromaticity, above)",
+      "png:gAMA": "gamma=0.45455 (See Gamma, above)",
+      "png:IHDR.bit-depth-orig": "8",
+      "png:IHDR.bit_depth": "8",
+      "png:IHDR.color-type-orig": "3",
+      "png:IHDR.color_type": "3 (Indexed)",
+      "png:IHDR.interlace_method": "0 (Not interlaced)",
+      "png:IHDR.width,height": "20, 20",
+      "png:pHYs": "x_res=2835, y_res=2835, units=1",
+      "png:PLTE.number_colors": "29",
+      "png:sRGB": "intent=0 (Perceptual Intent)",
+      "png:text": "3 tEXt/zTXt/iTXt chunks were found",
+      "png:tIME": "2026-06-18T09:46:56Z",
+      "png:tRNS": "chunk was found",
+      "signature": "ea977885f5d6de664f782dedbdf9deacdedce85313183da0019c73b6a186c147",
+      "Software": "Figma"
+    },
+    "tainted": false,
+    "filesize": "574B",
+    "numberPixels": "400",
+    "pixelsPerSecond": "6205B",
+    "userTime": "0.060u",
+    "elapsedTime": "0:01.064",
+    "version": "ImageMagick 7.1.0-52 Q8 x86 04ee6ce:20221106 https://imagemagick.org"
+  }
+}]

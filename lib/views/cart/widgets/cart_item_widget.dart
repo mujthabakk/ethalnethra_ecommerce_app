@@ -22,7 +22,6 @@ class CartItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final qty = line.quantity.round();
     final accepted = line.isAccept;
     final content = Container(
       padding: const EdgeInsets.symmetric(vertical: 25.0),
@@ -68,7 +67,7 @@ class CartItemWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  '₹${line.price.toStringAsFixed(2)} each',
+                  line.unitPriceLabel,
                   style: AppTextStyles.cartItemSubtitle,
                 ),
                 const SizedBox(height: 20),
@@ -78,12 +77,13 @@ class CartItemWidget extends StatelessWidget {
                       Icons.remove,
                       accepted ? onDecrement : () {},
                     ),
-                    const SizedBox(width: 15),
+                    const SizedBox(width: 12),
                     SizedBox(
-                      width: 30,
+                      width: 56,
                       child: Center(
                         child: Text(
-                          qty.toString(),
+                          line.quantityLabel,
+                          textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -92,7 +92,7 @@ class CartItemWidget extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 15),
+                    const SizedBox(width: 12),
                     _buildQuantityButton(
                       Icons.add,
                       accepted ? onIncrement : () {},

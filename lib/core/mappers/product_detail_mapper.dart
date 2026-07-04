@@ -29,6 +29,8 @@ extension ProductDetailDtoMapper on ProductDetailDto {
       preorderAvailable: preorderAvailable || listing.preorderAvailable,
       instantOrderAvailable:
           instantOrderAvailable || listing.instantOrderAvailable,
+      isCustomOrder: isCustomOrder || listing.isCustomOrder,
+      isGramWise: isGramWise || listing.isGramWise,
       listPrice: price,
       ourPrice: ourPrice,
       finalPrice: finalPrice,
@@ -36,7 +38,7 @@ extension ProductDetailDtoMapper on ProductDetailDto {
       preorderPrice: preorderPrice,
       hasDiscount: hasDiscount,
       discountPercentage: discountPercentage,
-      stock: stock,
+      stock: stock ?? listing.stock,
       category: category.isNotEmpty ? category : listing.category,
       type: type.isNotEmpty ? type : listing.type,
     );

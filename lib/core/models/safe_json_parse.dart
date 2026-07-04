@@ -117,6 +117,7 @@ UserDetails userDetailsFromJsonLoose(Map<String, dynamic> json) => UserDetails(
       email: json['email']?.toString(),
       phone: json['phone']?.toString(),
       gender: json['gender']?.toString(),
+      rewardCoins: intFromJson(json['reward_coins'] ?? json['rewardCoins']),
     );
 
 /// GET `/api/user/details` may return a flat user or `{ user: {...} }`.
@@ -242,21 +243,214 @@ OrdersListResponse ordersListResponseFromJsonLoose(Map<String, dynamic> json) {
   );
 }
 
-PlaceOrderResponse placeOrderResponseFromJsonLoose(Map<String, dynamic> json) =>
-    PlaceOrderResponse(
-      orderId: stringFromJson(json['order_id'] ?? json['orderId']),
-      orderNumber: stringFromJson(json['order_number'] ?? json['orderNumber']),
-      status: stringFromJson(json['status']),
-      trackingUrl: stringFromJson(json['tracking_url'] ?? json['trackingUrl']),
-      total: doubleFromJson(json['total']),
-      discount: doubleFromJson(json['discount'] ?? 0),
-      discounts: dynamicListFromJson(json['discounts']),
-      loyaltyApplied: boolFromJson(json['loyalty_applied'] ?? json['loyaltyApplied']),
-      eta: stringFromJson(json['eta']),
-      dispatchDate: stringFromJson(json['dispatch_date'] ?? json['dispatchDate']),
-      notes: stringFromJson(json['notes']),
-      deliveryCharge: doubleFromJson(json['delivery_charge'] ?? json['deliveryCharge'] ?? 0),
+RewardWallet rewardWalletFromJsonLoose(Map<String, dynamic> json) =>
+    RewardWallet(
+      availableCoins:
+          intFromJson(json['available_coins'] ?? json['availableCoins']),
+      minimumRequired:
+          intFromJson(json['minimum_required'] ?? json['minimumRequired']),
+      canRedeem: boolFromJson(json['can_redeem'] ?? json['canRedeem']),
+      maximumDiscount:
+          doubleFromJson(json['maximum_discount'] ?? json['maximumDiscount']),
+      coinValue: doubleFromJson(json['coin_value'] ?? json['coinValue'] ?? 1),
+      coinsToBeEarned:
+          intFromJson(json['coins_to_be_earned'] ?? json['coinsToBeEarned']),
+      payableAfterRedeeming: doubleFromJson(
+        json['payable_after_redeeming'] ?? json['payableAfterRedeeming'],
+      ),
     );
+
+CheckoutAddress checkoutAddressFromJsonLoose(Map<String, dynamic> json) =>
+    CheckoutAddress(
+      id: intFromJson(json['id']),
+      addressLine: stringFromJson(json['address_line'] ?? json['addressLine']),
+      pincode: stringFromJson(json['pincode']),
+    );
+
+CheckoutItem checkoutItemFromJsonLoose(Map<String, dynamic> json) =>
+    CheckoutItem(
+      productId: intFromJson(json['product_id'] ?? json['productId']),
+      name: stringFromJson(json['name']),
+      price: doubleFromJson(json['price']),
+      quantity: doubleFromJson(json['quantity']),
+      subtotal: doubleFromJson(json['subtotal']),
+    );
+
+CheckoutResponse checkoutResponseFromJsonLoose(Map<String, dynamic> json) {
+  final walletRaw = json['reward_wallet'] ?? json['rewardWallet'];
+  RewardWallet? wallet;
+  if (walletRaw is Map<String, dynamic>) {
+    wallet = rewardWalletFromJsonLoose(walletRaw);
+  } else if (walletRaw is Map) {
+    wallet = rewardWalletFromJsonLoose(Map<String, dynamic>.from(walletRaw));
+  }
+
+  final addressRaw = json['address'];
+  CheckoutAddress? address;
+  if (addressRaw is Map<String, dynamic>) {
+    address = checkoutAddressFromJsonLoose(addressRaw);
+  } else if (addressRaw is Map) {
+    address = checkoutAddressFromJsonLoose(Map<String, dynamic>.from(addressRaw));
+  }
+
+  return CheckoutResponse(
+    items: parseListLoose(
+      json,
+      listKey: 'items',
+      parse: checkoutItemFromJsonLoose,
+      keep: (i) => i.productId > 0 || i.name.isNotEmpty,
+    ),
+    subtotal: doubleFromJson(json['subtotal']),
+    deliveryCharge:
+        doubleFromJson(json['delivery_charge'] ?? json['deliveryCharge']),
+    discount: doubleFromJson(json['discount']),
+    total: doubleFromJson(json['total']),
+    rewardWallet: wallet,
+    address: address,
+    type: stringFromJson(json['type']),
+    eta: stringFromJson(json['eta']),
+  );
+}
+
+PaymentRewardInfo paymentRewardInfoFromJsonLoose(Map<String, dynamic> json) =>
+    PaymentRewardInfo(
+      used: boolFromJson(json['used']),
+      availableCoins:
+          intFromJson(json['available_coins'] ?? json['availableCoins']),
+      canRedeem: boolFromJson(json['can_redeem'] ?? json['canRedeem']),
+      rewardDiscount:
+          doubleFromJson(json['reward_discount'] ?? json['rewardDiscount']),
+      rewardCoinsRedeemed: intFromJson(
+        json['reward_coins_redeemed'] ?? json['rewardCoinsRedeemed'],
+      ),
+      rewardCoinsEarned: intFromJson(
+        json['reward_coins_earned'] ?? json['rewardCoinsEarned'],
+      ),
+      payableAmount:
+          doubleFromJson(json['payable_amount'] ?? json['payableAmount']),
+    );
+
+PaymentCustomer paymentCustomerFromJsonLoose(Map<String, dynamic> json) =>
+    PaymentCustomer(
+      name: stringFromJson(json['name']),
+      email: stringFromJson(json['email']),
+      contact: stringFromJson(json['contact']),
+    );
+
+PaymentSummary paymentSummaryFromJsonLoose(Map<String, dynamic> json) =>
+    PaymentSummary(
+      subtotal: doubleFromJson(json['subtotal']),
+      deliveryCharge:
+          doubleFromJson(json['delivery_charge'] ?? json['deliveryCharge']),
+      rewardDiscount:
+          doubleFromJson(json['reward_discount'] ?? json['rewardDiscount']),
+      total: doubleFromJson(json['total']),
+    );
+
+CreatePaymentResponse createPaymentResponseFromJsonLoose(
+  Map<String, dynamic> json,
+) {
+  final rewardRaw = json['reward'];
+  PaymentRewardInfo? reward;
+  if (rewardRaw is Map<String, dynamic>) {
+    reward = paymentRewardInfoFromJsonLoose(rewardRaw);
+  } else if (rewardRaw is Map) {
+    reward = paymentRewardInfoFromJsonLoose(Map<String, dynamic>.from(rewardRaw));
+  }
+
+  final customerRaw = json['customer'];
+  PaymentCustomer? customer;
+  if (customerRaw is Map<String, dynamic>) {
+    customer = paymentCustomerFromJsonLoose(customerRaw);
+  } else if (customerRaw is Map) {
+    customer =
+        paymentCustomerFromJsonLoose(Map<String, dynamic>.from(customerRaw));
+  }
+
+  final summaryRaw = json['summary'];
+  PaymentSummary? summary;
+  if (summaryRaw is Map<String, dynamic>) {
+    summary = paymentSummaryFromJsonLoose(summaryRaw);
+  } else if (summaryRaw is Map) {
+    summary = paymentSummaryFromJsonLoose(Map<String, dynamic>.from(summaryRaw));
+  }
+
+  return CreatePaymentResponse(
+    success: boolFromJson(json['success'] ?? true),
+    key: stringFromJson(json['key']),
+    razorpayOrderId:
+        stringFromJson(json['razorpay_order_id'] ?? json['razorpayOrderId']),
+    paymentLink: stringFromJson(json['payment_link'] ?? json['paymentLink']),
+    paymentLinkId:
+        stringFromJson(json['payment_link_id'] ?? json['paymentLinkId']),
+    amount: intFromJson(json['amount']),
+    currency: stringFromJson(json['currency']).isEmpty
+        ? 'INR'
+        : stringFromJson(json['currency']),
+    type: stringFromJson(json['type']),
+    reward: reward,
+    customer: customer,
+    summary: summary,
+  );
+}
+
+PlaceOrderResponse placeOrderResponseFromJsonLoose(Map<String, dynamic> json) {
+  final summary = json['summary'];
+  final summaryMap = summary is Map<String, dynamic>
+      ? summary
+      : summary is Map
+          ? Map<String, dynamic>.from(summary)
+          : null;
+  final reward = json['reward'];
+  final rewardMap = reward is Map<String, dynamic>
+      ? reward
+      : reward is Map
+          ? Map<String, dynamic>.from(reward)
+          : null;
+
+  return PlaceOrderResponse(
+    orderId: stringFromJson(
+      json['order_id'] ??
+          json['orderId'] ??
+          json['id'] ??
+          json['razorpay_order_id'],
+    ),
+    orderNumber: stringFromJson(
+      json['order_number'] ?? json['orderNumber'] ?? json['razorpay_order_id'],
+    ),
+    status: stringFromJson(json['status'] ?? (json['success'] == true ? 'success' : '')),
+    trackingUrl: stringFromJson(json['tracking_url'] ?? json['trackingUrl']),
+    total: doubleFromJson(
+      json['total'] ??
+          summaryMap?['total'] ??
+          rewardMap?['payable_amount'] ??
+          ((json['amount'] is num) ? (json['amount'] as num) / 100 : null),
+    ),
+    discount: doubleFromJson(
+      json['discount'] ??
+          summaryMap?['reward_discount'] ??
+          rewardMap?['reward_discount'] ??
+          0,
+    ),
+    discounts: dynamicListFromJson(json['discounts']),
+    loyaltyApplied: boolFromJson(
+      json['loyalty_applied'] ??
+          json['loyaltyApplied'] ??
+          rewardMap?['used'],
+    ),
+    eta: stringFromJson(json['eta']),
+    dispatchDate: stringFromJson(json['dispatch_date'] ?? json['dispatchDate']),
+    notes: stringFromJson(json['notes']),
+    deliveryCharge: doubleFromJson(
+      json['delivery_charge'] ??
+          json['deliveryCharge'] ??
+          summaryMap?['delivery_charge'] ??
+          0,
+    ),
+    paymentMethod: stringFromJson(json['payment_method'] ?? json['paymentMethod']),
+    message: stringFromJson(json['message']),
+  );
+}
 
 OrderTrackResponse orderTrackResponseFromJsonLoose(Map<String, dynamic> json) =>
     OrderTrackResponse(

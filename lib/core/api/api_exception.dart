@@ -18,6 +18,10 @@ class ApiException implements Exception {
       if (msg is String && msg.isNotEmpty) {
         return ApiException(msg, statusCode: status);
       }
+      final err = data['error'];
+      if (err is String && err.isNotEmpty) {
+        return ApiException(err, statusCode: status);
+      }
       final fieldMsg = _firstFieldError(data);
       if (fieldMsg != null) {
         return ApiException(fieldMsg, statusCode: status);

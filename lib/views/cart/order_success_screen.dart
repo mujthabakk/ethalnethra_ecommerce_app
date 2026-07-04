@@ -52,16 +52,31 @@ class _OrderSuccessScreenState extends ConsumerState<OrderSuccessScreen> {
               style: AppTextStyles.orderSuccessTitle,
             ),
             if (result != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                result.orderNumber,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade800,
+              if (result.orderNumber.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text(
+                  result.orderNumber,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade800,
+                  ),
                 ),
-              ),
+              ],
+              if (result.total > 0)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    '₹${result.total.toStringAsFixed(2)}',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                ),
               if (result.eta.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 6),

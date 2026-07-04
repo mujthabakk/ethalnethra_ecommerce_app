@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/models/user/user_details_models.dart';
 import '../../core/providers/location_user_providers.dart';
@@ -124,6 +125,53 @@ class AccountScreen extends ConsumerWidget {
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                    detailsAsync.when(
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
+                      data: (d) => Padding(
+                        padding: const EdgeInsets.fromLTRB(25, 20, 25, 0),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF2F3F2),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.monetization_on_outlined,
+                                color: AppColors.primary,
+                                size: 28,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Reward coins',
+                                      style: AppTextStyles.accountMenuLabel,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${d.rewardCoins} coins',
+                                      style: AppTextStyles.accountName.copyWith(
+                                        fontSize: 16,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 30),

@@ -301,6 +301,8 @@ class _AddressCard extends StatelessWidget {
                     const SizedBox(height: 5),
                     Text(
                       address.displayLines,
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 16,
                         color: Color(0xFF181725),
@@ -383,8 +385,9 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
     _line = TextEditingController(text: a?.addressLine ?? '');
     _zoneId = a?.zoneId;
     _areaId = a?.areaId;
-    _pincodeId = a?.pincodeId?.toString() ??
-        (int.tryParse(a?.pincode ?? '') != null ? a!.pincode : null);
+    _pincodeId = a?.pincodeSelectionId.isNotEmpty == true
+        ? a!.pincodeSelectionId
+        : null;
     _isDefault = a?.isDefault ?? false;
   }
 

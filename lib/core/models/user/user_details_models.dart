@@ -19,6 +19,7 @@ class UserDetails with _$UserDetails {
     String? email,
     String? phone,
     String? gender,
+    @JsonKey(name: 'reward_coins', fromJson: intFromJson) @Default(0) int rewardCoins,
   }) = _UserDetails;
 
   factory UserDetails.fromJson(Map<String, dynamic> json) =>

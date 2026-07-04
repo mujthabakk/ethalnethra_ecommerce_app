@@ -21,6 +21,12 @@ _$CartLineDtoImpl _$$CartLineDtoImplFromJson(
       ? false
       : boolFromJson(json['is_preorder']),
   isAccept: json['is_accept'] == null ? true : boolFromJson(json['is_accept']),
+  isCustomOrder: json['is_custom_order'] == null
+      ? false
+      : boolFromJson(json['is_custom_order']),
+  isGramWise: json['is_gram_wise'] == null
+      ? false
+      : boolFromJson(json['is_gram_wise']),
 );
 
 Map<String, dynamic> _$$CartLineDtoImplToJson(_$CartLineDtoImpl instance) =>
@@ -35,6 +41,8 @@ Map<String, dynamic> _$$CartLineDtoImplToJson(_$CartLineDtoImpl instance) =>
       'subtotal': instance.subtotal,
       'is_preorder': instance.isPreorder,
       'is_accept': instance.isAccept,
+      'is_custom_order': instance.isCustomOrder,
+      'is_gram_wise': instance.isGramWise,
     };
 
 _$CartResponseImpl _$$CartResponseImplFromJson(Map<String, dynamic> json) =>

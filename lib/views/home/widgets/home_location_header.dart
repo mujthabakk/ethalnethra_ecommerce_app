@@ -14,12 +14,11 @@ class HomeLocationHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final addressesAsync = ref.watch(userAddressesProvider);
-    final zonesAsync = ref.watch(zonesProvider);
 
     return GestureDetector(
       onTap: () => context.push(AppRouter.deliveryAddress),
       child: addressesAsync.when(
-        loading: () => _row(
+        loading: () => _locationRow(
           child: SizedBox(
             width: 120,
             height: 18,
@@ -31,84 +30,95 @@ class HomeLocationHeader extends ConsumerWidget {
             ),
           ),
         ),
-        error: (_, __) => _row(child: _label('Delivery address')),
+        error: (_, __) => _locationRow(child: _locationLabel('Delivery address')),
         data: (addresses) {
           final addr = pickDefaultAddress(addresses);
           if (addr == null) {
-            return _row(child: _label('Add delivery address'));
+            return _locationRow(child: _locationLabel('Add delivery address'));
           }
 
-          final zones = zonesAsync.valueOrNull ?? [];
-          final zoneName = zones
-              .where((z) => z.id == addr.zoneId)
-              .map((z) => z.name)
-              .firstOrNull;
-
-          final zoneIdInt = int.tryParse(addr.zoneId);
-          if (zoneIdInt == null) {
-            return _row(child: _label(addr.headerSummary(zoneName: zoneName)));
+          if (addr.hasResolvedLocationNames) {
+            return _locationRow(child: _locationLabel(addr.headerSummary()));
           }
 
-          final areasAsync = ref.watch(areasForZoneProvider(zoneIdInt));
-          return areasAsync.when(
-            data: (areas) {
-              final areaName = areas
-                  .where((a) => a.id == addr.areaId)
-                  .map((a) => a.name)
-                  .firstOrNull;
-              return _row(
-                child: _label(
-                  addr.headerSummary(zoneName: zoneName, areaName: areaName),
-                ),
-              );
-            },
-            loading: () => _row(
-              child: _label(
-                addr.headerSummary(zoneName: zoneName),
-              ),
-            ),
-            error: (_, __) => _row(
-              child: _label(addr.headerSummary(zoneName: zoneName)),
-            ),
-          );
+          return _LocationHeaderFallback(addr: addr);
         },
       ),
     );
   }
+}
 
-  Widget _row({required Widget child}) {
-    return Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'asstes/images/location.png',
-            width: 15,
-            height: 18,
-            errorBuilder: (_, __, ___) => const Icon(
-              Icons.location_on_outlined,
-              size: 20,
-              color: AppColors.darkBackground,
-            ),
+/// Resolves zone/area labels from location APIs when the address payload has no names.
+class _LocationHeaderFallback extends ConsumerWidget {
+  const _LocationHeaderFallback({required this.addr});
+
+  final UserAddressDto addr;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final zonesAsync = ref.watch(zonesProvider);
+    final zones = zonesAsync.valueOrNull ?? [];
+    final zoneName = zones
+        .where((z) => z.id == addr.zoneId)
+        .map((z) => z.name)
+        .firstOrNull;
+
+    final zoneIdInt = int.tryParse(addr.zoneId);
+    if (zoneIdInt == null) {
+      return _locationRow(
+        child: _locationLabel(addr.headerSummary(zoneName: zoneName)),
+      );
+    }
+
+    final areasAsync = ref.watch(areasForZoneProvider(zoneIdInt));
+    final text = areasAsync.when(
+      data: (areas) {
+        final areaName = areas
+            .where((a) => a.id == addr.areaId)
+            .map((a) => a.name)
+            .firstOrNull;
+        return addr.headerSummary(zoneName: zoneName, areaName: areaName);
+      },
+      loading: () => addr.headerSummary(zoneName: zoneName),
+      error: (_, __) => addr.headerSummary(zoneName: zoneName),
+    );
+
+    return _locationRow(child: _locationLabel(text));
+  }
+}
+
+Widget _locationRow({required Widget child}) {
+  return Center(
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset(
+          'asstes/images/location.png',
+          width: 15,
+          height: 18,
+          errorBuilder: (_, __, ___) => const Icon(
+            Icons.location_on_outlined,
+            size: 20,
+            color: AppColors.darkBackground,
           ),
-          const SizedBox(width: 8),
-          Flexible(child: child),
-        ],
-      ),
-    );
-  }
+        ),
+        const SizedBox(width: 8),
+        Flexible(child: child),
+      ],
+    ),
+  );
+}
 
-  Widget _label(String text) {
-    return Text(
-      text,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      textAlign: TextAlign.center,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: AppColors.darkBackground,
-      ),
-    );
-  }
+Widget _locationLabel(String text) {
+  return Text(
+    text,
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    textAlign: TextAlign.center,
+    style: const TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      color: AppColors.darkBackground,
+    ),
+  );
 }

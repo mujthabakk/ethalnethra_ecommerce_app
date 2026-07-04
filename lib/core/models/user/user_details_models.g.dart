@@ -14,6 +14,9 @@ _$UserDetailsImpl _$$UserDetailsImplFromJson(Map<String, dynamic> json) =>
       email: json['email'] as String?,
       phone: json['phone'] as String?,
       gender: json['gender'] as String?,
+      rewardCoins: json['reward_coins'] == null
+          ? 0
+          : intFromJson(json['reward_coins']),
     );
 
 Map<String, dynamic> _$$UserDetailsImplToJson(_$UserDetailsImpl instance) =>
@@ -24,6 +27,7 @@ Map<String, dynamic> _$$UserDetailsImplToJson(_$UserDetailsImpl instance) =>
       'email': instance.email,
       'phone': instance.phone,
       'gender': instance.gender,
+      'reward_coins': instance.rewardCoins,
     };
 
 _$UpdateUserDetailsResponseImpl _$$UpdateUserDetailsResponseImplFromJson(

@@ -132,7 +132,7 @@ class AppTextStyles {
     fontSize: 24,
     fontWeight: FontWeight.bold, // Gilroy-Bold
     color: AppColors.darkBackground,
-    height: 18 / 24,
+    height: 1.25,
     letterSpacing: 0.1,
   );
 

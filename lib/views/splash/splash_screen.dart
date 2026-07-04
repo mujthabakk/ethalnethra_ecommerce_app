@@ -1,84 +1,13 @@
-// import 'package:flutter/material.dart';
-// import 'package:go_router/go_router.dart';
-// import 'package:google_fonts/google_fonts.dart';
-// import '../../core/constants/app_colors.dart';
-// import '../../core/routes/app_router.dart';
-// import '../../core/storage/auth_storage.dart';
-
-// class SplashScreen extends StatefulWidget {
-//   const SplashScreen({super.key});
-
-//   @override
-//   State<SplashScreen> createState() => _SplashScreenState();
-// }
-
-// class _SplashScreenState extends State<SplashScreen> {
-//   @override
-//   void initState() {
-//     super.initState();
-//     _checkAuth();
-//   }
-
-//   Future<void> _checkAuth() async {
-//     // Show splash for 2 seconds
-//     await Future.delayed(const Duration(seconds: 2));
-//     if (!mounted) return;
-
-//     final token = AuthStorage().token;
-//     if (token != null && token.isNotEmpty) {
-//       context.go(AppRouter.mainNav);
-//     } else {
-//       context.go(AppRouter.mobileNumber);
-//     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: AppColors.primary,
-//       body: Center(
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             const Icon(
-//               Icons.shopping_basket,
-//               size: 80,
-//               color: Colors.white,
-//             ),
-//             const SizedBox(height: 16),
-//             Text(
-//               'Nectar',
-//               style: GoogleFonts.poppins(
-//                 fontSize: 32,
-//                 fontWeight: FontWeight.bold,
-//                 color: Colors.white,
-//                 letterSpacing: 1.2,
-//               ),
-//             ),
-//             const SizedBox(height: 8),
-//             Text(
-//               'online groceries',
-//               style: GoogleFonts.poppins(
-//                 fontSize: 14,
-//                 fontWeight: FontWeight.w500,
-//                 color: Colors.white,
-//                 letterSpacing: 2,
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_text_styles.dart';
 import '../../core/routes/app_router.dart';
 import '../../core/storage/auth_storage.dart';
+import '../../widgets/primary_button.dart';
 
+/// Launch screen matching the welcome design (delivery hero + Get Started).
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -87,94 +16,118 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  var _checkingAuth = true;
+  var _isLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAuth();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _bootstrap());
   }
 
-  Future<void> _checkAuth() async {
-    try {
+  Future<void> _bootstrap() async {
+    final token = AuthStorage().token;
+    final loggedIn = token != null && token.isNotEmpty;
 
-      // Splash delay
-      await Future.delayed(const Duration(seconds: 2));
-
+    if (loggedIn) {
+      await Future.delayed(const Duration(milliseconds: 1200));
       if (!mounted) return;
-
-      final token = AuthStorage().token;
-
-      if (token != null && token.isNotEmpty) {
-
-        // Navigate to home
-        context.go(AppRouter.mainNav);
-
-      } else {
-
-        // Navigate to login/mobile page
-        context.go(AppRouter.mobileNumber);
-      }
-
-    } catch (e) {
-
-      debugPrint("Splash Error: $e");
-
-      // Fallback navigation
-      if (mounted) {
-        context.go(AppRouter.mobileNumber);
-      }
+      context.go(AppRouter.mainNav);
+      return;
     }
+
+    if (mounted) {
+      setState(() {
+        _isLoggedIn = false;
+        _checkingAuth = false;
+      });
+    }
+  }
+
+  void _getStarted() {
+    context.go(AppRouter.mobileNumber);
   }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-
-            const Icon(
-              Icons.shopping_basket,
-              size: 80,
-              color: Colors.white,
-            ),
-
-            const SizedBox(height: 16),
-
-            Text(
-              'Nectar',
-              style: GoogleFonts.poppins(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                letterSpacing: 1.2,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'asstes/images/welcome.png',
+            fit: BoxFit.cover,
+            width: size.width,
+            height: size.height,
+            alignment: Alignment.center,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppColors.primary.withValues(alpha: 0.8),
+                      AppColors.darkBackground,
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: AppColors.welcomeGradient,
+                stops: [0.0, 0.5, 1.0],
               ),
             ),
-
-            const SizedBox(height: 8),
-
-            Text(
-              'Online Groceries',
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-                letterSpacing: 2,
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'Welcome',
+                    style: AppTextStyles.welcomeTitle,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'to our store',
+                    style: AppTextStyles.welcomeTitle,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Get your groceries in as fast as one hour',
+                    style: AppTextStyles.welcomeSubtitle,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 40),
+                  if (_checkingAuth || _isLoggedIn)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 90),
+                      child: CircularProgressIndicator(color: Colors.white),
+                    )
+                  else ...[
+                    PrimaryButton(
+                      text: 'Get Started',
+                      onPressed: _getStarted,
+                    ),
+                    const SizedBox(height: 90),
+                  ],
+                ],
               ),
             ),
-
-            const SizedBox(height: 40),
-
-            const CircularProgressIndicator(
-              color: Colors.white,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

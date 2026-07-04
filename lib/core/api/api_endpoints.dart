@@ -33,6 +33,8 @@ abstract final class ApiEndpoints {
 
   static const String orders = '/api/orders';
   static String orderById(String id) => '/api/orders/$id';
-  static const String ordersPlaceInstant = '/api/orders/place-instant';
+  static const String ordersCheckout = '/api/orders/checkout';
+  static const String ordersCreatePayment = '/api/orders/create-payment';
+  static const String ordersPlace = '/api/orders/place';
   static const String ordersPlacePreorder = '/api/orders/place-preorder';
 }

@@ -7,6 +7,7 @@ import '../../core/constants/app_text_styles.dart';
 import '../../core/models/user/user_details_models.dart';
 import '../../core/providers/auth_providers.dart';
 import '../../core/providers/location_user_providers.dart';
+import '../../core/providers/main_nav_tab_provider.dart';
 import '../../core/routes/app_router.dart';
 
 const _changeLinkColor = Color(0xFFE8835E);
@@ -90,6 +91,7 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
         );
     if (!mounted) return;
     if (ok) {
+      resetMainNavToHome(ref);
       context.go(AppRouter.mainNav);
     } else {
       final err = ref.read(updateProfileNotifierProvider).errorMessage;

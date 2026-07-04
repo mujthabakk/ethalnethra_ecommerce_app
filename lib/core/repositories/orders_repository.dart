@@ -16,23 +16,59 @@ class OrdersRepository {
     return OrdersListResponse.fromJson(data);
   }
 
-  Future<PlaceOrderResponse> placeInstantOrder({required int addressId}) async {
+  Future<CheckoutResponse> checkout({
+    required int addressId,
+    required String type,
+  }) async {
     final response = await _dio.post<Map<String, dynamic>>(
-      ApiEndpoints.ordersPlaceInstant,
-      data: {'address_id': addressId},
+      ApiEndpoints.ordersCheckout,
+      data: {
+        'address_id': addressId,
+        'type': type,
+      },
     );
     final data = response.data;
-    if (data == null) throw Exception('Empty place instant order response');
-    return PlaceOrderResponse.fromJson(data);
+    if (data == null) throw Exception('Empty checkout response');
+    return CheckoutResponse.fromJson(data);
   }
 
-  Future<PlaceOrderResponse> placePreorderOrder({required int addressId}) async {
+  Future<CreatePaymentResponse> createPayment({
+    required int addressId,
+    required String type,
+    bool useRewardCoins = false,
+  }) async {
     final response = await _dio.post<Map<String, dynamic>>(
-      ApiEndpoints.ordersPlacePreorder,
-      data: {'address_id': addressId},
+      ApiEndpoints.ordersCreatePayment,
+      data: {
+        'address_id': addressId,
+        'type': type,
+        'use_reward_coins': useRewardCoins,
+      },
     );
     final data = response.data;
-    if (data == null) throw Exception('Empty place preorder response');
+    if (data == null) throw Exception('Empty create payment response');
+    return CreatePaymentResponse.fromJson(data);
+  }
+
+  Future<PlaceOrderResponse> placeOrder({
+    required int addressId,
+    required PaymentMethod paymentMethod,
+    required bool isInstantCart,
+    bool useRewardCoins = false,
+  }) async {
+    final path = isInstantCart
+        ? ApiEndpoints.ordersPlace
+        : ApiEndpoints.ordersPlacePreorder;
+    final response = await _dio.post<Map<String, dynamic>>(
+      path,
+      data: {
+        'address_id': addressId,
+        'payment_method': paymentMethod.apiValue,
+        'use_reward_coins': useRewardCoins,
+      },
+    );
+    final data = response.data;
+    if (data == null) throw Exception('Empty place order response');
     return PlaceOrderResponse.fromJson(data);
   }
 

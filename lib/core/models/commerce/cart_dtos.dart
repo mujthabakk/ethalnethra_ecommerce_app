@@ -24,6 +24,12 @@ class CartLineDto with _$CartLineDto {
     @JsonKey(name: 'is_accept', fromJson: boolFromJson)
     @Default(true)
     bool isAccept,
+    @JsonKey(name: 'is_custom_order', fromJson: boolFromJson)
+    @Default(false)
+    bool isCustomOrder,
+    @JsonKey(name: 'is_gram_wise', fromJson: boolFromJson)
+    @Default(false)
+    bool isGramWise,
   }) = _CartLineDto;
 
   factory CartLineDto.fromJson(Map<String, dynamic> json) =>
@@ -42,6 +48,8 @@ CartLineDto cartLineFromJsonLoose(Map<String, dynamic> json) {
     subtotal: doubleFromJson(json['subtotal']),
     isPreorder: boolFromJson(json['is_preorder'] ?? json['isPreorder']),
     isAccept: boolFromJson(json['is_accept'] ?? json['isAccept'] ?? true),
+    isCustomOrder: boolFromJson(json['is_custom_order'] ?? json['isCustomOrder']),
+    isGramWise: boolFromJson(json['is_gram_wise'] ?? json['isGramWise']),
   );
 }
 

@@ -14,6 +14,8 @@ class ProductModel {
   final String unit;
   final bool preorderAvailable;
   final bool instantOrderAvailable;
+  final bool isCustomOrder;
+  final bool isGramWise;
 
   /// Back-compat alias for [preorderAvailable].
   bool get isPreOrder => preorderAvailable;
@@ -42,6 +44,8 @@ class ProductModel {
     bool isPreOrder = false,
     bool? preorderAvailable,
     this.instantOrderAvailable = false,
+    this.isCustomOrder = false,
+    this.isGramWise = false,
     double? listPrice,
     double? ourPrice,
     double? finalPrice,
@@ -64,7 +68,26 @@ class ProductModel {
 
   bool get isInStock => stock > 0;
 
-  bool get showDiscount => hasDiscount && listPrice > finalPrice;
+  /// Weight unit (e.g. `kg`), defaulting to `kg` when missing.
+  String get unitLabel {
+    final u = unit.trim();
+    return u.isEmpty ? 'kg' : u;
+  }
+
+  /// Shown selling price per unit, e.g. `₹75 / kg`.
+  String get pricePerUnitLabel =>
+      '₹${displayPrice.toStringAsFixed(2)} / $unitLabel';
+
+  /// Rounded discount badge text (e.g. `9% OFF`); empty when no discount.
+  String get discountLabel =>
+      showDiscount ? '${discountPercentage.round()}% OFF' : '';
+
+  /// Stock availability label, e.g. `5 in stock` / `Out of stock`.
+  String get stockLabel => isInStock ? '$stock in stock' : 'Out of stock';
+
+  /// Whether to show the struck-through actual price (`price`) next to the
+  /// shown selling price (`display_price`).
+  bool get showDiscount => hasDiscount && listPrice > displayPrice;
 
   double get effectivePreorderPrice {
     if (preorderPrice != null && preorderPrice! > 0) return preorderPrice!;

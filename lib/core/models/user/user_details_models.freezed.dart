@@ -28,6 +28,8 @@ mixin _$UserDetails {
   String? get email => throw _privateConstructorUsedError;
   String? get phone => throw _privateConstructorUsedError;
   String? get gender => throw _privateConstructorUsedError;
+  @JsonKey(name: 'reward_coins', fromJson: intFromJson)
+  int get rewardCoins => throw _privateConstructorUsedError;
 
   /// Serializes this UserDetails to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -53,6 +55,7 @@ abstract class $UserDetailsCopyWith<$Res> {
     String? email,
     String? phone,
     String? gender,
+    @JsonKey(name: 'reward_coins', fromJson: intFromJson) int rewardCoins,
   });
 }
 
@@ -77,6 +80,7 @@ class _$UserDetailsCopyWithImpl<$Res, $Val extends UserDetails>
     Object? email = freezed,
     Object? phone = freezed,
     Object? gender = freezed,
+    Object? rewardCoins = null,
   }) {
     return _then(
       _value.copyWith(
@@ -104,6 +108,10 @@ class _$UserDetailsCopyWithImpl<$Res, $Val extends UserDetails>
                 ? _value.gender
                 : gender // ignore: cast_nullable_to_non_nullable
                       as String?,
+            rewardCoins: null == rewardCoins
+                ? _value.rewardCoins
+                : rewardCoins // ignore: cast_nullable_to_non_nullable
+                      as int,
           )
           as $Val,
     );
@@ -126,6 +134,7 @@ abstract class _$$UserDetailsImplCopyWith<$Res>
     String? email,
     String? phone,
     String? gender,
+    @JsonKey(name: 'reward_coins', fromJson: intFromJson) int rewardCoins,
   });
 }
 
@@ -149,6 +158,7 @@ class __$$UserDetailsImplCopyWithImpl<$Res>
     Object? email = freezed,
     Object? phone = freezed,
     Object? gender = freezed,
+    Object? rewardCoins = null,
   }) {
     return _then(
       _$UserDetailsImpl(
@@ -176,6 +186,10 @@ class __$$UserDetailsImplCopyWithImpl<$Res>
             ? _value.gender
             : gender // ignore: cast_nullable_to_non_nullable
                   as String?,
+        rewardCoins: null == rewardCoins
+            ? _value.rewardCoins
+            : rewardCoins // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -192,6 +206,7 @@ class _$UserDetailsImpl implements _UserDetails {
     this.email,
     this.phone,
     this.gender,
+    @JsonKey(name: 'reward_coins', fromJson: intFromJson) this.rewardCoins = 0,
   });
 
   factory _$UserDetailsImpl.fromJson(Map<String, dynamic> json) =>
@@ -210,10 +225,13 @@ class _$UserDetailsImpl implements _UserDetails {
   final String? phone;
   @override
   final String? gender;
+  @override
+  @JsonKey(name: 'reward_coins', fromJson: intFromJson)
+  final int rewardCoins;
 
   @override
   String toString() {
-    return 'UserDetails(id: $id, name: $name, username: $username, email: $email, phone: $phone, gender: $gender)';
+    return 'UserDetails(id: $id, name: $name, username: $username, email: $email, phone: $phone, gender: $gender, rewardCoins: $rewardCoins)';
   }
 
   @override
@@ -227,13 +245,23 @@ class _$UserDetailsImpl implements _UserDetails {
                 other.username == username) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.phone, phone) || other.phone == phone) &&
-            (identical(other.gender, gender) || other.gender == gender));
+            (identical(other.gender, gender) || other.gender == gender) &&
+            (identical(other.rewardCoins, rewardCoins) ||
+                other.rewardCoins == rewardCoins));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, name, username, email, phone, gender);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    name,
+    username,
+    email,
+    phone,
+    gender,
+    rewardCoins,
+  );
 
   /// Create a copy of UserDetails
   /// with the given fields replaced by the non-null parameter values.
@@ -257,6 +285,7 @@ abstract class _UserDetails implements UserDetails {
     final String? email,
     final String? phone,
     final String? gender,
+    @JsonKey(name: 'reward_coins', fromJson: intFromJson) final int rewardCoins,
   }) = _$UserDetailsImpl;
 
   factory _UserDetails.fromJson(Map<String, dynamic> json) =
@@ -275,6 +304,9 @@ abstract class _UserDetails implements UserDetails {
   String? get phone;
   @override
   String? get gender;
+  @override
+  @JsonKey(name: 'reward_coins', fromJson: intFromJson)
+  int get rewardCoins;
 
   /// Create a copy of UserDetails
   /// with the given fields replaced by the non-null parameter values.

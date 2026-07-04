@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/constants/commerce_constants.dart';
+import '../../core/utils/custom_order_quantity.dart';
 import '../../core/models/commerce/cart_dtos.dart';
 import '../../core/providers/app_refresh_providers.dart';
 import '../../core/providers/cart_providers.dart';
@@ -32,6 +33,21 @@ class _CartScreenState extends ConsumerState<CartScreen> {
 
   bool _canCheckout(List<CartLineDto> lines, double total) {
     return _acceptedLines(lines).isNotEmpty && total >= minOrderAmount;
+  }
+
+  Future<void> _runCartAction(Future<void> Function() action) async {
+    try {
+      await action();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$e'),
+          backgroundColor: Colors.red.shade600,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override
@@ -154,22 +170,36 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                       ),
                       itemBuilder: (context, index) {
                         final item = cartItems[index];
-                        final qty = item.quantity.round();
+                        final weighted =
+                            item.isCustomOrder || item.isGramWise;
                         return CartItemWidget(
                           line: item,
-                          onIncrement: () {
-                            notifier.setLineQuantity(
-                              item.id,
-                              qty + 1,
-                            );
-                          },
-                          onDecrement: () {
-                            notifier.setLineQuantity(
-                              item.id,
-                              qty - 1,
-                            );
-                          },
-                          onRemove: () => notifier.removeLine(item.id),
+                          onIncrement: () => _runCartAction(() {
+                            final newQty = weighted
+                                ? CustomOrderQuantity.increment(
+                                    item.quantity,
+                                    isGramWise: item.isGramWise,
+                                  )
+                                : item.quantity.round() + 1;
+                            return notifier.setLineQuantity(item.id, newQty);
+                          }),
+                          onDecrement: () => _runCartAction(() {
+                            if (weighted) {
+                              final next = CustomOrderQuantity.decrement(
+                                item.quantity,
+                                isGramWise: item.isGramWise,
+                              );
+                              return next == null
+                                  ? notifier.removeLine(item.id)
+                                  : notifier.setLineQuantity(item.id, next);
+                            }
+                            final qty = item.quantity.round();
+                            return qty <= 1
+                                ? notifier.removeLine(item.id)
+                                : notifier.setLineQuantity(item.id, qty - 1);
+                          }),
+                          onRemove: () =>
+                              _runCartAction(() => notifier.removeLine(item.id)),
                         );
                       },
                     ),

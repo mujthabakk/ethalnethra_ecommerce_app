@@ -12,6 +12,7 @@ import '../explore/explore_screen.dart';
 import '../cart/cart_screen.dart';
 import '../favourite/favourite_screen.dart';
 import '../account/account_screen.dart';
+import 'widgets/nav_icon.dart';
 
 class MainNavScreen extends ConsumerWidget {
   const MainNavScreen({super.key});
@@ -38,7 +39,7 @@ class MainNavScreen extends ConsumerWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, -5),
             ),
@@ -61,74 +62,69 @@ class MainNavScreen extends ConsumerWidget {
             unselectedItemColor: AppColors.darkBackground,
             showSelectedLabels: false,
             showUnselectedLabels: false,
-            items: [
+            items: const [
               BottomNavigationBarItem(
-                icon: Image.asset(
-                  'asstes/icons/ic_store_unselected.png',
-                  width: 40,
-                  height: 40,
+                icon: NavIcon(
+                  svgPath: 'asstes/icons/home.svg',
+                  pngFallback: 'asstes/icons/ic_store_unselected.png',
                 ),
-                activeIcon: Image.asset(
-                  'asstes/icons/ic_store_selected.png',
-                  width: 40,
-                  height: 40,
-                  color: AppColors.primary,
+                activeIcon: NavIcon(
+                  svgPath: 'asstes/icons/home (selected).svg',
+                  pngFallback: 'asstes/icons/ic_store_selected.png',
+                  selected: true,
+                  selectedColor: AppColors.primary,
                 ),
                 label: 'Shop',
               ),
               BottomNavigationBarItem(
-                icon: Image.asset(
-                  'asstes/icons/ic_search.png',
-                  width: 40,
-                  height: 40,
+                icon: NavIcon(
+                  svgPath: 'asstes/icons/search.svg',
+                  pngFallback: 'asstes/icons/ic_search.png',
                 ),
-                activeIcon: Image.asset(
-                  'asstes/icons/ic_search_selected.png',
-                  width: 40,
-                  height: 40,
-                  color: AppColors.primary,
+                activeIcon: NavIcon(
+                  svgPath: 'asstes/icons/search(selected).svg',
+                  pngFallback: 'asstes/icons/ic_search_selected.png',
+                  selected: true,
+                  selectedColor: AppColors.primary,
                 ),
                 label: 'Explore',
               ),
               BottomNavigationBarItem(
-                icon: Image.asset(
-                  'asstes/icons/ic_cart_unselected.png',
-                  width: 40,
-                  height: 40,
+                icon: NavIcon(
+                  svgPath: 'asstes/icons/cart.svg',
+                  pngFallback: 'asstes/icons/ic_cart_unselected.png',
                 ),
-                activeIcon: Image.asset(
-                  'asstes/icons/ic_cart_selected.png',
-                  width: 40,
-                  height: 40,
-                  color: AppColors.primary,
+                activeIcon: NavIcon(
+                  svgPath: 'asstes/icons/cart(selected).svg',
+                  pngFallback: 'asstes/icons/ic_cart_selected.png',
+                  selected: true,
+                  selectedColor: AppColors.primary,
                 ),
                 label: 'Cart',
               ),
               BottomNavigationBarItem(
-                icon: Image.asset(
-                  'asstes/icons/ic_favorite_unselected.png',
-                  width: 40,
-                  height: 40,
+                icon: NavIcon(
+                  svgPath: 'asstes/icons/fav.svg',
+                  pngFallback: 'asstes/icons/ic_favorite_unselected.png',
                 ),
-                activeIcon: Image.asset(
-                  'asstes/icons/ic_favorite_selected.png',
-                  width: 40,
-                  height: 40,
-                  color: AppColors.primary,
+                activeIcon: NavIcon(
+                  svgPath: 'asstes/icons/fav(selected).svg',
+                  pngFallback: 'asstes/icons/ic_favorite_selected.png',
+                  selected: true,
+                  selectedColor: AppColors.primary,
                 ),
                 label: 'Favourite',
               ),
               BottomNavigationBarItem(
-                icon: Image.asset(
-                  'asstes/icons/ic_profile_unselected.png',
-                  width: 40,
-                  height: 40,
+                icon: NavIcon(
+                  svgPath: 'asstes/icons/Account.svg',
+                  pngFallback: 'asstes/icons/ic_profile_unselected.png',
                 ),
-                activeIcon: Image.asset(
-                  'asstes/icons/ic_profile_selected.png',
-                  width: 40,
-                  height: 40,
-                  color: AppColors.primary,
+                activeIcon: NavIcon(
+                  svgPath: 'asstes/icons/Account(selected).svg',
+                  pngFallback: 'asstes/icons/ic_profile_selected.png',
+                  selected: true,
+                  selectedColor: AppColors.primary,
                 ),
                 label: 'Account',
               ),

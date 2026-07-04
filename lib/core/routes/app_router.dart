@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../views/splash/splash_screen.dart';
 import '../../views/welcome/welcome_screen.dart';
 import '../../views/signin/signin_screen.dart';
 import '../../views/mobile_number/mobile_number_screen.dart';
@@ -20,7 +21,6 @@ import '../../views/account/edit_profile_screen.dart';
 import '../../views/account/delivery_address_screen.dart';
 import '../../views/account/promo_code_screen.dart';
 import '../../views/account/select_delivery_location_screen.dart';
-import '../../core/storage/auth_storage.dart';
 import '../../core/models/orders/orders_models.dart';
 import '../../models/product_model.dart';
 
@@ -75,16 +75,16 @@ class AppRouter {
   static const String selectLocation = '/select-location';
   static const String services = '/services';
 
-  static String get _initialLocation {
-    final token = AuthStorage().token;
-    return token != null && token.isNotEmpty ? mainNav : mobileNumber;
-  }
-
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: _initialLocation,
+    initialLocation: splash,
     debugLogDiagnostics: false,
     routes: [
+      GoRoute(
+        path: splash,
+        name: 'splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: welcome,
         name: 'welcome',
