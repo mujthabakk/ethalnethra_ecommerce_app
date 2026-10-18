@@ -17,9 +17,10 @@ import 'widgets/nav_icon.dart';
 class MainNavScreen extends ConsumerWidget {
   const MainNavScreen({super.key});
 
+  /// Index 0 = Categories (initial home page).
   static const List<Widget> _screens = [
-    HomeScreen(),
     ExploreScreen(),
+    HomeScreen(),
     CartScreen(),
     FavouriteScreen(),
     AccountScreen(),
@@ -65,6 +66,19 @@ class MainNavScreen extends ConsumerWidget {
             items: const [
               BottomNavigationBarItem(
                 icon: NavIcon(
+                  svgPath: 'asstes/icons/search.svg',
+                  pngFallback: 'asstes/icons/ic_search.png',
+                ),
+                activeIcon: NavIcon(
+                  svgPath: 'asstes/icons/search(selected).svg',
+                  pngFallback: 'asstes/icons/ic_search_selected.png',
+                  selected: true,
+                  selectedColor: AppColors.primary,
+                ),
+                label: 'Categories',
+              ),
+              BottomNavigationBarItem(
+                icon: NavIcon(
                   svgPath: 'asstes/icons/home.svg',
                   pngFallback: 'asstes/icons/ic_store_unselected.png',
                 ),
@@ -75,19 +89,6 @@ class MainNavScreen extends ConsumerWidget {
                   selectedColor: AppColors.primary,
                 ),
                 label: 'Shop',
-              ),
-              BottomNavigationBarItem(
-                icon: NavIcon(
-                  svgPath: 'asstes/icons/search.svg',
-                  pngFallback: 'asstes/icons/ic_search.png',
-                ),
-                activeIcon: NavIcon(
-                  svgPath: 'asstes/icons/search(selected).svg',
-                  pngFallback: 'asstes/icons/ic_search_selected.png',
-                  selected: true,
-                  selectedColor: AppColors.primary,
-                ),
-                label: 'Explore',
               ),
               BottomNavigationBarItem(
                 icon: NavIcon(
@@ -137,23 +138,24 @@ class MainNavScreen extends ConsumerWidget {
 
   static void _refreshTabData(WidgetRef ref, int index) {
     switch (index) {
-      case 0:
+      case 0: // Categories
+        ref.invalidate(homeCategoriesProvider);
+        ref.invalidate(homeProductsProvider);
+        ref.invalidate(filtersProvider);
+        break;
+      case 1: // Shop
         ref.invalidate(homeBannersProvider);
         ref.invalidate(homeCategoriesProvider);
         ref.invalidate(homeProductsProvider);
         ref.invalidate(filtersProvider);
         break;
-      case 1:
-        ref.invalidate(homeProductsProvider);
-        ref.invalidate(filtersProvider);
-        break;
-      case 2:
+      case 2: // Cart
         ref.invalidate(cartNotifierProvider);
         break;
-      case 3:
+      case 3: // Favourite
         ref.invalidate(favoritesNotifierProvider);
         break;
-      case 4:
+      case 4: // Account
         ref.invalidate(userDetailsProvider);
         ref.invalidate(userAddressesProvider);
         break;

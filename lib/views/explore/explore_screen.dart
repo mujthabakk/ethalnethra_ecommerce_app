@@ -32,7 +32,7 @@ class ExploreScreen extends ConsumerWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
-          'Find Products',
+          'Categories',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,

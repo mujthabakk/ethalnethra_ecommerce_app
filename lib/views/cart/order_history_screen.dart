@@ -8,6 +8,7 @@ import '../../core/models/orders/orders_models.dart';
 import '../../core/providers/cart_providers.dart';
 import '../../core/providers/location_user_providers.dart';
 import '../../core/routes/app_router.dart';
+import '../../core/utils/auth_guard.dart';
 import '../../core/widgets/app_network_image.dart';
 
 class OrderHistoryScreen extends ConsumerWidget {
@@ -35,6 +36,7 @@ class OrderHistoryScreen extends ConsumerWidget {
       );
       return;
     }
+    if (!await ensureLoggedIn(context, ref)) return;
     try {
       await ref.read(cartNotifierProvider.notifier).addToCart(
             item.productId,
@@ -42,14 +44,14 @@ class OrderHistoryScreen extends ConsumerWidget {
             preorder: item.isPreorder,
           );
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${item.displayName} added to cart')),
+      await showAddedToCartPopup(
+        context,
+        productName: item.displayName,
+        preorder: item.isPreorder,
       );
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      await showCartOrAuthError(context, e);
     }
   }
 

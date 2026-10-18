@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
+import '../../core/providers/main_nav_tab_provider.dart';
 import '../../core/routes/app_router.dart';
 import '../../core/storage/auth_storage.dart';
 import '../../widgets/primary_button.dart';
 
 /// Launch screen matching the welcome design (delivery hero + Get Started).
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   var _checkingAuth = true;
   var _isLoggedIn = false;
 
@@ -32,6 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (loggedIn) {
       await Future.delayed(const Duration(milliseconds: 1200));
       if (!mounted) return;
+      resetMainNavToHome(ref);
       context.go(AppRouter.mainNav);
       return;
     }

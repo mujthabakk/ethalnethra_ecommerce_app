@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/mappers/favorite_product_mapper.dart';
 import '../../core/providers/favorites_providers.dart';
+import '../../core/utils/auth_guard.dart';
 import '../home/widgets/search_bar_widget.dart';
 import 'widgets/favourite_item_widget.dart';
 
@@ -30,26 +31,19 @@ class _FavouriteScreenState extends ConsumerState<FavouriteScreen> {
   }
 
   Future<void> _addAllToCart() async {
+    if (!await ensureLoggedIn(context, ref)) return;
     setState(() => _isAddingAll = true);
     try {
       await ref.read(favoritesNotifierProvider.notifier).addAllToCart();
       if (!mounted) return;
       setState(() => _selectedIds.clear());
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('All favorites added to cart.'),
-          duration: Duration(seconds: 2),
-          behavior: SnackBarBehavior.floating,
-        ),
+      await showAddedToCartPopup(
+        context,
+        productName: 'All favorites',
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$e'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        await showCartOrAuthError(context, e);
       }
     } finally {
       if (mounted) setState(() => _isAddingAll = false);
@@ -58,6 +52,7 @@ class _FavouriteScreenState extends ConsumerState<FavouriteScreen> {
 
   Future<void> _moveSelectedToCart() async {
     if (_selectedIds.isEmpty) return;
+    if (!await ensureLoggedIn(context, ref)) return;
     setState(() => _isMovingSelected = true);
     try {
       await ref
@@ -65,21 +60,13 @@ class _FavouriteScreenState extends ConsumerState<FavouriteScreen> {
           .moveSelectedToCart(_selectedIds.toList());
       if (!mounted) return;
       setState(() => _selectedIds.clear());
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Selected items moved to cart.'),
-          duration: Duration(seconds: 2),
-          behavior: SnackBarBehavior.floating,
-        ),
+      await showAddedToCartPopup(
+        context,
+        productName: 'Selected items',
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$e'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        await showCartOrAuthError(context, e);
       }
     } finally {
       if (mounted) setState(() => _isMovingSelected = false);

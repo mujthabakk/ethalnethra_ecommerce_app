@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/providers/cart_providers.dart';
+import '../../../core/utils/auth_guard.dart';
 import '../../../core/utils/custom_order_quantity.dart';
 import '../../../core/widgets/app_network_image.dart';
 import '../../../models/product_model.dart';
@@ -121,6 +122,7 @@ class PreOrderModal extends ConsumerWidget {
             height: 67,
             child: ElevatedButton(
               onPressed: () async {
+                if (!await ensureLoggedIn(context, ref)) return;
                 try {
                   await ref.read(cartNotifierProvider.notifier).addToCart(
                         product.id,
@@ -133,25 +135,15 @@ class PreOrderModal extends ConsumerWidget {
                       );
                   if (context.mounted) {
                     Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          '${product.displayName} added to pre-order basket!',
-                        ),
-                        duration: const Duration(seconds: 1),
-                        behavior: SnackBarBehavior.floating,
-                      ),
+                    await showAddedToCartPopup(
+                      context,
+                      productName: product.displayName,
+                      preorder: true,
                     );
                   }
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('$e'),
-                        backgroundColor: Colors.red.shade600,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
+                    await showCartOrAuthError(context, e);
                   }
                 }
               },

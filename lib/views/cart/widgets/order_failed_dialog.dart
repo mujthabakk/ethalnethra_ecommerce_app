@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/providers/main_nav_tab_provider.dart';
 import '../../../core/routes/app_router.dart';
 
-class OrderFailedDialog extends StatelessWidget {
+class OrderFailedDialog extends ConsumerWidget {
   const OrderFailedDialog({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       insetPadding: const EdgeInsets.symmetric(horizontal: 25),
@@ -55,7 +58,6 @@ class OrderFailedDialog extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 context.pop();
-                // Logic to try again
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -78,6 +80,7 @@ class OrderFailedDialog extends StatelessWidget {
             TextButton(
               onPressed: () {
                 context.pop();
+                resetMainNavToHome(ref);
                 context.go(AppRouter.mainNav);
               },
               style: TextButton.styleFrom(

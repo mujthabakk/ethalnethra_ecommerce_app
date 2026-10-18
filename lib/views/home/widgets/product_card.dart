@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/providers/cart_providers.dart';
+import '../../../core/utils/auth_guard.dart';
 import '../../../core/utils/custom_order_quantity.dart';
 import '../../../core/routes/app_router.dart';
 import '../../../core/widgets/app_network_image.dart';
@@ -140,42 +141,30 @@ class ProductCard extends ConsumerWidget {
                 if (showInstant)
                   _InstantBasketButton(
                     onTap: () async {
-                    try {
-                      await ref
-                          .read(cartNotifierProvider.notifier)
-                          .addToCart(
-                            product.id,
-                            quantity:
-                                (product.isCustomOrder || product.isGramWise)
-                                ? CustomOrderQuantity.initial(
-                                    isGramWise: product.isGramWise,
-                                  )
-                                : 1,
-                            preorder: false,
+                      if (!await ensureLoggedIn(context, ref)) return;
+                      try {
+                        await ref.read(cartNotifierProvider.notifier).addToCart(
+                              product.id,
+                              quantity: (product.isCustomOrder ||
+                                      product.isGramWise)
+                                  ? CustomOrderQuantity.initial(
+                                      isGramWise: product.isGramWise,
+                                    )
+                                  : 1,
+                              preorder: false,
+                            );
+                        if (context.mounted) {
+                          await showAddedToCartPopup(
+                            context,
+                            productName: product.displayName,
                           );
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '${product.displayName} added to cart!',
-                            ),
-                            duration: const Duration(seconds: 1),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          await showCartOrAuthError(context, e);
+                        }
                       }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('$e'),
-                            backgroundColor: Colors.red.shade600,
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      }
-                    }
-                  },
+                    },
                   ),
               ],
             ),

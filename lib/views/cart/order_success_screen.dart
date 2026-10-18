@@ -6,6 +6,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/models/orders/orders_models.dart';
 import '../../core/providers/app_refresh_providers.dart';
+import '../../core/providers/main_nav_tab_provider.dart';
 import '../../core/routes/app_router.dart';
 
 class OrderSuccessScreen extends ConsumerStatefulWidget {
@@ -124,6 +125,7 @@ class _OrderSuccessScreenState extends ConsumerState<OrderSuccessScreen> {
             TextButton(
               onPressed: () {
                 refreshAfterCheckout(ref);
+                resetMainNavToHome(ref);
                 context.go(AppRouter.mainNav);
               },
               style: TextButton.styleFrom(

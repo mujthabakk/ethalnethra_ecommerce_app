@@ -10,6 +10,7 @@ import '../../core/models/catalog/product_detail_dto.dart';
 import '../../core/providers/cart_providers.dart';
 import '../../core/providers/catalog_providers.dart';
 import '../../core/providers/favorites_providers.dart';
+import '../../core/utils/auth_guard.dart';
 import '../../core/utils/custom_order_quantity.dart';
 import '../../core/widgets/app_network_image.dart';
 import '../../models/product_model.dart';
@@ -191,6 +192,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             onPressed: detailAsync.isLoading
                                 ? null
                                 : () async {
+                                    if (!await ensureLoggedIn(context, ref)) {
+                                      return;
+                                    }
                                     try {
                                       await ref
                                           .read(favoritesNotifierProvider
@@ -198,16 +202,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                           .toggleFavorite(widget.product.id);
                                     } catch (e) {
                                       if (context.mounted) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text('$e'),
-                                            backgroundColor:
-                                                Colors.red.shade600,
-                                            behavior:
-                                                SnackBarBehavior.floating,
-                                          ),
-                                        );
+                                        await showCartOrAuthError(context, e);
                                       }
                                     }
                                   },
@@ -368,6 +363,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       height: 67,
                       child: ElevatedButton(
                         onPressed: () async {
+                          if (!await ensureLoggedIn(context, ref)) return;
                           try {
                             await ref
                                 .read(cartNotifierProvider.notifier)
@@ -377,25 +373,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                   preorder: false,
                                 );
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    '${merged.displayName} added to instant basket!',
-                                  ),
-                                  duration: const Duration(seconds: 1),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
+                              await showAddedToCartPopup(
+                                context,
+                                productName: merged.displayName,
                               );
                             }
                           } catch (e) {
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('$e'),
-                                  backgroundColor: Colors.red.shade600,
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
+                              await showCartOrAuthError(context, e);
                             }
                           }
                         },
@@ -420,6 +405,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       height: 67,
                       child: ElevatedButton(
                         onPressed: () async {
+                          if (!await ensureLoggedIn(context, ref)) return;
                           try {
                             await ref
                                 .read(cartNotifierProvider.notifier)
@@ -429,25 +415,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                   preorder: true,
                                 );
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    '${merged.displayName} added to pre-order basket!',
-                                  ),
-                                  duration: const Duration(seconds: 1),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
+                              await showAddedToCartPopup(
+                                context,
+                                productName: merged.displayName,
+                                preorder: true,
                               );
                             }
                           } catch (e) {
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('$e'),
-                                  backgroundColor: Colors.red.shade600,
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
+                              await showCartOrAuthError(context, e);
                             }
                           }
                         },

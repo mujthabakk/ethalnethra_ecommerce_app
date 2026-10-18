@@ -298,7 +298,8 @@ class HomeScreen extends ConsumerWidget {
                   SectionHeader(
                     title: 'Categories',
                     onSeeAll: () {
-                      ref.read(mainNavTabIndexProvider.notifier).state = 1;
+                      ref.read(mainNavTabIndexProvider.notifier).state =
+                          kMainNavCategoryTabIndex;
                     },
                   ),
                   const SizedBox(height: 15),

@@ -12,10 +12,18 @@ class ApiException implements Exception {
 
   factory ApiException.fromDio(DioException e) {
     final status = e.response?.statusCode;
+    if (status == 401) {
+      return ApiException('Please log in to continue', statusCode: status);
+    }
     final data = e.response?.data;
     if (data is Map<String, dynamic>) {
       final msg = data['message'];
       if (msg is String && msg.isNotEmpty) {
+        final lower = msg.toLowerCase();
+        if (lower.contains('unauthenticated') ||
+            lower.contains('unauthorize')) {
+          return ApiException('Please log in to continue', statusCode: status);
+        }
         return ApiException(msg, statusCode: status);
       }
       final err = data['error'];
