@@ -30,6 +30,8 @@ dependencies:
   flutter_svg: ^2.3.0
   webview_flutter_android: 4.12.0
   webview_flutter_wkwebview: 3.25.0
+  speech_to_text: ^7.4.0
+  permission_handler: ^13.0.2
 
 dev_dependencies:
   build_runner: ^2.4.15
@@ -45,6 +47,31 @@ flutter:
   assets:
     - asstes/images/
     - asstes/icons/
+    - asstes/v2desgin/images/
+    - asstes/v2desgin/images/auth_pages/
+    - asstes/v2desgin/images/add_adders_page/
+    - asstes/v2desgin/images/item_page/
+    - asstes/v2desgin/images/category_page/
+    - asstes/v2desgin/images/product_details_page/
+    - asstes/v2desgin/images/checkout_page/
+    - asstes/v2desgin/images/payment_page/
+    - asstes/v2desgin/images/wish_list/
+    - asstes/v2desgin/images/profile/
+    - asstes/v2desgin/images/order_traking/
+    - asstes/v2desgin/images/ai_chat_page/
+    - asstes/v2desgin/images/notfication_page/
+    - asstes/v2desgin/login_page/
+    - asstes/v2desgin/kitchen_images/home_page/
+    - asstes/v2desgin/kitchen_images/navbar/
+    - asstes/v2desgin/kitchen_images/search_page/
+    - asstes/v2desgin/kitchen_images/restaurant_page/
+    - asstes/v2desgin/kitchen_images/product_page/
+    - asstes/v2desgin/kitchen_images/cart_page/
+    - asstes/v2desgin/kitchen_images/review_page/
+    - asstes/v2desgin/kitchen_images/profile_page/
+    - asstes/v2desgin/kitchen_images/wishlist_page/
+    - asstes/v2desgin/kitchen_images/order_tracking_page/
+    - asstes/v2desgin/kitchen_images/notifications_page/
   
   # fonts:
   #   - family: Gilroy

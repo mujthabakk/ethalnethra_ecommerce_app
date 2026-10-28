@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_text_styles.dart';
 
-/// App Theme Configuration
+/// App Theme Configuration — Poppins app-wide.
 class AppTheme {
   AppTheme._();
 
   static ThemeData get lightTheme {
+    final poppins = GoogleFonts.poppinsTextTheme();
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
       primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.scaffoldBackground,
-      fontFamily: AppTextStyles.fontFamily,
+      fontFamily: GoogleFonts.poppins().fontFamily,
+      textTheme: poppins.apply(
+        bodyColor: AppColors.darkBackground,
+        displayColor: AppColors.darkBackground,
+      ),
+      primaryTextTheme: poppins,
 
       // Color Scheme
       colorScheme: const ColorScheme.light(
@@ -27,11 +34,11 @@ class AppTheme {
       ),
 
       // AppBar Theme
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: AppColors.transparent,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: AppColors.darkBackground),
+        iconTheme: const IconThemeData(color: AppColors.darkBackground),
         titleTextStyle: AppTextStyles.heading3,
       ),
 

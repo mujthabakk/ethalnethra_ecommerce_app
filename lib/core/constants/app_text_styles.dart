@@ -7,7 +7,8 @@ import 'app_colors.dart';
 class AppTextStyles {
   AppTextStyles._();
 
-  static const String fontFamily = 'Gilroy';
+  /// App-wide typeface (Google Fonts Poppins).
+  static const String fontFamily = 'Poppins';
 
   // Welcome Screen Styles
   static TextStyle welcomeTitle = GoogleFonts.poppins(

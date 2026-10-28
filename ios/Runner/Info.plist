@@ -47,6 +47,10 @@
 	<string>This app needs access to location when open to help you select a delivery address.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app needs access to location to help you select a delivery address.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Ethal Assistant needs the microphone so you can ask for groceries by voice.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Ethal Assistant uses speech recognition to turn your voice into shopping requests.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>

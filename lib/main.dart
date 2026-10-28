@@ -7,6 +7,8 @@ import 'core/theme/app_theme.dart';
 import 'core/routes/app_router.dart';
 import 'core/widgets/force_update_wrapper.dart';
 
+/// App entry. Old screens are unchanged; open route is controlled in
+/// [AppRouter] (`kUseV2DesignEntry` → onboarding → login → home).
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
@@ -53,9 +55,19 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Nectar - Grocery Store',
+      title: 'Ethalnethra',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      // Default Material text falls back to Poppins via [AppTheme].
+      builder: (context, child) {
+        return DefaultTextStyle(
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: Colors.black87,
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       routerConfig: AppRouter.router,
     );
   }
