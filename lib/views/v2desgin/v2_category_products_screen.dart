@@ -1,124 +1,81 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/models/catalog/catalog_product.dart';
+import '../../core/providers/catalog_providers.dart';
+import '../../core/providers/favorites_providers.dart';
 import '../../core/routes/app_router.dart';
-import 'v2_assets.dart';
+import '../../core/widgets/app_network_image.dart';
 
 /// Figma category product listing (sidebar + 2-col product cards).
-class V2CategoryProductsScreen extends StatefulWidget {
+class V2CategoryProductsScreen extends ConsumerStatefulWidget {
   const V2CategoryProductsScreen({
     super.key,
-    this.initialCategory = 'Vegetables',
+    this.initialCategory = '',
+    this.search = '',
   });
 
   final String initialCategory;
+  final String search;
 
   @override
-  State<V2CategoryProductsScreen> createState() =>
+  ConsumerState<V2CategoryProductsScreen> createState() =>
       _V2CategoryProductsScreenState();
 }
 
-class _V2CategoryProductsScreenState extends State<V2CategoryProductsScreen> {
-  static const _sidebar = [
-    'Vegetables',
-    'Fruits',
-    'Dairy & eggs',
-    'Meats',
-    'Soft Drinks',
-    'Package foods',
-  ];
-
+class _V2CategoryProductsScreenState
+    extends ConsumerState<V2CategoryProductsScreen> {
   static const _filters = ['Sort by', 'Price', 'Offers', 'Type'];
 
-  static const _products = [
-    _Product(
-      image: V2Assets.prodTomato,
-      name: 'Indian Tomato',
-      weight: '500 g',
-      price: 20,
-      oldPrice: 25,
-      unit: '₹4/100 g',
-      bg: Color(0xFFFFE4DE),
-      badgeInImage: true,
-    ),
-    _Product(
-      image: V2Assets.prodCarrot,
-      name: 'Fresh Carrot',
-      weight: '500 g',
-      price: 20,
-      oldPrice: 25,
-      unit: '₹4/100 g',
-      bg: Color(0xFFFFCC95),
-      badgeInImage: true,
-    ),
-    _Product(
-      image: V2Assets.prodCapsicum,
-      name: 'Capsicum',
-      weight: '500 g',
-      price: 20,
-      oldPrice: 25,
-      unit: '₹4/100 g',
-      bg: Color(0xFFEEFBDD),
-      badgeInImage: true,
-    ),
-    _Product(
-      image: V2Assets.prodGarlic,
-      name: 'Garlic',
-      weight: '500 g',
-      price: 20,
-      oldPrice: 25,
-      unit: '₹4/100 g',
-      bg: Color(0xFFFFF48F),
-      badgeInImage: true,
-    ),
-    _Product(
-      image: V2Assets.prodCauliflower,
-      name: 'Cauliflower',
-      weight: '500 g',
-      price: 20,
-      oldPrice: 25,
-      unit: '₹4/100 g',
-      bg: Color(0xFFFFF6A1),
-      badgeInImage: true,
-    ),
-    _Product(
-      image: V2Assets.prodOnion,
-      name: 'Onion',
-      weight: '500 g',
-      price: 20,
-      oldPrice: 25,
-      unit: '₹4/100 g',
-      bg: Color(0xFFFFCECE),
-      badgeInImage: false,
-    ),
-  ];
-
   late String _selected;
-  final Set<int> _liked = {};
+  late String _search;
+  String? _sort;
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _selected = _resolveCategory(widget.initialCategory);
+    _selected = widget.initialCategory;
+    _search = widget.search;
+    _searchController.text = widget.search;
   }
 
-  String _resolveCategory(String initial) {
-    final lower = initial.toLowerCase();
-    if (lower.contains('veg')) return 'Vegetables';
-    if (lower.contains('fruit')) return 'Fruits';
-    if (lower.contains('dairy')) return 'Dairy & eggs';
-    if (lower.contains('meat')) return 'Meats';
-    if (lower.contains('drink')) return 'Soft Drinks';
-    if (lower.contains('package') || lower.contains('bakery')) {
-      return 'Package foods';
-    }
-    return 'Vegetables';
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final categories = ref.watch(homeCategoriesProvider);
+    ref.watch(filtersProvider);
+    final categoryItems = categories.value ?? const [];
+    final names = categoryItems
+        .map((item) => item.name)
+        .where((name) => name.isNotEmpty)
+        .toList();
+    final selected = _selected.isNotEmpty
+        ? _selected
+        : (names.isNotEmpty ? names.first : '');
+    final selectedId = categoryItems
+        .where((item) => item.name == selected)
+        .map((item) => item.id)
+        .firstOrNull;
+    final products = ref.watch(
+      catalogQueryProvider(
+        CatalogQuery(
+          category: selected.isEmpty ? null : selected,
+          categoryId: selectedId,
+          sort: _sort,
+          search: _search.isEmpty ? null : _search,
+        ),
+      ),
+    );
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
@@ -132,8 +89,11 @@ class _V2CategoryProductsScreenState extends State<V2CategoryProductsScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _buildSidebar(),
-                    Expanded(child: _buildProductGrid()),
+                    _buildSidebar(
+                      names.isEmpty && selected.isNotEmpty ? [selected] : names,
+                      selected,
+                    ),
+                    Expanded(child: _buildProductGrid(products)),
                   ],
                 ),
               ),
@@ -178,11 +138,22 @@ class _V2CategoryProductsScreenState extends State<V2CategoryProductsScreen> {
                 children: [
                   Icon(Icons.search, size: 20, color: Colors.grey.shade600),
                   const SizedBox(width: 8),
-                  Text(
-                    'Search Veggies',
-                    style: GoogleFonts.poppins(
-                      fontSize: 13.5,
-                      color: Colors.grey.shade600,
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      textInputAction: TextInputAction.search,
+                      onSubmitted: (value) =>
+                          setState(() => _search = value.trim()),
+                      decoration: InputDecoration(
+                        hintText: 'Search products',
+                        hintStyle: GoogleFonts.poppins(
+                          fontSize: 13.5,
+                          color: Colors.grey.shade600,
+                        ),
+                        border: InputBorder.none,
+                        isDense: true,
+                      ),
+                      style: GoogleFonts.poppins(fontSize: 13.5),
                     ),
                   ),
                 ],
@@ -210,6 +181,11 @@ class _V2CategoryProductsScreenState extends State<V2CategoryProductsScreen> {
             return Padding(
               padding: const EdgeInsets.only(right: 8),
               child: _chip(
+                onTap: f == 'Sort by'
+                    ? () => setState(() {
+                          _sort = _sort == 'popular' ? 'price_asc' : 'popular';
+                        })
+                    : null,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -239,8 +215,8 @@ class _V2CategoryProductsScreenState extends State<V2CategoryProductsScreen> {
     );
   }
 
-  Widget _chip({required Widget child, double pad = 12}) {
-    return Container(
+  Widget _chip({required Widget child, double pad = 12, VoidCallback? onTap}) {
+    final box = Container(
       height: 36,
       padding: EdgeInsets.symmetric(horizontal: pad),
       alignment: Alignment.center,
@@ -250,17 +226,19 @@ class _V2CategoryProductsScreenState extends State<V2CategoryProductsScreen> {
       ),
       child: child,
     );
+    if (onTap == null) return box;
+    return GestureDetector(onTap: onTap, child: box);
   }
 
-  Widget _buildSidebar() {
+  Widget _buildSidebar(List<String> labels, String selected) {
     return SizedBox(
       width: 52,
       child: ListView.builder(
         padding: const EdgeInsets.only(top: 8, bottom: 24),
-        itemCount: _sidebar.length,
+        itemCount: labels.length,
         itemBuilder: (context, i) {
-          final label = _sidebar[i];
-          final active = label == _selected;
+          final label = labels[i];
+          final active = label == selected;
           return GestureDetector(
             onTap: () => setState(() => _selected = label),
             child: Container(
@@ -291,14 +269,44 @@ class _V2CategoryProductsScreenState extends State<V2CategoryProductsScreen> {
     );
   }
 
-  Widget _buildProductGrid() {
-    // Show veggie products for Vegetables; empty placeholder for others for now
-    final items = _selected == 'Vegetables' ? _products : const <_Product>[];
+  Widget _buildProductGrid(AsyncValue<List<CatalogProduct>> products) {
+    if (products.isLoading) {
+      return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+    }
+    if (products.hasError) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            products.error.toString(),
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(fontSize: 13),
+          ),
+        ),
+      );
+    }
+    final source = products.value ?? const <CatalogProduct>[];
+    final items = source
+        .map(
+          (p) => _Product(
+            id: p.id,
+            image: p.imageUrl,
+            name: p.name,
+            weight: p.weight,
+            price: p.displayPrice.round(),
+            oldPrice: p.price.round(),
+            unit: p.category,
+            bg: const Color(0xFFF4F7EF),
+            badgeInImage: !p.hasDiscount,
+            badge: p.hasDiscount ? '${p.discountPercentage.round()} % OFF' : '',
+          ),
+        )
+        .toList();
 
     if (items.isEmpty) {
       return Center(
         child: Text(
-          'Coming soon',
+          'No products in this category',
           style: GoogleFonts.poppins(
             fontSize: 14,
             color: Colors.grey.shade500,
@@ -322,28 +330,22 @@ class _V2CategoryProductsScreenState extends State<V2CategoryProductsScreen> {
         return GestureDetector(
           onTap: () => context.push(
             AppRouter.v2ProductDetails,
-            extra: {
-              'title': p.name == 'Indian Tomato'
-                  ? 'Indian Tomato Fresh'
-                  : p.name,
-              'image': p.name == 'Indian Tomato'
-                  ? V2Assets.prodDetailTomato
-                  : p.image,
-              'price': p.price,
-              'oldPrice': p.oldPrice,
-              'weight': p.weight.replaceAll(' g', ' gm'),
-            },
+            extra: {'id': p.id},
           ),
           child: _ProductCard(
             product: p,
-            liked: _liked.contains(i),
-            onLike: () => setState(() {
-              if (_liked.contains(i)) {
-                _liked.remove(i);
-              } else {
-                _liked.add(i);
+            onLike: () async {
+              try {
+                await ref
+                    .read(favoritesNotifierProvider.notifier)
+                    .toggleFavorite(p.id);
+              } catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(e.toString())),
+                );
               }
-            }),
+            },
           ),
         );
       },
@@ -353,6 +355,7 @@ class _V2CategoryProductsScreenState extends State<V2CategoryProductsScreen> {
 
 class _Product {
   const _Product({
+    required this.id,
     required this.image,
     required this.name,
     required this.weight,
@@ -361,8 +364,10 @@ class _Product {
     required this.unit,
     required this.bg,
     required this.badgeInImage,
+    this.badge = '',
   });
 
+  final String id;
   final String image;
   final String name;
   final String weight;
@@ -371,17 +376,16 @@ class _Product {
   final String unit;
   final Color bg;
   final bool badgeInImage;
+  final String badge;
 }
 
 class _ProductCard extends StatelessWidget {
   const _ProductCard({
     required this.product,
-    required this.liked,
     required this.onLike,
   });
 
   final _Product product;
-  final bool liked;
   final VoidCallback onLike;
 
   static const _green = Color(0xFF0E5A03);
@@ -403,13 +407,9 @@ class _ProductCard extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image.asset(
-                  product.image,
+                AppImage(
+                  path: product.image,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => ColoredBox(
-                    color: product.bg,
-                    child: const Icon(Icons.image_outlined),
-                  ),
                 ),
                 if (!product.badgeInImage) ...[
                   Positioned(
@@ -425,7 +425,7 @@ class _ProductCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        '10 % OFF',
+                        product.badge.isEmpty ? product.weight : product.badge,
                         style: GoogleFonts.poppins(
                           fontSize: 9,
                           fontWeight: FontWeight.w600,
@@ -440,7 +440,7 @@ class _ProductCard extends StatelessWidget {
                     child: GestureDetector(
                       onTap: onLike,
                       child: Icon(
-                        liked ? Icons.favorite : Icons.favorite,
+                        Icons.favorite_border,
                         size: 18,
                         color: const Color(0xFFE53935),
                       ),

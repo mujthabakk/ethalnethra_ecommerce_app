@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../core/models/orders/orders_models.dart';
+import '../../core/providers/location_user_providers.dart';
 import '../../core/routes/app_router.dart';
 import 'v2_assets.dart';
 
 /// Figma Tracking Order — map + bottom sheet status / products / tip.
-class V2OrderTrackingScreen extends StatefulWidget {
+class V2OrderTrackingScreen extends ConsumerStatefulWidget {
   const V2OrderTrackingScreen({super.key});
 
   @override
-  State<V2OrderTrackingScreen> createState() => _V2OrderTrackingScreenState();
+  ConsumerState<V2OrderTrackingScreen> createState() =>
+      _V2OrderTrackingScreenState();
 }
 
-class _V2OrderTrackingScreenState extends State<V2OrderTrackingScreen> {
+class _V2OrderTrackingScreenState extends ConsumerState<V2OrderTrackingScreen> {
   static const _green = Color(0xFF0E5A03);
   static const _mint = Color(0xFFD1E0CF);
   static const _grey = Color(0xFFDADADA);
@@ -36,11 +40,37 @@ class _V2OrderTrackingScreenState extends State<V2OrderTrackingScreen> {
   static const _dest = LatLng(10.5276, 76.2144);
   static const _mid = LatLng(10.5288, 76.2122);
 
-  static const _products = [
-    (V2Assets.trackProdCapsicum, 'Green Capsicum', '1 kg', '₹ 89.00'),
-    (V2Assets.trackProdCarrot, 'Green Capsicum', '1 kg', '₹ 89.00'),
-    (V2Assets.trackProdEgg, 'Green Capsicum', '1 kg', '₹ 89.00'),
-  ];
+  List<OrderListItem> get _orders =>
+      ref.watch(ordersListProvider).value?.orders ?? const [];
+
+  OrderListItem? get _activeOrder => _orders.isEmpty ? null : _orders.first;
+
+  OrderTrackResponse? get _track {
+    final id = _activeOrder?.id ?? '';
+    if (id.isEmpty) return null;
+    return ref.watch(orderTrackProvider(id)).valueOrNull;
+  }
+
+  Future<void> _cancelOrder() async {
+    final order = _activeOrder;
+    if (order == null) return;
+    try {
+      await ref.read(ordersRepositoryProvider).cancelOrder(
+            order.id,
+            reason: 'Ordered by mistake',
+          );
+      ref.invalidate(ordersListProvider);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Order cancelled')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
 
   /// 0 Accepted, 1 Packed, 2 Pickup (current), 3 Delivered pending
   static const _activeStep = 2;
@@ -48,6 +78,11 @@ class _V2OrderTrackingScreenState extends State<V2OrderTrackingScreen> {
   @override
   Widget build(BuildContext context) {
     final bottomPad = MediaQuery.paddingOf(context).bottom;
+    final orderId = _activeOrder?.id ?? '';
+    if (orderId.isNotEmpty) {
+      ref.watch(orderDetailProvider(orderId));
+      ref.watch(orderTrackProvider(orderId));
+    }
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
@@ -221,8 +256,32 @@ class _V2OrderTrackingScreenState extends State<V2OrderTrackingScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                ..._products.map(_productRow),
+                if (_orders.isEmpty)
+                  Text(
+                    'No orders yet',
+                    style: GoogleFonts.poppins(color: Colors.black54),
+                  )
+                else
+                  ..._orders.map(
+                    (order) => _productRow((
+                      '',
+                      order.orderNumber,
+                      order.status,
+                      '₹ ${order.total.round()}',
+                    )),
+                  ),
                 const SizedBox(height: 14),
+                if (_activeOrder != null)
+                  TextButton(
+                    onPressed: _cancelOrder,
+                    child: Text(
+                      'Cancel order',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red.shade700,
+                      ),
+                    ),
+                  ),
                 _buildTipBanner(),
               ],
             ),
@@ -241,7 +300,9 @@ class _V2OrderTrackingScreenState extends State<V2OrderTrackingScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Out for delivery',
+                _track?.status.isNotEmpty == true
+                    ? _track!.status
+                    : (_orders.isEmpty ? 'No active order' : _orders.first.status),
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -250,7 +311,7 @@ class _V2OrderTrackingScreenState extends State<V2OrderTrackingScreen> {
               ),
               const SizedBox(height: 2),
               Text(
-                'Arriving at 10:43 AM',
+                _orders.isEmpty ? '' : _orders.first.orderNumber,
                 style: GoogleFonts.poppins(
                   fontSize: 13,
                   color: Colors.grey.shade600,
@@ -263,7 +324,7 @@ class _V2OrderTrackingScreenState extends State<V2OrderTrackingScreen> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              '2344',
+              _orders.isEmpty ? '--' : '₹ ${_orders.first.total.round()}',
               style: GoogleFonts.poppins(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -376,7 +437,7 @@ class _V2OrderTrackingScreenState extends State<V2OrderTrackingScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'James williams',
+                'Driver assigned after dispatch',
                 style: GoogleFonts.poppins(
                   fontSize: 14.5,
                   fontWeight: FontWeight.w700,

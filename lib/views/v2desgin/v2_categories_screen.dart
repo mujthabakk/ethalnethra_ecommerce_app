@@ -2,35 +2,30 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/providers/catalog_providers.dart';
 import '../../core/routes/app_router.dart';
+import '../../core/widgets/app_network_image.dart';
 import 'v2_assets.dart';
 import 'v2_colors.dart';
 
 /// Figma Categories page — Ethalnethra mart only.
-class V2CategoriesScreen extends StatefulWidget {
+class V2CategoriesScreen extends ConsumerStatefulWidget {
   const V2CategoriesScreen({super.key});
 
   @override
-  State<V2CategoriesScreen> createState() => _V2CategoriesScreenState();
+  ConsumerState<V2CategoriesScreen> createState() => _V2CategoriesScreenState();
 }
 
-class _V2CategoriesScreenState extends State<V2CategoriesScreen> {
-  static const _categories = [
-    (V2Assets.catBakery, 'Bakery', Color(0xFFFFEFBE)),
-    (V2Assets.catVegetables, 'Vegetables', Color(0xFFEAFDDD)),
-    (V2Assets.catDairyEggs, 'Dairy & Eggs', Color(0xFFECEBE1)),
-    (V2Assets.catMeats, 'Meats', Color(0xFFF38B7B)),
-    (V2Assets.catSoftDrinks, 'Soft Drinks', Color(0xFFFFF9CC)),
-    (V2Assets.catPackageFoods, 'Package Foods', Color(0xFFFFCCCC)),
-  ];
-
+class _V2CategoriesScreenState extends ConsumerState<V2CategoriesScreen> {
   int _navIndex = 1; // search / categories active
 
   @override
   Widget build(BuildContext context) {
+    final categories = ref.watch(homeCategoriesProvider).value ?? const [];
     final bottomPad = MediaQuery.paddingOf(context).bottom;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -56,18 +51,18 @@ class _V2CategoriesScreenState extends State<V2CategoriesScreen> {
                         crossAxisSpacing: 12,
                         childAspectRatio: 0.92,
                       ),
-                      itemCount: _categories.length,
+                      itemCount: categories.length,
                       itemBuilder: (context, i) {
-                        final c = _categories[i];
+                        final c = categories[i];
                         return GestureDetector(
                           onTap: () => context.push(
                             AppRouter.v2CategoryProducts,
-                            extra: c.$2,
+                            extra: c.name,
                           ),
                           child: _CategoryCard(
-                            image: c.$1,
-                            title: c.$2,
-                            color: c.$3,
+                            image: c.imageUrl ?? '',
+                            title: c.name,
+                            color: const Color(0xFFEAFDDD),
                           ),
                         );
                       },
@@ -338,12 +333,9 @@ class _CategoryCard extends StatelessWidget {
             right: -4,
             bottom: -6,
             top: 44,
-            child: Image.asset(
-              image,
+            child: AppImage(
+              path: image,
               fit: BoxFit.contain,
-              alignment: Alignment.bottomCenter,
-              filterQuality: FilterQuality.high,
-              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
             ),
           ),
         ],

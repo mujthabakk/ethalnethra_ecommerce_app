@@ -2,25 +2,33 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/providers/kitchen_providers.dart';
+import '../../../core/repositories/kitchen_repository.dart';
 import '../../../core/routes/app_router.dart';
+import '../../../core/widgets/app_network_image.dart';
 import 'kistcher_assets.dart';
 
 /// Figma Kitchen restaurant menu — rounded yellow sheet over the hero,
 /// sheet gradient `#FFFDB5 → #FFFFF7`, accent `#F2D262`, cart `#F8D749`.
-class KistcherRestaurantScreen extends StatefulWidget {
+class KistcherRestaurantScreen extends ConsumerStatefulWidget {
   const KistcherRestaurantScreen({
     super.key,
-    this.name = 'KFC',
-    this.subtitle = 'Kentucky fried chicken',
+    this.restaurantId = '',
+    this.name = '',
+    this.subtitle = '',
+    this.image = '',
     this.onBack,
     this.bottomInset = 0,
   });
 
+  final String restaurantId;
   final String name;
   final String subtitle;
+  final String image;
 
   /// Overrides the back button (used when shown as a shell tab).
   final VoidCallback? onBack;
@@ -29,11 +37,12 @@ class KistcherRestaurantScreen extends StatefulWidget {
   final double bottomInset;
 
   @override
-  State<KistcherRestaurantScreen> createState() =>
+  ConsumerState<KistcherRestaurantScreen> createState() =>
       _KistcherRestaurantScreenState();
 }
 
-class _KistcherRestaurantScreenState extends State<KistcherRestaurantScreen> {
+class _KistcherRestaurantScreenState
+    extends ConsumerState<KistcherRestaurantScreen> {
   static const _sheetTop = Color(0xFFFFFDB5);
   static const _sheetMid = Color(0xFFFFFDCC);
   static const _sheetLow = Color(0xFFFFFEE0);
@@ -54,52 +63,66 @@ class _KistcherRestaurantScreenState extends State<KistcherRestaurantScreen> {
 
   int _catIndex = 0;
   bool _liked = false;
+  String _heroImage = '';
+  String _name = '';
+  String _subtitle = '';
+  List<String> _categories = const [];
+  List<(String, String)> _offers = const [];
+  List<KitchenMenuSection> _sections = const [];
 
-  static const _categories = [
-    'Popular',
-    'Chicken buckets',
-    'Burgers',
-    'Sides',
-    'Beverages',
-  ];
+  List<_MenuItem> get _menu {
+    if (_sections.isEmpty) return const [];
+    final index = _catIndex.clamp(0, _sections.length - 1);
+    return _sections[index]
+        .items
+        .map(
+          (item) => _MenuItem(
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            image: item.imageUrl,
+            restaurantId: widget.restaurantId,
+          ),
+        )
+        .toList();
+  }
 
-  static const _offers = [
-    ('50% OFF', 'Minimum order ₹200.Valid for all items. Auto applied.'),
-    ('30% OFF', 'Minimum order ₹200.Valid for all items. Auto applied.'),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _heroImage = widget.image;
+    _name = widget.name;
+    _subtitle = widget.subtitle;
+    _load();
+  }
 
-  static const _menu = [
-    _MenuItem(
-      name: 'Big Mac Burger',
-      price: 250,
-      image: KistcherAssets.restMenuBurger,
-    ),
-    _MenuItem(
-      name: 'Big Mac Burger',
-      price: 250,
-      image: KistcherAssets.restMenuBurger,
-    ),
-    _MenuItem(
-      name: 'Big Mac Burger',
-      price: 250,
-      image: KistcherAssets.restMenuBurger,
-    ),
-    _MenuItem(
-      name: 'Big Mac Burger',
-      price: 250,
-      image: KistcherAssets.restMenuBurger,
-    ),
-    _MenuItem(
-      name: 'Big Mac Burger',
-      price: 250,
-      image: KistcherAssets.restMenuBurger,
-    ),
-    _MenuItem(
-      name: 'Big Mac Burger',
-      price: 250,
-      image: KistcherAssets.restMenuBurger,
-    ),
-  ];
+  Future<void> _load() async {
+    final id = widget.restaurantId;
+    if (id.isEmpty) return;
+    final repo = ref.read(kitchenRepositoryProvider);
+    try {
+      final results = await Future.wait([
+        repo.fetchRestaurant(id),
+        repo.fetchOffers(id),
+        repo.fetchMenu(id),
+      ]);
+      if (!mounted) return;
+      final restaurant = results[0] as KitchenRestaurant?;
+      final offers = results[1] as List<KitchenOffer>;
+      final menu = results[2] as List<KitchenMenuSection>;
+      setState(() {
+        if (restaurant != null) {
+          if (restaurant.imageUrl.isNotEmpty) _heroImage = restaurant.imageUrl;
+          if (restaurant.name.isNotEmpty) _name = restaurant.name;
+          if (restaurant.subtitle.isNotEmpty) _subtitle = restaurant.subtitle;
+        }
+        _offers = offers.map((item) => (item.title, item.detail)).toList();
+        _sections = menu;
+        _categories = menu.map((item) => item.name).where((name) => name.isNotEmpty).toList();
+        _catIndex = 0;
+      });
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,13 +145,14 @@ class _KistcherRestaurantScreenState extends State<KistcherRestaurantScreen> {
                 left: 0,
                 right: 0,
                 height: heroH,
-                child: Image.asset(
-                  KistcherAssets.restHero,
-                  fit: BoxFit.cover,
-                  alignment: Alignment.topCenter,
-                  errorBuilder: (_, __, ___) =>
-                      const ColoredBox(color: Color(0xFF881A11)),
-                ),
+                child: _heroImage.isEmpty
+                    ? const ColoredBox(color: Color(0xFF881A11))
+                    : AppImage(
+                        path: _heroImage,
+                        fit: BoxFit.cover,
+                        width: width,
+                        height: heroH,
+                      ),
               ),
 
               // Rounded yellow sheet
@@ -235,7 +259,7 @@ class _KistcherRestaurantScreenState extends State<KistcherRestaurantScreen> {
         fit: BoxFit.contain,
         errorBuilder: (_, __, ___) => Center(
           child: Text(
-            widget.name,
+            _name,
             style: GoogleFonts.poppins(
               color: const Color(0xFFE4002B),
               fontWeight: FontWeight.w800,
@@ -261,7 +285,7 @@ class _KistcherRestaurantScreenState extends State<KistcherRestaurantScreen> {
                   children: [
                     Flexible(
                       child: Text(
-                        widget.name,
+                        _name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
@@ -287,7 +311,7 @@ class _KistcherRestaurantScreenState extends State<KistcherRestaurantScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  widget.subtitle,
+                  _subtitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
@@ -600,13 +624,17 @@ class _PromoCard extends StatelessWidget {
 
 class _MenuItem {
   const _MenuItem({
+    required this.id,
     required this.name,
     required this.price,
     required this.image,
+    this.restaurantId = '',
   });
+  final String id;
   final String name;
   final int price;
   final String image;
+  final String restaurantId;
 }
 
 /// White card, inset image (name tab flush left), cream price row.
@@ -621,7 +649,13 @@ class _MenuCard extends StatelessWidget {
     return GestureDetector(
       onTap: () => context.push(
         AppRouter.kistcherProduct,
-        extra: {'title': item.name, 'price': item.price},
+        extra: {
+          'id': item.id,
+          'title': item.name,
+          'price': item.price,
+          'image': item.image,
+          'restaurantId': item.restaurantId,
+        },
       ),
       child: Container(
         padding: const EdgeInsets.all(5.5),
@@ -638,11 +672,9 @@ class _MenuCard extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.asset(
-                      item.image,
+                    AppImage(
+                      path: item.image,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                          const ColoredBox(color: Color(0xFFE0E0E0)),
                     ),
                     Positioned(
                       left: 0,

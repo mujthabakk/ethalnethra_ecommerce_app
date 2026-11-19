@@ -165,3 +165,14 @@ final verifyOtpNotifierProvider =
     NotifierProvider<VerifyOtpNotifier, VerifyOtpUiState>(
   VerifyOtpNotifier.new,
 );
+
+/// Name and email collected on sign-up, saved with `POST /api/user/details`
+/// after the phone OTP succeeds.
+class PendingSignup {
+  const PendingSignup({required this.name, required this.email});
+
+  final String name;
+  final String email;
+}
+
+final pendingSignupProvider = StateProvider<PendingSignup?>((ref) => null);

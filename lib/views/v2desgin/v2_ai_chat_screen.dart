@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,19 +7,22 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
+import '../../core/providers/catalog_providers.dart';
+import '../../core/providers/location_user_providers.dart';
+import '../../core/widgets/app_network_image.dart';
 import 'v2_assets.dart';
 
-/// Figma Ethal Assistant — text + voice + product suggestion grid.
-class V2AiChatScreen extends StatefulWidget {
+/// Figma Ethal Assistant — replies and products come from the API.
+class V2AiChatScreen extends ConsumerStatefulWidget {
   const V2AiChatScreen({super.key, this.userName = 'Sam'});
 
   final String userName;
 
   @override
-  State<V2AiChatScreen> createState() => _V2AiChatScreenState();
+  ConsumerState<V2AiChatScreen> createState() => _V2AiChatScreenState();
 }
 
-class _V2AiChatScreenState extends State<V2AiChatScreen> {
+class _V2AiChatScreenState extends ConsumerState<V2AiChatScreen> {
   static const _green = Color(0xFF0E5A03);
   static const _bg = Color(0xFFF8FFF6);
   static const _userBubble = Color(0xFFD1E0CF);
@@ -34,50 +38,26 @@ class _V2AiChatScreenState extends State<V2AiChatScreen> {
 
   final List<_ChatMsg> _messages = [];
 
-  static const _suggestions = [
-    'Show me some good quality fruits and vegetables',
-    'Show me apple prizes',
-    'Add one kilo rice to my cart',
-  ];
+  List<String> get _suggestions =>
+      ref.watch(aiSuggestionsProvider).value ?? const <String>[];
 
-  static const _produce = [
-    _ChatProduct(
-      image: V2Assets.prodTomato,
-      name: 'Indian Tomato',
-      weight: '500 g',
-      price: 20,
-      oldPrice: 25,
-      unit: '₹4/100 g',
-      bg: Color(0xFFFFE4DE),
-    ),
-    _ChatProduct(
-      image: V2Assets.prodCarrot,
-      name: 'Fresh Carrot',
-      weight: '500 g',
-      price: 20,
-      oldPrice: 25,
-      unit: '₹4/100 g',
-      bg: Color(0xFFFCEDD5),
-    ),
-    _ChatProduct(
-      image: V2Assets.prodOnion,
-      name: 'Fresh Onion big',
-      weight: '500 g',
-      price: 20,
-      oldPrice: 25,
-      unit: '₹4/100 g',
-      bg: Color(0xFFFCE6DE),
-    ),
-    _ChatProduct(
-      image: V2Assets.wishStrawberry,
-      name: 'Fresh Strawberries',
-      weight: '500 g',
-      price: 20,
-      oldPrice: 25,
-      unit: '₹4/100 g',
-      bg: Color(0xFFFFE4DE),
-    ),
-  ];
+  List<_ChatProduct> _cardsFromMaps(List<Map<String, dynamic>> raw) {
+    return raw
+        .map(
+          (item) => _ChatProduct(
+            image: (item['image_url'] ?? item['imageUrl'] ?? '').toString(),
+            name: (item['name'] ?? item['title'] ?? 'Product').toString(),
+            weight: (item['weight'] ?? '').toString(),
+            price: (item['price'] as num?)?.round() ?? 0,
+            oldPrice: (item['old_price'] as num?)?.round() ??
+                (item['price'] as num?)?.round() ??
+                0,
+            unit: (item['category'] ?? '').toString(),
+            bg: const Color(0xFFF4F7EF),
+          ),
+        )
+        .toList();
+  }
 
   @override
   void initState() {
@@ -188,7 +168,7 @@ class _V2AiChatScreenState extends State<V2AiChatScreen> {
     }
   }
 
-  void _send([String? preset]) {
+  Future<void> _send([String? preset]) async {
     final text = (preset ?? _controller.text).trim();
     if (text.isEmpty) return;
 
@@ -201,27 +181,65 @@ class _V2AiChatScreenState extends State<V2AiChatScreen> {
     _speech.stop();
     _focus.unfocus();
 
-    Future.delayed(const Duration(milliseconds: 450), () {
-      if (!mounted) return;
-      final reply = _replyFor(text);
-      setState(() {
-        _messages.add(
-          _ChatMsg(
-            text: reply.text,
-            isUser: false,
-            products: reply.showProducts ? _produce : null,
-          ),
-        );
-      });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scroll.hasClients) {
-          _scroll.animateTo(
-            _scroll.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 280),
-            curve: Curves.easeOut,
-          );
+    String reply = '';
+    var cards = <_ChatProduct>[];
+    try {
+      final ai = await ref.read(contentRepositoryProvider).sendAiMessage(text);
+      reply = ai.reply;
+      cards = _cardsFromMaps(ai.products);
+    } catch (e) {
+      reply = e.toString();
+    }
+
+    if (reply.isEmpty || cards.isEmpty) {
+      try {
+        final products = await ref.read(catalogRepositoryProvider).fetchProducts(
+              search: text,
+              limit: 6,
+            );
+        if (cards.isEmpty) {
+          cards = products.products
+              .map(
+                (item) => _ChatProduct(
+                  image: item.imageUrl,
+                  name: item.name,
+                  weight: item.weight,
+                  price: item.displayPrice.round(),
+                  oldPrice: item.price.round(),
+                  unit: item.category,
+                  bg: const Color(0xFFF4F7EF),
+                ),
+              )
+              .toList();
         }
-      });
+        if (reply.isEmpty) {
+          reply = cards.isEmpty
+              ? 'No matching products right now.'
+              : 'Here are products from the store that match your request.';
+        }
+      } catch (e) {
+        reply = reply.isEmpty ? e.toString() : reply;
+      }
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _messages.add(
+        _ChatMsg(
+          text: reply,
+          isUser: false,
+          products: cards.isEmpty ? null : cards,
+        ),
+      );
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scroll.hasClients) {
+        _scroll.animateTo(
+          _scroll.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeOut,
+        );
+      }
     });
   }
 
@@ -706,13 +724,9 @@ class _ChatProductCardState extends State<_ChatProductCard> {
                   padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      p.image,
+                    child: AppImage(
+                      path: p.image,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => ColoredBox(
-                        color: p.bg,
-                        child: const Icon(Icons.image_outlined),
-                      ),
                     ),
                   ),
                 ),

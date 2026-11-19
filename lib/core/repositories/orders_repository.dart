@@ -32,6 +32,23 @@ class OrdersRepository {
     return CheckoutResponse.fromJson(data);
   }
 
+  /// PDF contract: `{ "amount": 66, "currency": "INR" }`.
+  Future<CreatePaymentResponse> createPaymentOrder({
+    required num amount,
+    String currency = 'INR',
+  }) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      ApiEndpoints.ordersCreatePayment,
+      data: {
+        'amount': amount,
+        'currency': currency,
+      },
+    );
+    final data = response.data;
+    if (data == null) throw Exception('Empty create payment response');
+    return CreatePaymentResponse.fromJson(data);
+  }
+
   Future<CreatePaymentResponse> createPayment({
     required int addressId,
     required String type,
@@ -83,7 +100,7 @@ class OrdersRepository {
 
   Future<OrderTrackResponse> fetchOrderTrack(String orderId) async {
     final response = await _dio.get<Map<String, dynamic>>(
-      '${ApiEndpoints.orders}/$orderId/track',
+      ApiEndpoints.orderTrack(orderId),
     );
     final data = response.data;
     if (data == null) throw Exception('Empty order track response');
@@ -95,7 +112,7 @@ class OrdersRepository {
     String reason = 'Changed my mind',
   }) async {
     final response = await _dio.post<Map<String, dynamic>>(
-      '${ApiEndpoints.orders}/$orderId/cancel',
+      ApiEndpoints.orderCancel(orderId),
       data: {'reason': reason},
     );
     final data = response.data;

@@ -31,6 +31,9 @@ class CatalogRepository {
     int limit = 20,
     int page = 1,
     String? category,
+    String? categoryId,
+    String? brandId,
+    String? sort,
     String? search,
     String? type,
   }) async {
@@ -38,6 +41,13 @@ class CatalogRepository {
     if (category != null && category.isNotEmpty) {
       body['category'] = category;
     }
+    final parsedCategoryId = int.tryParse(categoryId ?? '');
+    if (parsedCategoryId != null) body['category_id'] = parsedCategoryId;
+    final parsedBrandId = int.tryParse(brandId ?? '');
+    if (brandId != null && brandId.isNotEmpty) {
+      body['brand_id'] = parsedBrandId ?? brandId;
+    }
+    if (sort != null && sort.isNotEmpty) body['sort'] = sort;
     if (search != null && search.isNotEmpty) {
       body['search'] = search;
     }
@@ -60,6 +70,45 @@ class CatalogRepository {
     final data = response.data;
     if (data == null) throw Exception('Empty product detail response');
     return ProductDetailDto.fromJson(data);
+  }
+
+  Future<List<CatalogProduct>> fetchBestValue() {
+    return _fetchDealList(ApiEndpoints.shopBestValue);
+  }
+
+  Future<List<CatalogProduct>> fetchTodaysDeals() {
+    return _fetchDealList(ApiEndpoints.shopTodaysDeals);
+  }
+
+  Future<List<CatalogProduct>> _fetchDealList(String path) async {
+    try {
+      final response = await _dio.get<dynamic>(path);
+      final raw = _dealItems(response.data);
+      return raw.map((item) {
+        final map = Map<String, dynamic>.from(item);
+        map['name'] ??= map['title'];
+        map['display_price'] ??= map['price'];
+        map['our_price'] ??= map['price'];
+        map['final_price'] ??= map['price'];
+        map['old_price'] ??= map['price'];
+        if (map['price'] == null && map['old_price'] != null) {
+          map['price'] = map['old_price'];
+        }
+        return catalogProductFromJsonLoose(map);
+      }).where((item) => item.id.isNotEmpty || item.name.isNotEmpty).toList();
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) return const [];
+      rethrow;
+    }
+  }
+
+  List<Map<String, dynamic>> _dealItems(dynamic data) {
+    dynamic raw = data;
+    if (data is Map) {
+      raw = data['data'] ?? data['products'] ?? data['items'] ?? data;
+    }
+    if (raw is! List) return const [];
+    return raw.whereType<Map>().map((item) => Map<String, dynamic>.from(item)).toList();
   }
 
   Future<FiltersResponse> fetchFilters() async {

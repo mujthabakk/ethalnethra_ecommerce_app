@@ -28,16 +28,16 @@ class V2AuthTabSwitch extends StatelessWidget {
         children: [
           Expanded(
             child: _tab(
-              label: 'E mail',
-              selected: isEmail,
-              onTap: () => onChanged(true),
+              label: 'Phone number',
+              selected: !isEmail,
+              onTap: () => onChanged(false),
             ),
           ),
           Expanded(
             child: _tab(
-              label: 'Phone number',
-              selected: !isEmail,
-              onTap: () => onChanged(false),
+              label: 'E mail',
+              selected: isEmail,
+              onTap: () => onChanged(true),
             ),
           ),
         ],

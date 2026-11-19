@@ -1,51 +1,86 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/models/catalog/banner_item.dart';
+import '../../core/models/catalog/catalog_product.dart';
+import '../../core/models/catalog/category_item.dart';
+import '../../core/models/user/user_address_models.dart';
+import '../../core/providers/auth_providers.dart';
+import '../../core/providers/cart_providers.dart';
+import '../../core/providers/catalog_providers.dart';
+import '../../core/providers/location_user_providers.dart';
 import '../../core/routes/app_router.dart';
+import '../../core/widgets/app_network_image.dart';
 import 'v2_assets.dart';
 import 'v2_colors.dart';
 
-/// V2 Ethalnethra home — Figma exact (#0E5A03 / #DEFFD9).
-class V2HomeScreen extends StatefulWidget {
+/// V2 Ethalnethra home — layout kept, catalogue comes from the live API.
+class V2HomeScreen extends ConsumerStatefulWidget {
   const V2HomeScreen({super.key});
 
   @override
-  State<V2HomeScreen> createState() => _V2HomeScreenState();
+  ConsumerState<V2HomeScreen> createState() => _V2HomeScreenState();
 }
 
-class _V2HomeScreenState extends State<V2HomeScreen> {
+class _V2HomeScreenState extends ConsumerState<V2HomeScreen> {
   int _serviceIndex = 0;
   int _bannerIndex = 0;
   int _bestValuePage = 0;
   int _navIndex = 0;
   bool _showDeliveryBar = true;
-  final Map<int, int> _qty = {};
+  final Map<String, int> _qty = {};
+  final _searchController = TextEditingController();
 
-  static const _categories = [
-    (V2Assets.categoryVeggies, 'Veggies'),
-    (V2Assets.categoryFruits, 'Fruits'),
-    (V2Assets.categoryDairy, 'Dairy'),
-    (V2Assets.categoryMeats, 'Meats'),
-    (V2Assets.categorySnaks, 'Snaks'),
-    (V2Assets.categoryDrinks, 'Drinks'),
-  ];
+  List<CategoryItem> _categories = const [];
+  List<CatalogProduct> _products = const [];
+  List<BannerItem> _banners = const [];
+  bool _loadingCatalog = true;
 
-  static const _bestValues = [
-    ('up to 50% OFF', 'Dairy & Egg', V2Assets.valueCard),
-    ('up to 10% OFF', 'Snacks', V2Assets.categorySnaks),
-    ('up to 30% OFF', 'Fresh orange', V2Assets.categoryFruits),
-    ('up to 60% OFF', 'Veggies', V2Assets.produceBasket),
-  ];
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
-  static const _todaysDeals = [
-    (V2Assets.categoryFruits, 'Fresh Banana', '1 kg', 100, 200),
-    (V2Assets.categoryVeggies, 'Capsicum', '500 g', 80, 120),
-    (V2Assets.categoryDairy, 'Cauliflower', '1 pc', 45, 60),
-    (V2Assets.categoryDrinks, 'Fresh Juice', '1 L', 90, 140),
-  ];
+  List<CatalogProduct> get _bestValues {
+    final dedicated = ref.watch(bestValueProvider).valueOrNull ?? const [];
+    if (dedicated.isNotEmpty) return dedicated.take(8).toList();
+    final discounted = _products.where((p) => p.hasDiscount).toList();
+    final source = discounted.isNotEmpty ? discounted : _products;
+    return source.take(8).toList();
+  }
+
+  List<CatalogProduct> get _todaysDeals {
+    final dedicated = ref.watch(todaysDealsProvider).valueOrNull ?? const [];
+    if (dedicated.isNotEmpty) return dedicated.take(8).toList();
+    return _products.take(8).toList();
+  }
+
+  void _openProduct(CatalogProduct product) {
+    context.push(
+      AppRouter.v2ProductDetails,
+      extra: {'id': product.id},
+    );
+  }
+
+  void _openSearch([String? category]) {
+    context.push(
+      AppRouter.v2CategoryProducts,
+      extra: {
+        'category': category ?? '',
+        'search': _searchController.text.trim(),
+      },
+    );
+  }
+
+  String _money(num value) {
+    if (value == value.roundToDouble()) return value.toInt().toString();
+    return value.toStringAsFixed(2);
+  }
 
   bool get _isMart => _serviceIndex == 0;
 
@@ -56,7 +91,16 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cats = ref.watch(homeCategoriesProvider);
+    final products = ref.watch(homeProductsProvider);
+    final banners = ref.watch(homeBannersProvider);
+    _categories = cats.value ?? const [];
+    _products = products.value ?? const [];
+    _banners = banners.value ?? const [];
+    _loadingCatalog = cats.isLoading || products.isLoading;
+
     final bottomPad = MediaQuery.paddingOf(context).bottom;
+    final locationLabel = _deliveryLabel();
 
     return Scaffold(
       backgroundColor: V2Colors.white,
@@ -84,7 +128,7 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
             bottom: false,
             child: Column(
               children: [
-                _buildHeader(),
+                _buildHeader(locationLabel),
                 _buildServiceTabs(),
                 Expanded(
                   child: _isMart
@@ -139,7 +183,23 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  String _deliveryLabel() {
+    final token = ref.read(authStorageProvider).token;
+    if (token == null || token.isEmpty) return 'Select location';
+    final addresses = ref.watch(userAddressesProvider);
+    final list = addresses.value ?? const <UserAddressDto>[];
+    if (list.isEmpty) return 'Select location';
+    final current = list.cast<UserAddressDto?>().firstWhere(
+          (item) => item?.isDefault == true,
+          orElse: () => list.first,
+        );
+    if (current == null) return 'Select location';
+    final line = current.addressLine.trim();
+    if (line.isEmpty) return current.label;
+    return '${current.label}, $line';
+  }
+
+  Widget _buildHeader(String locationLabel) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       child: Row(
@@ -167,7 +227,7 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                     children: [
                       Flexible(
                         child: Text(
-                          'Home, New York',
+                          locationLabel,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
@@ -251,7 +311,7 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                   return;
                 }
                 if (i == 2) {
-                  context.push(AppRouter.kistcherBlank, extra: 'Our Services');
+                  context.go(AppRouter.serviceHome);
                   return;
                 }
                 setState(() => _serviceIndex = i);
@@ -314,11 +374,21 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
           children: [
             Icon(Icons.search, color: Colors.grey.shade600, size: 22),
             const SizedBox(width: 10),
-            Text(
-              'Search Store',
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: Colors.grey.shade600,
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                textInputAction: TextInputAction.search,
+                onSubmitted: (_) => _openSearch(),
+                decoration: InputDecoration(
+                  hintText: 'Search Store',
+                  hintStyle: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                  border: InputBorder.none,
+                  isDense: true,
+                ),
+                style: GoogleFonts.poppins(fontSize: 14),
               ),
             ),
           ],
@@ -328,6 +398,9 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
   }
 
   Widget _buildPromoBanner() {
+    if (_banners.isEmpty) return const SizedBox.shrink();
+    final index = _bannerIndex.clamp(0, _banners.length - 1);
+    final banner = _banners[index];
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
       child: Column(
@@ -356,16 +429,9 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                           bottom: -h * 0.08,
                           width: imgW,
                           height: h * 1.08,
-                          child: Image.asset(
-                            V2Assets.bannerProduce,
+                          child: AppImage(
+                            path: banner.imageUrl,
                             fit: BoxFit.contain,
-                            alignment: Alignment.bottomRight,
-                            filterQuality: FilterQuality.high,
-                            errorBuilder: (_, __, ___) => Image.asset(
-                              V2Assets.produceBasket,
-                              fit: BoxFit.contain,
-                              alignment: Alignment.bottomRight,
-                            ),
                           ),
                         ),
                         Padding(
@@ -379,7 +445,7 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Up To 50%\nDiscount',
+                                banner.title,
                                 style: GoogleFonts.poppins(
                                   fontSize: w < 360 ? 22 : 26,
                                   fontWeight: FontWeight.w700,
@@ -389,7 +455,9 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                'Shop fresh products grab\nexclusive deals',
+                                (banner.description ?? '').isEmpty
+                                    ? banner.title
+                                    : banner.description!,
                                 style: GoogleFonts.poppins(
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w500,
@@ -398,7 +466,9 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                                 ),
                               ),
                               const Spacer(),
-                              Container(
+                              GestureDetector(
+                                onTap: () => _openSearch(),
+                                child: Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 20,
                                   vertical: 10,
@@ -416,6 +486,7 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                                   ),
                                 ),
                               ),
+                              ),
                             ],
                           ),
                         ),
@@ -429,8 +500,8 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(3, (i) {
-              final active = _bannerIndex == i;
+            children: List.generate(_banners.length, (i) {
+              final active = index == i;
               return GestureDetector(
                 onTap: () => setState(() => _bannerIndex = i),
                 child: AnimatedContainer(
@@ -555,6 +626,18 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
   }
 
   Widget _buildCategories() {
+    if (_loadingCatalog && _categories.isEmpty) {
+      return const SizedBox(
+        height: 112,
+        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+      );
+    }
+    if (_categories.isEmpty) {
+      return const SizedBox(
+        height: 48,
+        child: Center(child: Text('No categories')),
+      );
+    }
     return SizedBox(
       height: 112,
       child: ListView.separated(
@@ -565,7 +648,7 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
         itemBuilder: (context, i) {
           final item = _categories[i];
           return GestureDetector(
-            onTap: _openCategories,
+            onTap: () => _openSearch(item.name),
             child: SizedBox(
               width: 74,
               child: Column(
@@ -578,16 +661,14 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     padding: const EdgeInsets.all(10),
-                    child: Image.asset(
-                      item.$1,
+                    child: AppImage(
+                      path: item.imageUrl ?? '',
                       fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) =>
-                          const Icon(Icons.image_outlined),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    item.$2,
+                    item.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
@@ -606,16 +687,28 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
   }
 
   Widget _buildBestValues() {
+    final items = _bestValues;
+    if (items.isEmpty) {
+      return const SizedBox(
+        height: 48,
+        child: Center(child: Text('No deals right now')),
+      );
+    }
     return SizedBox(
       height: 190,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _bestValues.length,
+        itemCount: items.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (context, i) {
-          final item = _bestValues[i];
-          return Container(
+          final item = items[i];
+          final off = item.hasDiscount
+              ? '${item.discountPercentage.round()}% OFF'
+              : item.category;
+          return GestureDetector(
+            onTap: () => _openProduct(item),
+            child: Container(
             width: 128,
             decoration: BoxDecoration(
               gradient: V2Colors.promoGradient,
@@ -626,7 +719,7 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.$1,
+                  off,
                   style: GoogleFonts.poppins(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -636,7 +729,9 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  item.$2,
+                  item.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     color: V2Colors.textSecondary,
@@ -644,16 +739,15 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                 ),
                 const Spacer(),
                 Center(
-                  child: Image.asset(
-                    item.$3,
+                  child: AppImage(
+                    path: item.imageUrl,
                     height: 88,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) =>
-                        const Icon(Icons.image_outlined, size: 48),
                   ),
                 ),
               ],
             ),
+          ),
           );
         },
       ),
@@ -665,7 +759,7 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
       padding: const EdgeInsets.only(top: 12, bottom: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(3, (i) {
+        children: List.generate(_bestValues.isEmpty ? 0 : _bestValues.length.clamp(0, 8), (i) {
           final active = _bestValuePage == i;
           return GestureDetector(
             onTap: () => setState(() => _bestValuePage = i),
@@ -701,8 +795,11 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
         ),
         itemBuilder: (context, i) {
           final item = _todaysDeals[i];
-          final qty = _qty[i] ?? 1;
-          return Container(
+          final qty = _qty[item.id] ?? 1;
+          final showOld = item.hasDiscount && item.price > item.displayPrice;
+          return GestureDetector(
+            onTap: () => _openProduct(item),
+            child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -722,11 +819,9 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         padding: const EdgeInsets.all(10),
-                        child: Image.asset(
-                          item.$1,
+                        child: AppImage(
+                          path: item.imageUrl,
                           fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) =>
-                              const Icon(Icons.image_outlined),
                         ),
                       ),
                       Positioned(
@@ -745,7 +840,9 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                             ),
                           ),
                           child: Text(
-                            '10% OFF',
+                            item.hasDiscount
+                                ? '${item.discountPercentage.round()}% OFF'
+                                : item.weight,
                             style: GoogleFonts.poppins(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
@@ -776,7 +873,7 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  item.$2,
+                  item.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
@@ -786,7 +883,7 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                   ),
                 ),
                 Text(
-                  item.$3,
+                  item.weight,
                   style: GoogleFonts.poppins(
                     fontSize: 11,
                     color: V2Colors.textSecondary,
@@ -796,22 +893,24 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                 Row(
                   children: [
                     Text(
-                      '₹ ${item.$4}',
+                      '₹ ${_money(item.displayPrice)}',
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: V2Colors.textPrimary,
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '₹ ${item.$5}',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: V2Colors.textSecondary,
-                        decoration: TextDecoration.lineThrough,
+                    if (showOld) ...[
+                      const SizedBox(width: 6),
+                      Text(
+                        '₹ ${_money(item.price)}',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: V2Colors.textSecondary,
+                          decoration: TextDecoration.lineThrough,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -820,7 +919,7 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                   children: [
                     _qtyBtn(
                       Icons.add,
-                      () => setState(() => _qty[i] = qty + 1),
+                      () => setState(() => _qty[item.id] = qty + 1),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -835,7 +934,7 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                     _qtyBtn(
                       Icons.remove,
                       () {
-                        if (qty > 1) setState(() => _qty[i] = qty - 1);
+                        if (qty > 1) setState(() => _qty[item.id] = qty - 1);
                       },
                     ),
                   ],
@@ -845,7 +944,25 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                   width: double.infinity,
                   height: 36,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      try {
+                        await ref.read(cartNotifierProvider.notifier).addToCart(
+                              item.id,
+                              quantity: qty,
+                            );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Added to cart')),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(e.toString())),
+                          );
+                        }
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: V2Colors.darkGreen,
                       foregroundColor: Colors.white,
@@ -866,6 +983,7 @@ class _V2HomeScreenState extends State<V2HomeScreen> {
                 ),
               ],
             ),
+          ),
           );
         },
       ),

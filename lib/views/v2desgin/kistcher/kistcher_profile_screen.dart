@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/models/user/user_details_models.dart';
+import '../../../core/providers/location_user_providers.dart';
 import '../../../core/routes/app_router.dart';
 import 'kistcher_assets.dart';
 import 'kistcher_page_header.dart';
 
 /// Figma Kitchen "Profile" — avatar + edit pill, Refer & Earn banner,
 /// white grouped menu cards with `#FDF7E2` icon tiles.
-class KistcherProfileScreen extends StatelessWidget {
+class KistcherProfileScreen extends ConsumerWidget {
   const KistcherProfileScreen({super.key, this.onBack, this.bottomInset = 0});
 
   /// Overrides the back button (used when shown as a shell tab).
@@ -35,7 +38,7 @@ class KistcherProfileScreen extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final media = MediaQuery.of(context);
 
     final forYou = [
@@ -118,7 +121,7 @@ class KistcherProfileScreen extends StatelessWidget {
                   showMenu: false,
                 ),
                 const SizedBox(height: 32),
-                _buildUser(),
+                _buildUser(ref),
                 const SizedBox(height: 37),
                 Padding(
                   padding: const EdgeInsets.only(left: 4, right: 6),
@@ -160,7 +163,14 @@ class KistcherProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildUser() {
+  Widget _buildUser(WidgetRef ref) {
+    final user = ref.watch(userDetailsProvider).valueOrNull;
+    final name = user?.displayName.isNotEmpty == true ? user!.displayName : 'Guest';
+    final email = user?.email ?? '';
+    final phone = user?.phone ?? '';
+    final contact = user == null
+        ? 'Sign in to see your account'
+        : (email.isNotEmpty ? email : phone);
     return Row(
       children: [
         SizedBox(
@@ -204,7 +214,7 @@ class KistcherProfileScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Saadhiya Patil',
+                name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.poppins(
@@ -216,7 +226,7 @@ class KistcherProfileScreen extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                'saadhiya@gmail.com',
+                contact,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.poppins(

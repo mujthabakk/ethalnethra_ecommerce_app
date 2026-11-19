@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/providers/location_user_providers.dart';
+import '../../core/repositories/content_repository.dart';
 import '../../core/routes/app_router.dart';
-import 'v2_assets.dart';
 
 /// Figma Notifications — Today (mint) + Yesterday (grey) cards.
-class V2NotificationsScreen extends StatelessWidget {
+class V2NotificationsScreen extends ConsumerWidget {
   const V2NotificationsScreen({super.key});
 
   static const _todayBg = Color(0xFFD1E0CF);
@@ -15,70 +17,25 @@ class V2NotificationsScreen extends StatelessWidget {
   static const _green = Color(0xFF0E5A03);
   static const _yesterdayBg = Color(0xFFF5F5F5);
 
-  static const _today = [
-    _Notif(
-      icon: V2Assets.notifTruck,
-      fallback: Icons.local_shipping_outlined,
-      title: 'Your order is on the way!',
-      time: '2 min ago',
-      body:
-          'Your groceries are out for delivery. Get ready to receive your fresh picks.',
-    ),
-    _Notif(
-      icon: V2Assets.notifCheck,
-      fallback: Icons.check_circle_outline,
-      title: 'Order Confirmed',
-      time: '35 min ago',
-      body:
-          'Your order #ETH2048 has been confirmed. We’re getting everything ready for you.',
-    ),
-  ];
-
-  static const _yesterday = [
-    _Notif(
-      icon: V2Assets.notifChat,
-      fallback: Icons.chat_bubble_outline,
-      title: 'New Message',
-      time: '02.01.2026',
-      body:
-          'Your driver sent you a message regarding your recent delivery #ETH3456.',
-    ),
-    _Notif(
-      icon: V2Assets.notifLate,
-      fallback: Icons.schedule_outlined,
-      title: 'Running a bit late',
-      time: '02.01.2026',
-      body:
-          'There’s a slight delay due to traffic. Thank you for your patience.',
-    ),
-    _Notif(
-      icon: V2Assets.notifDelivered,
-      fallback: Icons.inventory_2_outlined,
-      title: 'Order Delivered Successfully',
-      time: '02.01.2026',
-      body:
-          'Your groceries have arrived! We hope you enjoy your fresh picks.',
-    ),
-    _Notif(
-      icon: V2Assets.notifDeal,
-      fallback: Icons.local_offer_outlined,
-      title: 'Fresh deals just for you!',
-      time: '02.01.2026',
-      body:
-          'Save 20% on selected fresh fruits and vegetables. Your favorites are waiting!',
-    ),
-    _Notif(
-      icon: V2Assets.notifHeart,
-      fallback: Icons.favorite_border,
-      title: 'Your favorites are waiting',
-      time: '02.01.2026',
-      body:
-          'The groceries you saved are ready to shop. Add your favorites to your cart before you forget!',
-    ),
-  ];
+  List<_Notif> _map(List<InboxNotification> items) {
+    return items
+        .map(
+          (item) => _Notif(
+            icon: '',
+            fallback: Icons.notifications_none_rounded,
+            title: item.title,
+            time: item.timestamp,
+            body: item.message,
+          ),
+        )
+        .toList();
+  }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final inbox = ref.watch(notificationsProvider);
+    final today = _map(inbox.value?.today ?? const []);
+    final yesterday = _map(inbox.value?.yesterday ?? const []);
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
@@ -92,9 +49,31 @@ class V2NotificationsScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                   physics: const BouncingScrollPhysics(),
                   children: [
+                    if (inbox.isLoading)
+                      const Padding(
+                        padding: EdgeInsets.all(32),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (inbox.hasError)
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          inbox.error.toString(),
+                          style: GoogleFonts.poppins(),
+                        ),
+                      )
+                    else if (today.isEmpty && yesterday.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Text(
+                          'No notifications',
+                          style: GoogleFonts.poppins(),
+                        ),
+                      ),
+                    if (today.isNotEmpty) ...[
                     _sectionLabel('Today'),
                     const SizedBox(height: 10),
-                    ..._today.map(
+                    ...today.map(
                       (n) => _NotifCard(
                         notif: n,
                         bg: _todayBg,
@@ -102,10 +81,12 @@ class V2NotificationsScreen extends StatelessWidget {
                         iconColor: Colors.white,
                       ),
                     ),
+                    ],
+                    if (yesterday.isNotEmpty) ...[
                     const SizedBox(height: 18),
                     _sectionLabel('Yesterday'),
                     const SizedBox(height: 10),
-                    ..._yesterday.map(
+                    ...yesterday.map(
                       (n) => _NotifCard(
                         notif: n,
                         bg: _yesterdayBg,
@@ -113,6 +94,7 @@ class V2NotificationsScreen extends StatelessWidget {
                         iconColor: Colors.black,
                       ),
                     ),
+                    ],
                   ],
                 ),
               ),

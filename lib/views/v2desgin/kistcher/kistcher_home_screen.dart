@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/providers/kitchen_providers.dart';
+import '../../../core/repositories/kitchen_repository.dart';
 import '../../../core/routes/app_router.dart';
+import '../../../core/widgets/app_network_image.dart';
 import '../v2_assets.dart';
 import 'kistcher_assets.dart';
 import 'kistcher_curved_categories.dart';
 import 'kistcher_glass.dart';
 
 /// Figma Ethalnethra Kitchen home — dark hero, glass cards, curved categories.
-class KistcherHomeScreen extends StatefulWidget {
+class KistcherHomeScreen extends ConsumerStatefulWidget {
   const KistcherHomeScreen({super.key});
 
   @override
-  State<KistcherHomeScreen> createState() => _KistcherHomeScreenState();
+  ConsumerState<KistcherHomeScreen> createState() => _KistcherHomeScreenState();
 }
 
-class _KistcherHomeScreenState extends State<KistcherHomeScreen> {
+class _KistcherHomeScreenState extends ConsumerState<KistcherHomeScreen> {
   static const _bg = Color(0xFFFFFFFF);
   static const _yellow = Color(0xFFFFD600);
   static const _vegGreen = Color(0xFF2E7D32);
@@ -25,70 +29,39 @@ class _KistcherHomeScreenState extends State<KistcherHomeScreen> {
   bool _vegOnly = true;
   int _serviceIndex = 1; // kitchen selected
 
-  static const _categories = [
-    KistcherCategory(image: KistcherAssets.catPizza, label: 'Pizza'),
-    KistcherCategory(image: KistcherAssets.catBurger, label: 'Burger'),
-    KistcherCategory(image: KistcherAssets.catShawarma, label: 'Shawarma'),
-    KistcherCategory(image: KistcherAssets.catBiriyani, label: 'Biriyani'),
-    KistcherCategory(
-      image: KistcherAssets.catLoadedFries,
-      label: 'Loaded Fries',
-    ),
-  ];
+  KitchenHomeData get _home =>
+      ref.watch(kitchenHomeProvider).valueOrNull ?? const KitchenHomeData();
 
-  static const _hotDeals = [
-    _HotDeal(
-      image: KistcherAssets.hotNoodles,
-      title: 'Noodles Twist',
-      subtitle: 'with spicy sauce',
-      price: 150,
-      oldPrice: 250,
-      discount: 25,
-    ),
-    _HotDeal(
-      image: KistcherAssets.hotPizza,
-      title: 'Pizza Slice',
-      subtitle: 'with spicy sauce',
-      price: 150,
-      oldPrice: 250,
-      discount: 25,
-    ),
-  ];
+  List<KistcherCategory> get _categories => _home.categories
+      .map((item) => KistcherCategory(image: item.icon, label: item.name))
+      .toList();
 
-  static const _restaurants = [
-    _RestCard(
-      image: KistcherAssets.restBiryani,
-      title: 'Sultan Kochi Biryani',
-      rating: '4.5',
-      range: '250-500',
-      off: '25% OFF',
-      mins: '22 mins',
-    ),
-    _RestCard(
-      image: KistcherAssets.restBurger,
-      title: 'Burger Combo | Burger House',
-      rating: '4.5',
-      range: '250-500',
-      off: '25% OFF',
-      mins: '18 mins',
-    ),
-    _RestCard(
-      image: KistcherAssets.restDosa,
-      title: 'Masala Dosa | Indian Coffe house',
-      rating: '4.5',
-      range: '250-500',
-      off: '25% OFF',
-      mins: '22 mins',
-    ),
-    _RestCard(
-      image: KistcherAssets.restClub,
-      title: 'Club Sandwich | Burger House',
-      rating: '4.5',
-      range: '250-500',
-      off: '25% OFF',
-      mins: '20 mins',
-    ),
-  ];
+  List<_HotDeal> get _hotDeals => _home.deals
+      .map(
+        (item) => _HotDeal(
+          image: item.imageUrl,
+          title: item.title,
+          subtitle: item.subtitle,
+          price: item.price,
+          oldPrice: item.oldPrice,
+          discount: item.discount,
+        ),
+      )
+      .toList();
+
+  List<_RestCard> get _restaurants => _home.restaurants
+      .map(
+        (item) => _RestCard(
+          id: item.id,
+          image: item.imageUrl,
+          title: item.subtitle.isEmpty ? item.name : '${item.name} | ${item.subtitle}',
+          rating: item.rating.isEmpty ? '—' : item.rating,
+          range: item.deliveryFee.isEmpty ? '' : '₹${item.deliveryFee}',
+          off: item.cuisines.take(2).join(' | '),
+          mins: item.etaMins.isEmpty ? '' : '${item.etaMins} mins',
+        ),
+      )
+      .toList();
 
   void _onServiceTap(int i) {
     if (i == 0) {
@@ -96,8 +69,8 @@ class _KistcherHomeScreenState extends State<KistcherHomeScreen> {
       return;
     }
     if (i == 2) {
-      // Our Services — white for now
-      context.push(AppRouter.kistcherBlank, extra: 'Our Services');
+      // Our Services
+      context.go(AppRouter.serviceHome);
       return;
     }
     setState(() => _serviceIndex = i);
@@ -132,8 +105,9 @@ class _KistcherHomeScreenState extends State<KistcherHomeScreen> {
           SliverToBoxAdapter(child: _buildServiceTabs()),
           SliverToBoxAdapter(
             child: KistcherCurvedCategories(
+              key: ValueKey(_categories.length),
               categories: _categories,
-              initialIndex: 2,
+              initialIndex: _categories.length > 2 ? 2 : 0,
             ),
           ),
           ContainedSliver(child: _buildHotDeals()),
@@ -783,13 +757,11 @@ class _HotDealCard extends StatelessWidget {
             left: -4,
             right: -4,
             height: _imgH,
-            child: Image.asset(
-              deal.image,
+            child: AppImage(
+              path: deal.image,
               fit: BoxFit.contain,
-              alignment: Alignment.bottomCenter,
-              filterQuality: FilterQuality.high,
-              errorBuilder: (_, __, ___) =>
-                  const Icon(Icons.fastfood, size: 72),
+              width: _cardW,
+              height: _imgH,
             ),
           ),
         ],
@@ -800,6 +772,7 @@ class _HotDealCard extends StatelessWidget {
 
 class _RestCard {
   const _RestCard({
+    required this.id,
     required this.image,
     required this.title,
     required this.rating,
@@ -808,6 +781,7 @@ class _RestCard {
     required this.mins,
   });
 
+  final String id;
   final String image;
   final String title;
   final String rating;
@@ -834,10 +808,12 @@ class _RestaurantCardState extends State<_RestaurantCard> {
       onTap: () => context.push(
         AppRouter.kistcherRestaurant,
         extra: {
+          'id': c.id,
           'name': c.title.split('|').first.trim(),
           'subtitle': c.title.contains('|')
               ? c.title.split('|').last.trim()
               : 'Restaurant',
+          'image': c.image,
         },
       ),
       child: ClipRRect(
@@ -848,11 +824,11 @@ class _RestaurantCardState extends State<_RestaurantCard> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.asset(
-                c.image,
+              AppImage(
+                path: c.image,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
-                    const ColoredBox(color: Color(0xFF333333)),
+                width: double.infinity,
+                height: 196,
               ),
               Positioned(
                 left: 12,

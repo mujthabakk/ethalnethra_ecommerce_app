@@ -1,72 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/models/commerce/cart_dtos.dart';
+import '../../core/providers/cart_providers.dart';
 import '../../core/routes/app_router.dart';
-import 'v2_assets.dart';
+import '../../core/widgets/app_network_image.dart';
 
 /// Figma My Cart — Instant / Pre-order tabs + pastel item rows.
-class V2CartScreen extends StatefulWidget {
+class V2CartScreen extends ConsumerStatefulWidget {
   const V2CartScreen({super.key});
 
   @override
-  State<V2CartScreen> createState() => _V2CartScreenState();
+  ConsumerState<V2CartScreen> createState() => _V2CartScreenState();
 }
 
-class _V2CartScreenState extends State<V2CartScreen> {
+class _V2CartScreenState extends ConsumerState<V2CartScreen> {
   static const _green = Color(0xFF0E5A03);
 
   int _tab = 0; // 0 Instant, 1 Pre-order
-
-  late final List<_CartItem> _items = [
-    _CartItem(
-      name: 'Indian Tomato Fresh',
-      weight: '1 kg',
-      price: 40,
-      image: V2Assets.prodDetailTomato,
-      bg: const Color(0xFFFFECEC),
-      qtyBg: const Color(0x2BFFA9A9), // FFA9A9 @ ~17%
-      minus: const Color(0xFFFFA9A9),
-      qty: 1,
-    ),
-    _CartItem(
-      name: 'Indian Tomato Fresh',
-      weight: '1 kg',
-      price: 40,
-      image: V2Assets.prodCauliflower,
-      bg: const Color(0xFFE7FFC8),
-      qtyBg: const Color(0xC4E3FDC1), // E3FDC1 @ 77%
-      minus: const Color(0xFF8BC34A),
-      qty: 1,
-    ),
-    _CartItem(
-      name: 'Indian Tomato Fresh',
-      weight: '1 kg',
-      price: 40,
-      image: V2Assets.catPackageFoods,
-      bg: const Color(0xFFC8EFFF),
-      qtyBg: const Color(0xC4C9FAFD), // C9FAFD @ 77%
-      minus: const Color(0xFF4DD0E1),
-      qty: 1,
-    ),
-    _CartItem(
-      name: 'Indian Tomato Fresh',
-      weight: '1 kg',
-      price: 40,
-      image: V2Assets.categoryFruits,
-      bg: const Color(0xFFFFF48F),
-      qtyBg: const Color(0xFFFFF48F),
-      minus: const Color(0xFFE6C200),
-      qty: 1,
-    ),
-  ];
+  List<_CartItem> _items = const [];
+  String? _cartError;
+  bool _cartLoading = true;
 
   int get _itemTotal =>
-      _items.fold(0, (sum, e) => sum + e.price * e.qty);
+      _items.fold(0, (sum, e) => sum + e.subtotal.round());
+
+  List<_CartItem> _mapLines(List<CartLineDto> lines) {
+    const palettes = [
+      (Color(0xFFFFECEC), Color(0x2BFFA9A9), Color(0xFFFFA9A9)),
+      (Color(0xFFE7FFC8), Color(0xC4E3FDC1), Color(0xFF8BC34A)),
+      (Color(0xFFC8EFFF), Color(0xC4C9FAFD), Color(0xFF4DD0E1)),
+      (Color(0xFFFFF48F), Color(0xFFFFF48F), Color(0xFFE6C200)),
+    ];
+    return [
+      for (var i = 0; i < lines.length; i++)
+        _CartItem(
+          lineId: lines[i].id,
+          name: lines[i].name,
+          weight: '${lines[i].quantity}',
+          price: lines[i].price,
+          subtotal: lines[i].subtotal,
+          image: lines[i].imageUrl,
+          bg: palettes[i % palettes.length].$1,
+          qtyBg: palettes[i % palettes.length].$2,
+          minus: palettes[i % palettes.length].$3,
+          qty: lines[i].quantity,
+        ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final cartAsync = ref.watch(cartNotifierProvider);
+    _cartLoading = cartAsync.isLoading;
+    _cartError = cartAsync.hasError ? cartAsync.error.toString() : null;
+    final cart = cartAsync.value;
+    final lines = cart == null
+        ? const <CartLineDto>[]
+        : (_tab == 0 ? cart.instant : cart.preorder);
+    _items = _mapLines(lines);
+
     final bottomPad = MediaQuery.paddingOf(context).bottom;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -83,6 +79,29 @@ class _V2CartScreenState extends State<V2CartScreen> {
                   padding: EdgeInsets.fromLTRB(16, 8, 16, 24 + bottomPad),
                   physics: const BouncingScrollPhysics(),
                   children: [
+                    if (_cartLoading)
+                      const Padding(
+                        padding: EdgeInsets.all(32),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (_cartError != null)
+                      Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Text(
+                          _cartError!,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.poppins(),
+                        ),
+                      )
+                    else if (_items.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Text(
+                          'Your cart is empty',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.poppins(color: Colors.black54),
+                        ),
+                      ),
                     ...List.generate(_items.length, (i) {
                       return Column(
                         children: [
@@ -216,11 +235,9 @@ class _V2CartScreenState extends State<V2CartScreen> {
               borderRadius: BorderRadius.circular(16),
             ),
             padding: const EdgeInsets.all(8),
-            child: Image.asset(
-              item.image,
+            child: AppImage(
+              path: item.image,
               fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) =>
-                  const Icon(Icons.image_outlined),
             ),
           ),
           const SizedBox(width: 12),
@@ -243,7 +260,9 @@ class _V2CartScreenState extends State<V2CartScreen> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () => setState(() => _items.removeAt(index)),
+                      onTap: () => ref
+                          .read(cartNotifierProvider.notifier)
+                          .removeLine(item.lineId),
                       child: Icon(
                         Icons.delete_outline_rounded,
                         size: 20,
@@ -264,7 +283,7 @@ class _V2CartScreenState extends State<V2CartScreen> {
                 Row(
                   children: [
                     Text(
-                      '₹ ${item.price}',
+                      '₹ ${item.subtotal.round()}',
                       style: GoogleFonts.poppins(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -299,12 +318,16 @@ class _V2CartScreenState extends State<V2CartScreen> {
             icon: Icons.add,
             filled: false,
             color: item.minus,
-            onTap: () => setState(() => item.qty++),
+            onTap: () => ref
+                .read(cartNotifierProvider.notifier)
+                .setLineQuantity(item.lineId, item.qty + 1),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Text(
-              '${item.qty}',
+              item.qty == item.qty.roundToDouble()
+                  ? item.qty.toInt().toString()
+                  : item.qty.toString(),
               style: GoogleFonts.poppins(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -317,7 +340,9 @@ class _V2CartScreenState extends State<V2CartScreen> {
             color: item.minus,
             onTap: () {
               if (item.qty > 1) {
-                setState(() => item.qty--);
+                ref
+                    .read(cartNotifierProvider.notifier)
+                    .setLineQuantity(item.lineId, item.qty - 1);
               }
             },
           ),
@@ -540,10 +565,12 @@ class _V2CartScreenState extends State<V2CartScreen> {
 }
 
 class _CartItem {
-  _CartItem({
+  const _CartItem({
+    required this.lineId,
     required this.name,
     required this.weight,
     required this.price,
+    required this.subtotal,
     required this.image,
     required this.bg,
     required this.qtyBg,
@@ -551,12 +578,14 @@ class _CartItem {
     required this.qty,
   });
 
+  final String lineId;
   final String name;
   final String weight;
-  final int price;
+  final double price;
+  final double subtotal;
   final String image;
   final Color bg;
   final Color qtyBg;
   final Color minus;
-  int qty;
+  final double qty;
 }

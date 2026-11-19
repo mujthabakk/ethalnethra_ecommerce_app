@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../core/providers/kitchen_providers.dart';
+import '../../../core/providers/location_user_providers.dart';
 import '../../../core/routes/app_router.dart';
 import '../v2_assets.dart';
 import 'kistcher_assets.dart';
 
 /// Figma Kitchen "Tracking Order" — light Google map with black route,
 /// rounded white sheet: status, stepper, partner, products, tip banner.
-class KistcherOrderTrackingScreen extends StatelessWidget {
-  const KistcherOrderTrackingScreen({super.key});
+class KistcherOrderTrackingScreen extends ConsumerWidget {
+  const KistcherOrderTrackingScreen({super.key, this.orderId = ''});
+
+  final String orderId;
 
   static const _ink = Color(0xFF181724);
   static const _accent = Color(0xFFF2D262);
@@ -46,17 +51,30 @@ class KistcherOrderTrackingScreen extends StatelessWidget {
     LatLng(10.5298, 76.2181),
   ];
 
-  static const _products = [
-    (KistcherAssets.wishPodiIdli, 'Green Capsicum', '1 kg', '₹ 89.00'),
-    (KistcherAssets.wishMasalaDosa, 'Green Capsicum', '1 kg', '₹ 89.00'),
-    (KistcherAssets.wishBiriyani, 'Green Capsicum', '1 kg', '₹ 89.00'),
-  ];
-
-  /// 0 Accepted, 1 Packed, 2 Pickup (current), 3 Delivered.
-  static const _activeStep = 2;
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final track = ref.watch(kitchenTrackProvider(orderId)).valueOrNull;
+    final orders = ref.watch(ordersListProvider).valueOrNull?.orders ?? const [];
+    final shop = orders.isEmpty ? null : orders.first;
+    final shopTrack = shop == null
+        ? null
+        : ref.watch(orderTrackProvider(shop.id)).valueOrNull;
+    final status = (track?.status.isNotEmpty == true
+            ? track!.status
+            : shopTrack?.status ?? shop?.status ?? 'Order status')
+        .replaceAll('_', ' ');
+    final code = (track?.orderNumber.isNotEmpty == true
+            ? track!.orderNumber
+            : shopTrack?.orderNumber ?? shop?.orderNumber ?? '');
+    final eta = (track?.etaMins.isNotEmpty == true
+            ? '${track!.etaMins} mins'
+            : shopTrack?.eta ?? '');
+    final driver = track?.driverName.isNotEmpty == true
+        ? track!.driverName
+        : 'Driver assigned after dispatch';
+    final activeStep = _stepFor(track?.status.isNotEmpty == true
+        ? track!.status
+        : shopTrack?.status ?? shop?.status ?? '');
     final media = MediaQuery.of(context);
     // Sheet starts where the Figma map ends (302 of a 932 frame).
     final sheetTop = (media.padding.top + 255).clamp(0.0, media.size.height);
@@ -182,11 +200,11 @@ class KistcherOrderTrackingScreen extends StatelessWidget {
                     30 + media.padding.bottom,
                   ),
                   children: [
-                    _buildStatus(),
+                    _buildStatus(status, eta, code),
                     const SizedBox(height: 28),
-                    _buildStepper(),
+                    _buildStepper(activeStep),
                     const SizedBox(height: 40),
-                    _buildPartner(),
+                    _buildPartner(driver),
                     const SizedBox(height: 34),
                     Text(
                       'Products in order',
@@ -197,10 +215,13 @@ class KistcherOrderTrackingScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 22),
-                    for (var i = 0; i < _products.length; i++) ...[
-                      if (i > 0) const SizedBox(height: 21),
-                      _buildProduct(_products[i]),
-                    ],
+                    if (shop != null)
+                      _buildProduct((
+                        '',
+                        shop.orderNumber,
+                        shop.status,
+                        '₹ ${shop.total}',
+                      )),
                     const SizedBox(height: 30),
                     _buildTip(),
                   ],
@@ -213,7 +234,24 @@ class KistcherOrderTrackingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatus() {
+  int _stepFor(String status) {
+    final value = status.toLowerCase();
+    if (value.contains('deliver')) return 3;
+    if (value.contains('pick') ||
+        value.contains('way') ||
+        value.contains('dispatch')) {
+      return 2;
+    }
+    if (value.contains('pack')) return 1;
+    if (value.contains('accept') ||
+        value.contains('confirm') ||
+        value.contains('place')) {
+      return 0;
+    }
+    return 0;
+  }
+
+  Widget _buildStatus(String status, String eta, String code) {
     TextStyle big() => GoogleFonts.poppins(
           fontSize: 17,
           fontWeight: FontWeight.w500,
@@ -234,16 +272,16 @@ class KistcherOrderTrackingScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Out for delivery', style: big()),
+              Text(status, style: big()),
               const SizedBox(height: 7),
-              Text('Arriving at 10:43 AM', style: small()),
+              Text(eta.isEmpty ? 'Tracking updates after dispatch' : eta, style: small()),
             ],
           ),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text('2344', style: big()),
+            Text(code.isEmpty ? '—' : code, style: big()),
             const SizedBox(height: 7),
             Text('Your code', style: small()),
           ],
@@ -252,7 +290,7 @@ class KistcherOrderTrackingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStepper() {
+  Widget _buildStepper(int activeStep) {
     const steps = [
       (KistcherAssets.trackAccepted, 18.0, 14.0, 'Accepted'),
       (KistcherAssets.trackPacked, 17.0, 17.0, 'Packed'),
@@ -278,7 +316,7 @@ class KistcherOrderTrackingScreen extends StatelessWidget {
                   top: circle / 2 - 1,
                   height: 2,
                   child: ColoredBox(
-                    color: i < _activeStep ? _accent : _pending,
+                    color: i < activeStep ? _accent : _pending,
                   ),
                 ),
               for (var i = 0; i < steps.length; i++) ...[
@@ -289,7 +327,7 @@ class KistcherOrderTrackingScreen extends StatelessWidget {
                     width: circle,
                     height: circle,
                     decoration: BoxDecoration(
-                      color: i <= _activeStep ? _accent : _pending,
+                      color: i <= activeStep ? _accent : _pending,
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
@@ -322,7 +360,7 @@ class KistcherOrderTrackingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPartner() {
+  Widget _buildPartner(String driverName) {
     Widget action(String asset, double w, double h) => Container(
           width: 43,
           height: 43,
@@ -355,7 +393,7 @@ class KistcherOrderTrackingScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'James wiliams',
+                driverName,
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -395,7 +433,9 @@ class KistcherOrderTrackingScreen extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.asset(p.$1, width: 92, height: 84, fit: BoxFit.cover),
+            child: p.$1.isEmpty
+                ? const SizedBox(width: 92, height: 84)
+                : Image.asset(p.$1, width: 92, height: 84, fit: BoxFit.cover),
           ),
           const SizedBox(width: 16),
           Expanded(

@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/providers/kitchen_providers.dart';
 import '../../../core/routes/app_router.dart';
+import '../../../core/widgets/app_network_image.dart';
 import 'kistcher_assets.dart';
 import 'kistcher_page_header.dart';
 
 /// Figma Kitchen "My wishlist" — search + filter, category chips,
 /// 2-column white cards with in-stock badge, Add to cart and Remove.
-class KistcherWishlistScreen extends StatefulWidget {
+class KistcherWishlistScreen extends ConsumerStatefulWidget {
   const KistcherWishlistScreen({super.key, this.onBack, this.bottomInset = 0});
 
   /// Overrides the back button (used when shown as a shell tab).
@@ -20,10 +23,11 @@ class KistcherWishlistScreen extends StatefulWidget {
   final double bottomInset;
 
   @override
-  State<KistcherWishlistScreen> createState() => _KistcherWishlistScreenState();
+  ConsumerState<KistcherWishlistScreen> createState() =>
+      _KistcherWishlistScreenState();
 }
 
-class _KistcherWishlistScreenState extends State<KistcherWishlistScreen> {
+class _KistcherWishlistScreenState extends ConsumerState<KistcherWishlistScreen> {
   static const _ink = Color(0xFF181724);
   static const _accent = Color(0xFFF2D262);
   static const _addBtn = Color(0xFFE6BD42);
@@ -45,21 +49,74 @@ class _KistcherWishlistScreenState extends State<KistcherWishlistScreen> {
 
   static const _chips = ['All items', 'Fruits', 'Vegetables', 'Dairy'];
 
-  final _items = <(String, int, String)>[
-    ('Podi Idli', 100, KistcherAssets.wishPodiIdli),
-    ('Burger Combo', 100, KistcherAssets.wishBurgerCombo),
-    ('Masala Dosa', 100, KistcherAssets.wishMasalaDosa),
-    ('Chicken biriyani', 100, KistcherAssets.wishBiriyani),
-  ];
+  List<_WishItem> _items = const [];
 
   int _chip = 0;
   String _query = '';
 
   @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final rows = await ref.read(kitchenRepositoryProvider).fetchWishlist();
+      if (!mounted) return;
+      setState(() {
+        _items = rows
+            .map(
+              (item) => _WishItem(
+                item.id,
+                item.restaurantId,
+                item.name,
+                item.price,
+                item.imageUrl,
+              ),
+            )
+            .toList();
+      });
+    } catch (_) {}
+  }
+
+  Future<void> _remove(_WishItem item) async {
+    try {
+      await ref.read(kitchenRepositoryProvider).removeWishlist(item.id);
+      await _load();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
+
+  Future<void> _add(_WishItem item) async {
+    if (item.restaurantId.isEmpty) {
+      context.push(AppRouter.kistcherCart);
+      return;
+    }
+    try {
+      await ref.read(kitchenRepositoryProvider).addToCart(
+            restaurantId: item.restaurantId,
+            menuItemId: item.id,
+          );
+      if (!mounted) return;
+      context.push(AppRouter.kistcherCart);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
     final visible = _items
-        .where((e) => e.$1.toLowerCase().contains(_query.toLowerCase()))
+        .where((e) => e.name.toLowerCase().contains(_query.toLowerCase()))
         .toList();
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -102,11 +159,11 @@ class _KistcherWishlistScreenState extends State<KistcherWishlistScreen> {
                   itemBuilder: (context, i) {
                     final item = visible[i];
                     return _WishCard(
-                      name: item.$1,
-                      price: item.$2,
-                      image: item.$3,
-                      onAdd: () => context.push(AppRouter.kistcherCart),
-                      onRemove: () => setState(() => _items.remove(item)),
+                      name: item.name,
+                      price: item.price,
+                      image: item.image,
+                      onAdd: () => _add(item),
+                      onRemove: () => _remove(item),
                     );
                   },
                 ),
@@ -267,6 +324,16 @@ class _KistcherWishlistScreenState extends State<KistcherWishlistScreen> {
   }
 }
 
+class _WishItem {
+  const _WishItem(this.id, this.restaurantId, this.name, this.price, this.image);
+
+  final String id;
+  final String restaurantId;
+  final String name;
+  final int price;
+  final String image;
+}
+
 class _WishCard extends StatelessWidget {
   const _WishCard({
     required this.name,
@@ -300,7 +367,7 @@ class _WishCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: Image.asset(image, fit: BoxFit.cover),
+                  child: AppImage(path: image, fit: BoxFit.cover),
                 ),
                 Positioned(
                   top: 14,

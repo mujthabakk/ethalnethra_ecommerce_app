@@ -1,25 +1,32 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/models/orders/orders_models.dart';
+import '../../core/models/user/user_address_models.dart';
+import '../../core/providers/cart_providers.dart';
+import '../../core/providers/location_user_providers.dart';
 import '../../core/routes/app_router.dart';
 import 'v2_assets.dart';
 
 /// Figma Check Out — delivery address + payment methods.
-class V2CheckoutScreen extends StatefulWidget {
-  const V2CheckoutScreen({super.key, this.total = 200});
+class V2CheckoutScreen extends ConsumerStatefulWidget {
+  const V2CheckoutScreen({super.key, this.total = 0});
 
   final int total;
 
   @override
-  State<V2CheckoutScreen> createState() => _V2CheckoutScreenState();
+  ConsumerState<V2CheckoutScreen> createState() => _V2CheckoutScreenState();
 }
 
-class _V2CheckoutScreenState extends State<V2CheckoutScreen> {
+class _V2CheckoutScreenState extends ConsumerState<V2CheckoutScreen> {
   static const _green = Color(0xFF0E5A03);
 
-  int _payment = 0;
+  int _payment = 1;
+  bool _placing = false;
 
   static const _methods = [
     (
@@ -47,6 +54,69 @@ class _V2CheckoutScreenState extends State<V2CheckoutScreen> {
       Icons.account_balance_wallet_outlined,
     ),
   ];
+
+  UserAddressDto? get _address {
+    final list = ref.watch(userAddressesProvider).value ?? const <UserAddressDto>[];
+    if (list.isEmpty) return null;
+    for (final item in list) {
+      if (item.isDefault) return item;
+    }
+    return list.first;
+  }
+
+  Future<void> _placeOrder() async {
+    final address = _address;
+    if (address == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Add a delivery address first')),
+      );
+      return;
+    }
+    setState(() => _placing = true);
+    try {
+      final method = _payment == 1 ? PaymentMethod.cod : PaymentMethod.online;
+      final orders = ref.read(ordersRepositoryProvider);
+      final cart = ref.read(cartNotifierProvider).valueOrNull;
+      final hasPreorder = cart?.preorder.isNotEmpty ?? false;
+      final hasInstant = cart == null || cart.instant.isNotEmpty || !hasPreorder;
+      if (method == PaymentMethod.online && widget.total > 0) {
+        try {
+          await orders.createPaymentOrder(amount: widget.total);
+        } on DioException catch (e) {
+          if (e.response?.statusCode != 404) rethrow;
+        }
+      }
+      PlaceOrderResponse? result;
+      if (hasInstant) {
+        await orders.checkout(addressId: address.id, type: 'instant');
+        result = await orders.placeOrder(
+          addressId: address.id,
+          paymentMethod: method,
+          isInstantCart: true,
+        );
+      }
+      if (hasPreorder) {
+        await orders.checkout(addressId: address.id, type: 'preorder');
+        result = await orders.placeOrder(
+          addressId: address.id,
+          paymentMethod: method,
+          isInstantCart: false,
+        );
+      }
+      if (result == null) {
+        throw Exception('Cart is empty');
+      }
+      if (!mounted) return;
+      context.go(AppRouter.v2PaymentSuccess, extra: result.orderNumber);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      if (mounted) setState(() => _placing = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -192,7 +262,9 @@ class _V2CheckoutScreenState extends State<V2CheckoutScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Residence',
+                      _address?.label.isNotEmpty == true
+                          ? _address!.label
+                          : 'Delivery address',
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -201,7 +273,9 @@ class _V2CheckoutScreenState extends State<V2CheckoutScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '3891 Ranchview Dr. Richardson,\nCalifornia 62639',
+                      _address == null
+                          ? 'Add a delivery address to place an order'
+                          : _address!.addressLine,
                       style: GoogleFonts.poppins(
                         fontSize: 12.5,
                         height: 1.35,
@@ -360,12 +434,7 @@ class _V2CheckoutScreenState extends State<V2CheckoutScreen> {
           ),
           const Spacer(),
           ElevatedButton(
-            onPressed: () {
-              context.go(
-                AppRouter.v2PaymentSuccess,
-                extra: 'IT-ORD-23984XQ7',
-              );
-            },
+            onPressed: _placing ? null : _placeOrder,
             style: ElevatedButton.styleFrom(
               backgroundColor: _green,
               foregroundColor: Colors.white,

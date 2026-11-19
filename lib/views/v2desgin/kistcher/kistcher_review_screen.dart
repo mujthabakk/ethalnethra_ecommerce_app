@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/models/user/user_address_models.dart';
+import '../../../core/providers/kitchen_providers.dart';
+import '../../../core/providers/location_user_providers.dart';
 import '../../../core/routes/app_router.dart';
 import 'kistcher_assets.dart';
 import 'kistcher_page_header.dart';
 
 /// Figma Kitchen "Review" (payment) — address card, payment method chips,
 /// pill input fields, Confirm / Cancel order buttons.
-class KistcherReviewScreen extends StatefulWidget {
-  const KistcherReviewScreen({super.key, this.savedAmount = 100});
+class KistcherReviewScreen extends ConsumerStatefulWidget {
+  const KistcherReviewScreen({super.key, this.savedAmount = 0});
 
   final int savedAmount;
 
   @override
-  State<KistcherReviewScreen> createState() => _KistcherReviewScreenState();
+  ConsumerState<KistcherReviewScreen> createState() =>
+      _KistcherReviewScreenState();
 }
 
 enum _PayMethod { card, cash, upi }
 
-class _KistcherReviewScreenState extends State<KistcherReviewScreen> {
+class _KistcherReviewScreenState extends ConsumerState<KistcherReviewScreen> {
   static const _accent = Color(0xFFF2D262);
   static const _surface = Color(0xFFFFFFFA);
   static const _chipBorder = Color(0xFFBFBFBC);
@@ -39,6 +44,51 @@ class _KistcherReviewScreenState extends State<KistcherReviewScreen> {
   );
 
   _PayMethod _method = _PayMethod.card;
+  bool _placing = false;
+
+  UserAddressDto? get _address {
+    final list = ref.watch(userAddressesProvider).valueOrNull ?? const [];
+    if (list.isEmpty) return null;
+    for (final item in list) {
+      if (item.isDefault) return item;
+    }
+    return list.first;
+  }
+
+  Future<void> _confirm() async {
+    final list = ref.read(userAddressesProvider).valueOrNull ?? const [];
+    final address = list.isEmpty
+        ? null
+        : list.firstWhere((item) => item.isDefault, orElse: () => list.first);
+    if (address == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Add a delivery address first')),
+      );
+      return;
+    }
+    setState(() => _placing = true);
+    final method = _method == _PayMethod.cash ? 'COD' : 'ONLINE';
+    try {
+      final repo = ref.read(kitchenRepositoryProvider);
+      await repo.checkout(addressId: address.id);
+      await repo.placeOrder(
+        addressId: address.id,
+        paymentMethod: method,
+      );
+      if (!mounted) return;
+      await showKistcherOrderConfirmed(
+        context,
+        savedAmount: widget.savedAmount,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      if (mounted) setState(() => _placing = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +184,9 @@ class _KistcherReviewScreenState extends State<KistcherReviewScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '6391 mirpur, Dhaka Banghaldesh',
+                  _address?.addressLine.isNotEmpty == true
+                      ? _address!.addressLine
+                      : 'Add a delivery address',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
@@ -328,10 +380,7 @@ class _KistcherReviewScreenState extends State<KistcherReviewScreen> {
     return Column(
       children: [
         GestureDetector(
-          onTap: () => showKistcherOrderConfirmed(
-            context,
-            savedAmount: widget.savedAmount,
-          ),
+          onTap: _placing ? null : _confirm,
           child: Container(
             height: 45,
             decoration: BoxDecoration(

@@ -1,37 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/providers/favorites_providers.dart';
 import '../../core/routes/app_router.dart';
+import '../../core/widgets/app_network_image.dart';
 import 'v2_assets.dart';
 
 /// Figma My wishlist — search, chips, 2-col product cards.
-class V2WishlistScreen extends StatefulWidget {
+class V2WishlistScreen extends ConsumerStatefulWidget {
   const V2WishlistScreen({super.key});
 
   @override
-  State<V2WishlistScreen> createState() => _V2WishlistScreenState();
+  ConsumerState<V2WishlistScreen> createState() => _V2WishlistScreenState();
 }
 
-class _V2WishlistScreenState extends State<V2WishlistScreen> {
+class _V2WishlistScreenState extends ConsumerState<V2WishlistScreen> {
   static const _green = Color(0xFF0E5A03);
   static const _grey = Color(0xFFDADADA);
   static const _chipBg = Color(0xFFF2F2F2);
 
   static const _chips = ['All items', 'Fruits', 'Vegetables', 'Dairy'];
 
-  final List<_WishItem> _items = [
-    _WishItem(V2Assets.wishEgg, 'Egg set', 100),
-    _WishItem(V2Assets.wishStrawberry, 'Egg set', 100),
-    _WishItem(V2Assets.wishCarrot, 'Egg set', 100),
-    _WishItem(V2Assets.wishPepper, 'Egg set', 100),
-  ];
-
   int _chip = 0;
 
   @override
   Widget build(BuildContext context) {
+    final favAsync = ref.watch(favoritesNotifierProvider);
+    final favorites = favAsync.value ?? const [];
+    final items = favorites
+        .map((item) => _WishItem(item.imageUrl, item.name, item.price.round(), item.id))
+        .toList();
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
@@ -42,8 +43,45 @@ class _V2WishlistScreenState extends State<V2WishlistScreen> {
               _buildHeader(),
               _buildSearchRow(),
               _buildChips(),
+              if (items.isNotEmpty)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () async {
+                      try {
+                        await ref
+                            .read(favoritesNotifierProvider.notifier)
+                            .addAllToCart();
+                        if (context.mounted) context.push(AppRouter.v2Cart);
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(e.toString())),
+                        );
+                      }
+                    },
+                    child: Text(
+                      'Add all to cart',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        color: _green,
+                      ),
+                    ),
+                  ),
+                ),
               Expanded(
-                child: GridView.builder(
+                child: favAsync.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : favAsync.hasError
+                        ? Center(child: Text(favAsync.error.toString()))
+                        : items.isEmpty
+                            ? Center(
+                                child: Text(
+                                  'No saved products',
+                                  style: GoogleFonts.poppins(),
+                                ),
+                              )
+                            : GridView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                   physics: const BouncingScrollPhysics(),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -52,11 +90,25 @@ class _V2WishlistScreenState extends State<V2WishlistScreen> {
                     crossAxisSpacing: 14,
                     childAspectRatio: 0.58,
                   ),
-                  itemCount: _items.length,
+                  itemCount: favAsync.isLoading ? 0 : items.length,
                   itemBuilder: (context, i) => _WishCard(
-                    item: _items[i],
-                    onRemove: () => setState(() => _items.removeAt(i)),
-                    onAddCart: () => context.push(AppRouter.v2Cart),
+                    item: items[i],
+                    onRemove: () => ref
+                        .read(favoritesNotifierProvider.notifier)
+                        .toggleFavorite(items[i].id),
+                    onAddCart: () async {
+                      try {
+                        await ref
+                            .read(favoritesNotifierProvider.notifier)
+                            .moveSelectedToCart([items[i].id]);
+                        if (context.mounted) context.push(AppRouter.v2Cart);
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(e.toString())),
+                        );
+                      }
+                    },
                   ),
                 ),
               ),
@@ -220,10 +272,11 @@ class _V2WishlistScreenState extends State<V2WishlistScreen> {
 }
 
 class _WishItem {
-  _WishItem(this.image, this.name, this.price);
+  _WishItem(this.image, this.name, this.price, this.id);
   final String image;
   final String name;
   final int price;
+  final String id;
 }
 
 class _WishCard extends StatelessWidget {
@@ -262,11 +315,9 @@ class _WishCard extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      item.image,
+                    child: AppImage(
+                      path: item.image,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                          const ColoredBox(color: Colors.white),
                     ),
                   ),
                 ),

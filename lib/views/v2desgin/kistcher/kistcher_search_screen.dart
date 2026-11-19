@@ -2,24 +2,28 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/providers/kitchen_providers.dart';
 import '../../../core/routes/app_router.dart';
+import '../../../core/widgets/app_network_image.dart';
 import 'kistcher_assets.dart';
 import 'kistcher_glass.dart';
 
 /// Figma Kitchen Search — exact scaffold gradient + glass result cards.
-class KistcherSearchScreen extends StatefulWidget {
-  const KistcherSearchScreen({super.key, this.initialQuery = 'burger'});
+class KistcherSearchScreen extends ConsumerStatefulWidget {
+  const KistcherSearchScreen({super.key, this.initialQuery = ''});
 
   final String initialQuery;
 
   @override
-  State<KistcherSearchScreen> createState() => _KistcherSearchScreenState();
+  ConsumerState<KistcherSearchScreen> createState() =>
+      _KistcherSearchScreenState();
 }
 
-class _KistcherSearchScreenState extends State<KistcherSearchScreen> {
+class _KistcherSearchScreenState extends ConsumerState<KistcherSearchScreen> {
   /// Figma Linear fill stops (exact):
   /// 0%  #FFFCA1 @ 82%
   /// 100% #FFFFFF @ 100%
@@ -37,45 +41,42 @@ class _KistcherSearchScreenState extends State<KistcherSearchScreen> {
     'Free Delivery',
   ];
 
-  static const _results = [
-    _SearchResult(
-      image: KistcherAssets.searchCard1,
-      name: 'Burger House',
-      categories: 'Burger | French Fries',
-      priceRange: '₹250 - ₹300',
-      rating: '4.5',
-      mins: '22 mins',
-    ),
-    _SearchResult(
-      image: KistcherAssets.searchCard2,
-      name: 'Indian Coffee House',
-      categories: 'Dosa | Idli | Masala Dosa',
-      priceRange: '₹120 - ₹250',
-      rating: '4.5',
-      mins: '18 mins',
-    ),
-    _SearchResult(
-      image: KistcherAssets.searchCard3,
-      name: 'Arya Bhavan',
-      categories: 'Idli | Vada | Chutney',
-      priceRange: '₹80 - ₹180',
-      rating: '4.6',
-      mins: '20 mins',
-    ),
-    _SearchResult(
-      image: KistcherAssets.searchCard4,
-      name: 'Malabar Kitchen',
-      categories: 'Puttu | Kadala Curry',
-      priceRange: '₹150 - ₹280',
-      rating: '4.4',
-      mins: '25 mins',
-    ),
-  ];
+  List<_SearchResult> _results = const [];
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialQuery);
+    _runSearch(widget.initialQuery);
+  }
+
+  Future<void> _runSearch(String query) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) {
+      if (mounted) setState(() => _results = const []);
+      return;
+    }
+    try {
+      final rows = await ref.read(kitchenRepositoryProvider).search(trimmed);
+      if (!mounted) return;
+      setState(() {
+        _results = rows
+            .map(
+              (item) => _SearchResult(
+                id: item.id,
+                image: item.imageUrl,
+                name: item.name,
+                categories: item.cuisines.join(' | '),
+                priceRange: item.deliveryFee.isEmpty ? '' : '₹${item.deliveryFee}',
+                rating: item.rating,
+                mins: item.etaMins.isEmpty ? '' : '${item.etaMins} mins',
+              ),
+            )
+            .toList();
+      });
+    } catch (_) {
+      if (mounted) setState(() => _results = const []);
+    }
   }
 
   @override
@@ -190,6 +191,8 @@ class _KistcherSearchScreenState extends State<KistcherSearchScreen> {
                         color: const Color(0xFF2A2A2A),
                       ),
                       cursorColor: _chipYellow,
+                      textInputAction: TextInputAction.search,
+                      onSubmitted: _runSearch,
                       decoration: InputDecoration(
                         isDense: true,
                         border: InputBorder.none,
@@ -317,6 +320,7 @@ class _RoundIconBtn extends StatelessWidget {
 
 class _SearchResult {
   const _SearchResult({
+    required this.id,
     required this.image,
     required this.name,
     required this.categories,
@@ -325,6 +329,7 @@ class _SearchResult {
     required this.mins,
   });
 
+  final String id;
   final String image;
   final String name;
   final String categories;
@@ -344,8 +349,10 @@ class _SearchResultCard extends StatelessWidget {
       onTap: () => context.push(
         AppRouter.kistcherRestaurant,
         extra: {
+          'id': result.id,
           'name': result.name,
           'subtitle': result.categories,
+          'image': result.image,
         },
       ),
       child: Container(
@@ -365,11 +372,11 @@ class _SearchResultCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(
-              result.image,
+            AppImage(
+              path: result.image,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) =>
-                  const ColoredBox(color: Color(0xFF444444)),
+              width: double.infinity,
+              height: 200,
             ),
             // Bottom fade into glass
             Positioned(

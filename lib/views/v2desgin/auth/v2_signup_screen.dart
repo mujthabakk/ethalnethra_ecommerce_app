@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/providers/auth_providers.dart';
 import '../../../core/routes/app_router.dart';
 import 'v2_auth_colors.dart';
 import 'v2_auth_shell.dart';
 import 'v2_auth_widgets.dart';
 
 /// V2 Create Account — Figma exact (centered title + glass fields).
-class V2SignupScreen extends StatefulWidget {
+class V2SignupScreen extends ConsumerStatefulWidget {
   const V2SignupScreen({super.key});
 
   @override
-  State<V2SignupScreen> createState() => _V2SignupScreenState();
+  ConsumerState<V2SignupScreen> createState() => _V2SignupScreenState();
 }
 
-class _V2SignupScreenState extends State<V2SignupScreen> {
+class _V2SignupScreenState extends ConsumerState<V2SignupScreen> {
   final _name = TextEditingController();
   final _email = TextEditingController();
   final _pass = TextEditingController();
@@ -96,7 +98,21 @@ class _V2SignupScreenState extends State<V2SignupScreen> {
           const SizedBox(height: 22),
           V2GradientCtaButton(
             label: 'Sign Up',
-            onTap: () => context.go(AppRouter.v2Home),
+            onTap: () {
+              final name = _name.text.trim();
+              final email = _email.text.trim();
+              if (name.isEmpty || !email.contains('@')) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Enter your name and email')),
+                );
+                return;
+              }
+              ref.read(pendingSignupProvider.notifier).state = PendingSignup(
+                name: name,
+                email: email,
+              );
+              context.go(AppRouter.v2Login);
+            },
           ),
           const SizedBox(height: 16),
           const V2SocialRow(),

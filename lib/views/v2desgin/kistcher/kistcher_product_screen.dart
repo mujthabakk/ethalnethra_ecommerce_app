@@ -2,29 +2,39 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/providers/kitchen_providers.dart';
 import '../../../core/routes/app_router.dart';
+import '../../../core/widgets/app_network_image.dart';
 import 'kistcher_assets.dart';
 
 /// Figma Kitchen product details — dark hero, concave-top frosted sheet that
 /// fades from the blurred hero into `#FAF8EA`, accent `#F2D262`.
-class KistcherProductScreen extends StatefulWidget {
+class KistcherProductScreen extends ConsumerStatefulWidget {
   const KistcherProductScreen({
     super.key,
-    this.title = 'Cheese with Chicken Burger',
-    this.price = 200,
+    this.title = '',
+    this.price = 0,
+    this.menuItemId = '',
+    this.restaurantId = '',
+    this.image = '',
   });
 
   final String title;
   final int price;
+  final String menuItemId;
+  final String restaurantId;
+  final String image;
 
   @override
-  State<KistcherProductScreen> createState() => _KistcherProductScreenState();
+  ConsumerState<KistcherProductScreen> createState() =>
+      _KistcherProductScreenState();
 }
 
-class _KistcherProductScreenState extends State<KistcherProductScreen> {
+class _KistcherProductScreenState extends ConsumerState<KistcherProductScreen> {
   static const _bg = Color(0xFFFAF8EA);
   static const _heroDark = Color(0xFF14181D);
   static const _accent = Color(0xFFF2D262);
@@ -48,15 +58,86 @@ class _KistcherProductScreenState extends State<KistcherProductScreen> {
   int _qty = 1;
   bool _liked = false;
   bool _descExpanded = false;
+  late String _title = widget.title;
+  late int _price = widget.price;
+  late String _image = widget.image;
+  String _description = '';
 
   static const _sizes = ['Small', 'Regular', 'Medium', 'Large'];
 
-  static const _often = [
-    _OftenItem('Shawarma Combo', 150, KistcherAssets.prodOften1),
-    _OftenItem('Loaded Fries', 250, KistcherAssets.prodOften2),
-    _OftenItem('Pizza', 250, KistcherAssets.prodOften3),
-    _OftenItem('Loaded Fries', 250, KistcherAssets.prodOften2),
-  ];
+  List<_OftenItem> _often = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final id = widget.menuItemId;
+    if (id.isEmpty) return;
+    final repo = ref.read(kitchenRepositoryProvider);
+    try {
+      final item = await repo.fetchMenuItem(id);
+      final often = await repo.fetchOftenOrdered(id);
+      if (!mounted) return;
+      setState(() {
+        if (item != null) {
+          if (item.name.isNotEmpty) _title = item.name;
+          if (item.price > 0) _price = item.price;
+          if (item.imageUrl.isNotEmpty) _image = item.imageUrl;
+          _description = item.description;
+        }
+        _often = often
+            .map((row) => _OftenItem(row.name, row.price, row.imageUrl))
+            .toList();
+      });
+    } catch (_) {}
+  }
+
+  Future<void> _toggleLike() async {
+    final id = widget.menuItemId;
+    final next = !_liked;
+    setState(() => _liked = next);
+    if (id.isEmpty) return;
+    final repo = ref.read(kitchenRepositoryProvider);
+    try {
+      if (next) {
+        await repo.addWishlist(id);
+      } else {
+        await repo.removeWishlist(id);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _liked = !next);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
+
+  Future<void> _addToCart() async {
+    final itemId = widget.menuItemId;
+    final restaurantId = widget.restaurantId;
+    if (itemId.isNotEmpty && restaurantId.isNotEmpty) {
+      try {
+        await ref.read(kitchenRepositoryProvider).addToCart(
+              restaurantId: restaurantId,
+              menuItemId: itemId,
+              quantity: _qty,
+              size: _sizes[_size],
+            );
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+        return;
+      }
+    }
+    if (!mounted) return;
+    context.push(AppRouter.kistcherCart);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,13 +168,14 @@ class _KistcherProductScreenState extends State<KistcherProductScreen> {
                   onPageChanged: (i) => setState(() => _page = i),
                   itemBuilder: (_, __) => Align(
                     alignment: Alignment.topCenter,
-                    child: Image.asset(
-                      KistcherAssets.prodHero,
-                      width: width,
-                      height: imageH,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                    ),
+                    child: _image.isEmpty
+                        ? const SizedBox.shrink()
+                        : AppImage(
+                            path: _image,
+                            width: width,
+                            height: imageH,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                 ),
               ),
@@ -193,7 +275,7 @@ class _KistcherProductScreenState extends State<KistcherProductScreen> {
                   ),
                   const Spacer(),
                   _GlassCircleBtn(
-                    onTap: () => setState(() => _liked = !_liked),
+                    onTap: _toggleLike,
                     child: Image.asset(
                       KistcherAssets.prodHeart,
                       width: 15,
@@ -249,7 +331,7 @@ class _KistcherProductScreenState extends State<KistcherProductScreen> {
           children: [
             Expanded(
               child: Text(
-                widget.title,
+                _title,
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.w400,
@@ -283,7 +365,7 @@ class _KistcherProductScreenState extends State<KistcherProductScreen> {
         ),
         const SizedBox(height: 10),
         Text(
-          '₹ ${widget.price}',
+          '₹ $_price',
           style: GoogleFonts.poppins(
             fontSize: 21,
             fontWeight: FontWeight.w500,
@@ -314,9 +396,11 @@ class _KistcherProductScreenState extends State<KistcherProductScreen> {
               ),
               children: [
                 TextSpan(
-                  text: _descExpanded
-                      ? 'Premium chicken burger topped with melted cheddar cheese, crispy bacon, fresh lettuce, and signature house sauce on a toasted brioche bun. Served hot and fresh every time you order. '
-                      : 'Premium chicken burger topped with melted cheddar cheese, crispy bacon, fresh lettuce, and signature house sauce on a toasted brioche bun. ',
+                  text: _description.isEmpty
+                      ? ''
+                      : (_descExpanded || _description.length <= 90
+                          ? _description
+                          : '${_description.substring(0, 90)}... '),
                 ),
                 TextSpan(
                   text: _descExpanded ? 'Less' : 'More...',
@@ -578,7 +662,7 @@ class _KistcherProductScreenState extends State<KistcherProductScreen> {
         const SizedBox(width: 16),
         Expanded(
           child: GestureDetector(
-            onTap: () => context.push(AppRouter.kistcherCart),
+            onTap: _addToCart,
             child: Container(
               height: 46,
               decoration: BoxDecoration(
@@ -740,13 +824,11 @@ class _OftenCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.asset(
-              item.image,
+            child: AppImage(
+              path: item.image,
               width: 104,
               height: 88,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) =>
-                  const ColoredBox(color: Color(0xFFFFF6A7)),
             ),
           ),
           const SizedBox(height: 8),

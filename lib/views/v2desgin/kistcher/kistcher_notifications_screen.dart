@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/providers/location_user_providers.dart';
+import '../../../core/repositories/content_repository.dart';
 import 'kistcher_assets.dart';
 
 /// Figma Kitchen "Notifications" — Today cards in yellow, Yesterday in grey.
-class KistcherNotificationsScreen extends StatelessWidget {
+class KistcherNotificationsScreen extends ConsumerWidget {
   const KistcherNotificationsScreen({super.key});
 
   static const _ink = Color(0xFF181724);
@@ -24,57 +27,26 @@ class KistcherNotificationsScreen extends StatelessWidget {
     stops: [0.0, 0.2, 0.46, 0.73, 0.93],
   );
 
-  static const _today = [
-    _Notice(
-      KistcherAssets.notifOnTheWay,
-      'Your order is on the way!',
-      '2 min ago',
-      'Your groceries are out for delivery. Get ready to receive your fresh picks.',
-    ),
-    _Notice(
-      KistcherAssets.notifConfirmed,
-      'Order Confirmed',
-      '35 min ago',
-      "Your order #ETH2048 has been confirmed. We're getting everything ready for you.",
-    ),
-  ];
-
-  static const _yesterday = [
-    _Notice(
-      KistcherAssets.notifMessage,
-      'New Message',
-      '02.01.2026',
-      'Your driver sent you a message regarding your recent delivery #ETH3456.',
-    ),
-    _Notice(
-      KistcherAssets.notifLate,
-      'Running a bit late',
-      '02.01.2026',
-      "There's a slight delay due to traffic. Thank you for your patience.",
-    ),
-    _Notice(
-      KistcherAssets.notifDelivered,
-      'Order Delivered Successfully',
-      '02.01.2026',
-      'Your groceries have arrived! We hope you enjoy your fresh picks.',
-    ),
-    _Notice(
-      KistcherAssets.notifDeals,
-      'Fresh deals just for you!',
-      '02.01.2026',
-      'Save 20% on selected fresh fruits and vegetables. Your favorites are waiting!',
-    ),
-    _Notice(
-      KistcherAssets.notifFavorites,
-      'Your favorites are waiting',
-      '02.01.2026',
-      'The groceries you saved are ready to shop. Add your favorites to your cart before you forget!',
-    ),
-  ];
+  List<_Notice> _map(List<InboxNotification> items) {
+    return items
+        .map(
+          (item) => _Notice(
+            KistcherAssets.notifDeals,
+            item.title,
+            item.timestamp,
+            item.message,
+          ),
+        )
+        .toList();
+  }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final media = MediaQuery.of(context);
+    final grouped = ref.watch(notificationsProvider).valueOrNull ??
+        const GroupedNotifications();
+    final today = _map(grouped.today);
+    final yesterday = _map(grouped.yesterday);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
@@ -97,16 +69,16 @@ class KistcherNotificationsScreen extends StatelessWidget {
                 const SizedBox(height: 40),
                 _sectionTitle('Today'),
                 const SizedBox(height: 18),
-                for (var i = 0; i < _today.length; i++) ...[
+                for (var i = 0; i < today.length; i++) ...[
                   if (i > 0) const SizedBox(height: 22),
-                  _NoticeCard(notice: _today[i], highlighted: true),
+                  _NoticeCard(notice: today[i], highlighted: true),
                 ],
                 const SizedBox(height: 24),
                 _sectionTitle('Yesterday'),
                 const SizedBox(height: 14),
-                for (var i = 0; i < _yesterday.length; i++) ...[
+                for (var i = 0; i < yesterday.length; i++) ...[
                   if (i > 0) const SizedBox(height: 21),
-                  _NoticeCard(notice: _yesterday[i], highlighted: false),
+                  _NoticeCard(notice: yesterday[i], highlighted: false),
                 ],
               ],
             ),

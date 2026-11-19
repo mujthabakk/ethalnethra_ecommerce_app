@@ -43,6 +43,23 @@ import '../../views/v2desgin/kistcher/kistcher_review_screen.dart';
 import '../../views/v2desgin/kistcher/kistcher_search_screen.dart';
 import '../../views/v2desgin/kistcher/kistcher_shell.dart';
 import '../../views/v2desgin/kistcher/kistcher_wishlist_screen.dart';
+import '../../views/v2desgin/service/buy_sell/buy_sell_data.dart';
+import '../../views/v2desgin/service/buy_sell/buy_sell_details_screen.dart';
+import '../../views/v2desgin/service/buy_sell/buy_sell_home_screen.dart';
+import '../../views/v2desgin/service/buy_sell/buy_sell_results_screen.dart';
+import '../../views/v2desgin/service/buy_sell/buy_sell_search_screen.dart';
+import '../../views/v2desgin/service/real_estate/real_estate_data.dart';
+import '../../views/v2desgin/service/real_estate/real_estate_details_screen.dart';
+import '../../views/v2desgin/service/real_estate/real_estate_featured_screen.dart';
+import '../../views/v2desgin/service/real_estate/real_estate_home_screen.dart';
+import '../../views/v2desgin/service/service_data.dart';
+import '../../views/v2desgin/service/spare_parts/spare_parts_data.dart';
+import '../../views/v2desgin/service/spare_parts/spare_parts_details_screen.dart';
+import '../../views/v2desgin/service/spare_parts/spare_parts_home_screen.dart';
+import '../../views/v2desgin/service/spare_parts/spare_parts_search_screen.dart';
+import '../../views/v2desgin/service/service_home_screen.dart';
+import '../../views/v2desgin/service/service_providers_screen.dart';
+import '../../views/v2desgin/service/service_schedule_screen.dart';
 import '../../views/v2desgin/v2_onboarding_screen.dart';
 import '../../views/v2desgin/auth/v2_login_screen.dart';
 import '../../views/v2desgin/auth/v2_otp_screen.dart';
@@ -127,6 +144,20 @@ class AppRouter {
   static const String kistcherWishlist = '/kistcher-wishlist';
   static const String kistcherNotifications = '/kistcher-notifications';
   static const String kistcherOrderTracking = '/kistcher-order-tracking';
+  static const String serviceHome = '/our-services';
+  static const String serviceProviders = '/our-services/providers';
+  static const String serviceSchedule = '/our-services/schedule';
+  static const String realEstateHome = '/our-services/real-estate';
+  static const String realEstateFeatured = '/our-services/real-estate/featured';
+  static const String realEstateDetails = '/our-services/real-estate/details';
+  static const String sparePartsHome = '/our-services/spare-parts';
+  static const String sparePartsSearch = '/our-services/spare-parts/search';
+  static const String sparePartsDetails = '/our-services/spare-parts/details';
+  static const String buySellHome = '/our-services/buy-sell';
+  static const String buySellSearch = '/our-services/buy-sell/search';
+  static const String buySellResults = '/our-services/buy-sell/results';
+  static const String buySellDetails = '/our-services/buy-sell/details';
+  static const String buySellLocation = '/our-services/buy-sell/location';
   /// V2 auth / onboarding (app open when [kUseV2DesignEntry] is true).
   static const String v2Onboarding = '/v2-onboarding';
   static const String v2Login = '/v2-login';
@@ -158,9 +189,7 @@ class AppRouter {
         path: v2Otp,
         name: 'v2Otp',
         builder: (context, state) {
-          final phone = state.extra is String
-              ? state.extra as String
-              : '+91 8398 737 880';
+          final phone = state.extra is String ? state.extra as String : '';
           return V2OtpScreen(phoneDisplay: phone);
         },
       ),
@@ -178,9 +207,14 @@ class AppRouter {
         path: v2CategoryProducts,
         name: 'v2CategoryProducts',
         builder: (context, state) {
-          final cat = state.extra is String
-              ? state.extra as String
-              : 'Vegetables';
+          final extra = state.extra;
+          if (extra is Map) {
+            return V2CategoryProductsScreen(
+              initialCategory: (extra['category'] as String?) ?? '',
+              search: (extra['search'] as String?) ?? '',
+            );
+          }
+          final cat = extra is String ? extra : '';
           return V2CategoryProductsScreen(initialCategory: cat);
         },
       ),
@@ -191,11 +225,12 @@ class AppRouter {
           final extra = state.extra;
           if (extra is Map) {
             return V2ProductDetailsScreen(
-              title: (extra['title'] as String?) ?? 'Indian Tomato Fresh',
+              productId: extra['id']?.toString(),
+              title: (extra['title'] as String?) ?? '',
               image: extra['image'] as String?,
-              price: (extra['price'] as int?) ?? 20,
-              oldPrice: (extra['oldPrice'] as int?) ?? 25,
-              weight: (extra['weight'] as String?) ?? '500 gm',
+              price: (extra['price'] as int?) ?? 0,
+              oldPrice: (extra['oldPrice'] as int?) ?? 0,
+              weight: (extra['weight'] as String?) ?? '',
             );
           }
           return const V2ProductDetailsScreen();
@@ -255,6 +290,115 @@ class AppRouter {
         builder: (context, state) => const KistcherShell(),
       ),
       GoRoute(
+        path: serviceHome,
+        name: 'serviceHome',
+        builder: (context, state) => const ServiceHomeScreen(),
+      ),
+      GoRoute(
+        path: serviceProviders,
+        name: 'serviceProviders',
+        builder: (context, state) {
+          final category = state.extra is String ? state.extra as String : '';
+          return ServiceProvidersScreen(
+            category: category.isEmpty ? 'Services' : category,
+          );
+        },
+      ),
+      GoRoute(
+        path: serviceSchedule,
+        name: 'serviceSchedule',
+        builder: (context, state) {
+          final extra = state.extra;
+          return ServiceScheduleScreen(
+            provider: extra is ServiceProvider
+                ? extra
+                : ServiceData.providers.first,
+          );
+        },
+      ),
+      GoRoute(
+        path: realEstateHome,
+        name: 'realEstateHome',
+        builder: (context, state) => const RealEstateHomeScreen(),
+      ),
+      GoRoute(
+        path: realEstateFeatured,
+        name: 'realEstateFeatured',
+        builder: (context, state) => const RealEstateFeaturedScreen(),
+      ),
+      GoRoute(
+        path: realEstateDetails,
+        name: 'realEstateDetails',
+        builder: (context, state) {
+          final extra = state.extra;
+          return RealEstateDetailsScreen(
+            property: extra is Property ? extra : RealEstateData.nearby[1],
+          );
+        },
+      ),
+      GoRoute(
+        path: sparePartsHome,
+        name: 'sparePartsHome',
+        builder: (context, state) => const SparePartsHomeScreen(),
+      ),
+      GoRoute(
+        path: sparePartsSearch,
+        name: 'sparePartsSearch',
+        builder: (context, state) => const SparePartsSearchScreen(),
+      ),
+      GoRoute(
+        path: sparePartsDetails,
+        name: 'sparePartsDetails',
+        builder: (context, state) {
+          final extra = state.extra;
+          return SparePartsDetailsScreen(
+            part: extra is SparePart ? extra : SparePartsData.engine,
+          );
+        },
+      ),
+      GoRoute(
+        path: buySellHome,
+        name: 'buySellHome',
+        builder: (context, state) => const BuySellHomeScreen(),
+      ),
+      GoRoute(
+        path: buySellSearch,
+        name: 'buySellSearch',
+        builder: (context, state) => const BuySellSearchScreen(),
+      ),
+      GoRoute(
+        path: buySellResults,
+        name: 'buySellResults',
+        builder: (context, state) {
+          final extra = state.extra;
+          final map = extra is Map ? extra : const {};
+          return BuySellResultsScreen(
+            query: map['query'] as String? ?? '',
+            category: map['category'] as String?,
+            title: map['title'] as String?,
+          );
+        },
+      ),
+      GoRoute(
+        path: buySellDetails,
+        name: 'buySellDetails',
+        builder: (context, state) {
+          final extra = state.extra;
+          return BuySellDetailsScreen(
+            listing: extra is BuySellListing ? extra : BuySellData.iphone15,
+          );
+        },
+      ),
+      GoRoute(
+        path: buySellLocation,
+        name: 'buySellLocation',
+        builder: (context, state) => const SelectDeliveryLocationScreen(
+          accent: Color(0xFF2E67AE),
+          compact: true,
+          subtitle: 'Select your area to find deals near you',
+        ),
+      ),
+      GoRoute(
         path: kistcherBlank,
         name: 'kistcherBlank',
         builder: (context, state) {
@@ -266,7 +410,7 @@ class AppRouter {
         path: kistcherSearch,
         name: 'kistcherSearch',
         builder: (context, state) {
-          final q = state.extra is String ? state.extra as String : 'burger';
+          final q = state.extra is String ? state.extra as String : '';
           return KistcherSearchScreen(initialQuery: q);
         },
       ),
@@ -277,8 +421,10 @@ class AppRouter {
           final extra = state.extra;
           if (extra is Map) {
             return KistcherRestaurantScreen(
-              name: extra['name'] as String? ?? 'KFC',
-              subtitle: extra['subtitle'] as String? ?? 'Kentucky fried chicken',
+              restaurantId: extra['id']?.toString() ?? '',
+              name: extra['name'] as String? ?? '',
+              subtitle: extra['subtitle'] as String? ?? '',
+              image: extra['image'] as String? ?? '',
             );
           }
           return const KistcherRestaurantScreen();
@@ -291,8 +437,11 @@ class AppRouter {
           final extra = state.extra;
           if (extra is Map) {
             return KistcherProductScreen(
-              title: extra['title'] as String? ?? 'Cheese with Chicken Burger',
-              price: extra['price'] as int? ?? 200,
+              menuItemId: extra['id']?.toString() ?? '',
+              restaurantId: extra['restaurantId']?.toString() ?? '',
+              title: extra['title'] as String? ?? '',
+              price: extra['price'] as int? ?? 0,
+              image: extra['image'] as String? ?? '',
             );
           }
           return const KistcherProductScreen();
@@ -326,7 +475,10 @@ class AppRouter {
       GoRoute(
         path: kistcherOrderTracking,
         name: 'kistcherOrderTracking',
-        builder: (context, state) => const KistcherOrderTrackingScreen(),
+        builder: (context, state) {
+          final id = state.extra is String ? state.extra as String : '';
+          return KistcherOrderTrackingScreen(orderId: id);
+        },
       ),
       GoRoute(
         path: splash,

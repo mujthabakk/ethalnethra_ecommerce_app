@@ -2,25 +2,29 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/providers/auth_providers.dart';
+import '../../../core/providers/location_user_providers.dart';
 import '../../../core/routes/app_router.dart';
+import '../../../core/utils/phone_utils.dart';
 import 'v2_auth_colors.dart';
 import 'v2_auth_shell.dart';
 import 'v2_auth_widgets.dart';
 
 /// V2 OTP — Figma exact (centered title + 4 glass boxes).
-class V2OtpScreen extends StatefulWidget {
-  const V2OtpScreen({super.key, this.phoneDisplay = '+91 8398 737 880'});
+class V2OtpScreen extends ConsumerStatefulWidget {
+  const V2OtpScreen({super.key, this.phoneDisplay = ''});
 
   final String phoneDisplay;
 
   @override
-  State<V2OtpScreen> createState() => _V2OtpScreenState();
+  ConsumerState<V2OtpScreen> createState() => _V2OtpScreenState();
 }
 
-class _V2OtpScreenState extends State<V2OtpScreen> {
+class _V2OtpScreenState extends ConsumerState<V2OtpScreen> {
   final _ctrls = List.generate(4, (_) => TextEditingController());
   final _focus = List.generate(4, (_) => FocusNode());
 
@@ -33,6 +37,58 @@ class _V2OtpScreenState extends State<V2OtpScreen> {
       f.dispose();
     }
     super.dispose();
+  }
+
+  String get _phone => normalizeIndianPhone(widget.phoneDisplay);
+
+  Future<void> _resend() async {
+    if (_phone.length < 10) return;
+    final ok = await ref.read(resendOtpNotifierProvider.notifier).resend(_phone);
+    if (!mounted) return;
+    final message = ok
+        ? 'OTP sent again'
+        : (ref.read(resendOtpNotifierProvider).errorMessage ?? 'Could not resend OTP');
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _verify() async {
+    final otp = _ctrls.map((c) => c.text).join();
+    if (_phone.length < 10 || otp.length < 4) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter the 4 digit code')),
+      );
+      return;
+    }
+    final ok = await ref.read(verifyOtpNotifierProvider.notifier).verify(
+          phone: _phone,
+          otp: otp,
+        );
+    if (!mounted) return;
+    if (!ok) {
+      final err = ref.read(verifyOtpNotifierProvider).errorMessage;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(err ?? 'Could not verify OTP')),
+      );
+      return;
+    }
+    final pending = ref.read(pendingSignupProvider);
+    if (pending != null) {
+      try {
+        await ref.read(userProfileRepositoryProvider).updateUserDetails(
+              name: pending.name,
+              email: pending.email,
+              phone: _phone,
+            );
+        ref.read(pendingSignupProvider.notifier).state = null;
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
+    }
+    if (!mounted) return;
+    context.go(AppRouter.selectLocation);
   }
 
   void _onChanged(int i, String v) {
@@ -111,7 +167,7 @@ class _V2OtpScreenState extends State<V2OtpScreen> {
           ),
           const SizedBox(height: 4),
           GestureDetector(
-            onTap: () {},
+            onTap: _resend,
             child: Text(
               'Resend it',
               textAlign: TextAlign.center,
@@ -127,7 +183,7 @@ class _V2OtpScreenState extends State<V2OtpScreen> {
           const SizedBox(height: 28),
           V2GradientCtaButton(
             label: 'Login',
-            onTap: () => context.go(AppRouter.selectLocation),
+            onTap: _verify,
           ),
           const SizedBox(height: 14),
           Text(

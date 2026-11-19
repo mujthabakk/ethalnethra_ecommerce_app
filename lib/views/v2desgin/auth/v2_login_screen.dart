@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/providers/auth_providers.dart';
 import '../../../core/routes/app_router.dart';
+import '../../../core/utils/phone_utils.dart';
 import 'v2_auth_colors.dart';
 import 'v2_auth_shell.dart';
 import 'v2_auth_widgets.dart';
 
 /// V2 Login — Figma exact (centered title + glass card).
-class V2LoginScreen extends StatefulWidget {
+class V2LoginScreen extends ConsumerStatefulWidget {
   const V2LoginScreen({super.key});
 
   @override
-  State<V2LoginScreen> createState() => _V2LoginScreenState();
+  ConsumerState<V2LoginScreen> createState() => _V2LoginScreenState();
 }
 
-class _V2LoginScreenState extends State<V2LoginScreen> {
-  var _isEmail = true;
+class _V2LoginScreenState extends ConsumerState<V2LoginScreen> {
+  var _isEmail = false;
   var _obscure = true;
   var _remember = false;
 
@@ -32,17 +35,33 @@ class _V2LoginScreenState extends State<V2LoginScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_isEmail) {
-      // After login → choose delivery location
-      context.go(AppRouter.selectLocation);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sign in with your phone number to receive an OTP'),
+        ),
+      );
+      setState(() => _isEmail = false);
       return;
     }
-    final phone = _phoneCtrl.text.trim();
-    context.push(
-      AppRouter.v2Otp,
-      extra: phone.isEmpty ? '+91 8398 737 880' : '+91 $phone',
-    );
+    final phone = normalizeIndianPhone(_phoneCtrl.text);
+    if (phone.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter a valid 10-digit mobile number')),
+      );
+      return;
+    }
+    final ok = await ref.read(sendOtpNotifierProvider.notifier).send(phone);
+    if (!mounted) return;
+    if (!ok) {
+      final err = ref.read(sendOtpNotifierProvider).errorMessage;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(err ?? 'Could not send OTP')),
+      );
+      return;
+    }
+    context.push(AppRouter.v2Otp, extra: phone);
   }
 
   @override

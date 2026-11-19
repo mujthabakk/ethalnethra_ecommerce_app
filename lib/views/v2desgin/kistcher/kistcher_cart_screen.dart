@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/providers/kitchen_providers.dart';
 import '../../../core/routes/app_router.dart';
+import '../../../core/widgets/app_network_image.dart';
 import 'kistcher_assets.dart';
 import 'kistcher_page_header.dart';
 
 /// Figma Kitchen "My Cart" — yellow → white page gradient, glass item cards,
 /// pill promo field, dashed bill summary, `#F8D148` pay button.
-class KistcherCartScreen extends StatefulWidget {
+class KistcherCartScreen extends ConsumerStatefulWidget {
   const KistcherCartScreen({super.key, this.onBack, this.bottomInset = 0});
 
   /// Overrides the back button (used when shown as a shell tab).
@@ -19,25 +22,97 @@ class KistcherCartScreen extends StatefulWidget {
   final double bottomInset;
 
   @override
-  State<KistcherCartScreen> createState() => _KistcherCartScreenState();
+  ConsumerState<KistcherCartScreen> createState() => _KistcherCartScreenState();
 }
 
-class _KistcherCartScreenState extends State<KistcherCartScreen> {
+class _KistcherCartScreenState extends ConsumerState<KistcherCartScreen> {
   static const _accent = Color(0xFFF2D262);
   static const _payBtn = Color(0xFFF8D148);
   static const _hPad = 25.0;
   static const _innerPad = 33.0;
-  static const _delivery = 100;
-  static const _discount = 100;
+  int _delivery = 0;
+  int _discount = 0;
 
-  final _items = <_CartItem>[
-    _CartItem('Cheese with Chicken Burger', 'Burger House', 250,
-        KistcherAssets.cartBurger, 1),
-    _CartItem('Club Sandwich', 'Burger House', 550,
-        KistcherAssets.cartSandwich, 2),
-    _CartItem('Rameshwaram Idli', 'Arya Bhavan', 250,
-        KistcherAssets.cartIdli, 1),
-  ];
+  final _promo = TextEditingController();
+  List<_CartItem> _items = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void dispose() {
+    _promo.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    try {
+      final cart = await ref.read(kitchenRepositoryProvider).fetchCart();
+      if (!mounted) return;
+      setState(() {
+        _delivery = cart.deliveryCharge;
+        _discount = cart.discount;
+        _items = cart.items
+            .map(
+              (line) => _CartItem(
+                line.id,
+                line.name,
+                line.restaurantName,
+                line.price,
+                line.imageUrl,
+                line.qty,
+              ),
+            )
+            .toList();
+      });
+    } catch (_) {}
+  }
+
+  Future<void> _changeQty(_CartItem item, int next) async {
+    if (item.id.isEmpty || next < 1) return;
+    try {
+      await ref.read(kitchenRepositoryProvider).updateCartItem(
+            item.id,
+            quantity: next,
+          );
+      await _load();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
+
+  Future<void> _remove(_CartItem item) async {
+    if (item.id.isEmpty) return;
+    try {
+      await ref.read(kitchenRepositoryProvider).removeCartItem(item.id);
+      await _load();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
+
+  Future<void> _applyPromo() async {
+    final code = _promo.text.trim();
+    if (code.isEmpty) return;
+    try {
+      await ref.read(kitchenRepositoryProvider).applyPromo(code);
+      await _load();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
 
   int get _subtotal =>
       _items.fold(0, (sum, item) => sum + item.price * item.qty);
@@ -79,11 +154,9 @@ class _KistcherCartScreenState extends State<KistcherCartScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: _hPad),
                     child: _CartCard(
                       item: _items[i],
-                      onAdd: () => setState(() => _items[i].qty++),
-                      onRemove: () => setState(() {
-                        if (_items[i].qty > 1) _items[i].qty--;
-                      }),
-                      onDelete: () => setState(() => _items.removeAt(i)),
+                      onAdd: () => _changeQty(_items[i], _items[i].qty + 1),
+                      onRemove: () => _changeQty(_items[i], _items[i].qty - 1),
+                      onDelete: () => _remove(_items[i]),
                     ),
                   ),
                 ],
@@ -148,6 +221,7 @@ class _KistcherCartScreenState extends State<KistcherCartScreen> {
           const SizedBox(width: 15),
           Expanded(
             child: TextField(
+              controller: _promo,
               style: GoogleFonts.poppins(fontSize: 14, color: Colors.black),
               cursorColor: Colors.black,
               decoration: InputDecoration(
@@ -168,7 +242,7 @@ class _KistcherCartScreenState extends State<KistcherCartScreen> {
             ),
           ),
           GestureDetector(
-            onTap: () => FocusScope.of(context).unfocus(),
+            onTap: _applyPromo,
             child: Container(
               width: 94,
               height: 29,
@@ -315,7 +389,8 @@ class _DashPainter extends CustomPainter {
 }
 
 class _CartItem {
-  _CartItem(this.name, this.shop, this.price, this.image, this.qty);
+  _CartItem(this.id, this.name, this.shop, this.price, this.image, this.qty);
+  final String id;
   final String name;
   final String shop;
   final int price;
@@ -361,15 +436,11 @@ class _CartCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.asset(
-              item.image,
+            child: AppImage(
+              path: item.image,
               width: 90,
               height: 90,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const ColoredBox(
-                color: Color(0xFFEDE5AE),
-                child: SizedBox(width: 90, height: 90),
-              ),
             ),
           ),
           const SizedBox(width: 15),

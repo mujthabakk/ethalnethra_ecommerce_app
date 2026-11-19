@@ -13,7 +13,20 @@ import '../../core/routes/app_router.dart';
 
 /// Figma: Choose delivery location — exact layout + light map style.
 class SelectDeliveryLocationScreen extends StatefulWidget {
-  const SelectDeliveryLocationScreen({super.key});
+  const SelectDeliveryLocationScreen({
+    super.key,
+    this.accent = const Color(0xFF0E5A03),
+    this.compact = false,
+    this.subtitle = "Select where you'd like your groceries delivered",
+  });
+
+  /// Brand colour for pin, chip and Confirm button (mart green by default).
+  final Color accent;
+
+  /// Buy & Sell look: no "Order will be delivered here" strip and no
+  /// "Delivery Available" chip — just address + Confirm Location.
+  final bool compact;
+  final String subtitle;
 
   @override
   State<SelectDeliveryLocationScreen> createState() =>
@@ -23,14 +36,13 @@ class SelectDeliveryLocationScreen extends StatefulWidget {
 class _SelectDeliveryLocationScreenState
     extends State<SelectDeliveryLocationScreen> {
   static const _apiKey = 'AIzaSyA9RITqSbjrdG8mPjO4d3mVMTUVnxoDLnA';
-  static const _green = Color(0xFF0E5A03);
+  Color get _green => widget.accent;
   static const _mint = Color(0xFFDEFFD9);
   static const _beige = Color(0xFFF2EDE7);
 
   static const _pinAsset =
       'asstes/v2desgin/images/add_adders_page/Group 6984.png';
-  static const _vectorPin =
-      'asstes/v2desgin/images/add_adders_page/Vector.png';
+  static const _vectorPin = 'asstes/v2desgin/images/add_adders_page/Vector.png';
   static const _shippingAsset =
       'asstes/v2desgin/images/add_adders_page/fast-shipping 1.png';
 
@@ -308,11 +320,9 @@ class _SelectDeliveryLocationScreenState
             ),
 
             if (!_mapReady)
-              const ColoredBox(
-                color: Color(0xFFE8EEF2),
-                child: Center(
-                  child: CircularProgressIndicator(color: _green),
-                ),
+              ColoredBox(
+                color: const Color(0xFFE8EEF2),
+                child: Center(child: CircularProgressIndicator(color: _green)),
               ),
           ],
         ),
@@ -372,7 +382,7 @@ class _SelectDeliveryLocationScreenState
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  "Select where you'd like your groceries delivered",
+                  widget.subtitle,
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
@@ -525,20 +535,21 @@ class _SelectDeliveryLocationScreenState
           mainAxisSize: MainAxisSize.min,
           children: [
             // Beige header strip
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              color: _beige,
-              child: Text(
-                'Order will be delivered here',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF3D3D3D),
+            if (!widget.compact)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                color: _beige,
+                child: Text(
+                  'Order will be delivered here',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF3D3D3D),
+                  ),
                 ),
               ),
-            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
               child: Column(
@@ -549,16 +560,18 @@ class _SelectDeliveryLocationScreenState
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(top: 1),
-                        child: Image.asset(
-                          _vectorPin,
-                          width: 18,
-                          height: 24,
-                          errorBuilder: (_, __, ___) => const Icon(
-                            Icons.location_on,
-                            color: _green,
-                            size: 22,
-                          ),
-                        ),
+                        child: widget.compact
+                            ? Icon(Icons.location_on, color: _green, size: 26)
+                            : Image.asset(
+                                _vectorPin,
+                                width: 18,
+                                height: 24,
+                                errorBuilder: (_, __, ___) => Icon(
+                                  Icons.location_on,
+                                  color: _green,
+                                  size: 22,
+                                ),
+                              ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -591,66 +604,67 @@ class _SelectDeliveryLocationScreenState
                   ),
                   const SizedBox(height: 12),
                   // Delivery available chip
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-                    decoration: BoxDecoration(
-                      color: _mint,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        Image.asset(
-                          _shippingAsset,
-                          width: 34,
-                          height: 34,
-                          errorBuilder: (_, __, ___) => const Icon(
-                            Icons.delivery_dining,
-                            color: _green,
-                            size: 30,
+                  if (!widget.compact)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                      decoration: BoxDecoration(
+                        color: _mint,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Image.asset(
+                            _shippingAsset,
+                            width: 34,
+                            height: 34,
+                            errorBuilder: (_, __, ___) => Icon(
+                              Icons.delivery_dining,
+                              color: _green,
+                              size: 30,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Delivery Available',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: _green,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text.rich(
-                                TextSpan(
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Delivery Available',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    color: _green.withValues(alpha: 0.9),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: _green,
                                   ),
-                                  children: [
-                                    const TextSpan(
-                                      text: 'Estimated delivery : ',
-                                    ),
-                                    TextSpan(
-                                      text: '20-30 min',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
-                                        color: _green,
-                                      ),
-                                    ),
-                                  ],
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 2),
+                                Text.rich(
+                                  TextSpan(
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      color: _green.withValues(alpha: 0.9),
+                                    ),
+                                    children: [
+                                      const TextSpan(
+                                        text: 'Estimated delivery : ',
+                                      ),
+                                      TextSpan(
+                                        text: '20-30 min',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: _green,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 14),
                   SizedBox(
                     width: double.infinity,

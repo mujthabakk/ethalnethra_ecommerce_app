@@ -72,6 +72,11 @@ flutter:
     - asstes/v2desgin/kitchen_images/wishlist_page/
     - asstes/v2desgin/kitchen_images/order_tracking_page/
     - asstes/v2desgin/kitchen_images/notifications_page/
+    - asstes/v2desgin/service/home_page/
+    - asstes/v2desgin/service/home_innar_page/
+    - asstes/v2desgin/service/real_easate/
+    - asstes/v2desgin/service/Spare_parts_page/
+    - asstes/v2desgin/service/Buy_and_sell/
   
   # fonts:
   #   - family: Gilroy

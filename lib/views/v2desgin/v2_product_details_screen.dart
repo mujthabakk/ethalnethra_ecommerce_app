@@ -1,22 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/models/catalog/catalog_product.dart';
+import '../../core/models/catalog/product_detail_dto.dart';
+import '../../core/providers/cart_providers.dart';
+import '../../core/providers/catalog_providers.dart';
 import '../../core/routes/app_router.dart';
+import '../../core/widgets/app_network_image.dart';
 import 'v2_assets.dart';
 
 /// Figma Product Details — exact layout (#0E5A03 / #5AA000).
-class V2ProductDetailsScreen extends StatefulWidget {
+class V2ProductDetailsScreen extends ConsumerStatefulWidget {
   const V2ProductDetailsScreen({
     super.key,
-    this.title = 'Indian Tomato Fresh',
+    this.productId,
+    this.title = '',
     this.image,
-    this.price = 20,
-    this.oldPrice = 25,
-    this.weight = '500 gm',
+    this.price = 0,
+    this.oldPrice = 0,
+    this.weight = '',
   });
 
+  final String? productId;
   final String title;
   final String? image;
   final int price;
@@ -24,27 +32,73 @@ class V2ProductDetailsScreen extends StatefulWidget {
   final String weight;
 
   @override
-  State<V2ProductDetailsScreen> createState() => _V2ProductDetailsScreenState();
+  ConsumerState<V2ProductDetailsScreen> createState() =>
+      _V2ProductDetailsScreenState();
 }
 
-class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
+class _V2ProductDetailsScreenState extends ConsumerState<V2ProductDetailsScreen> {
   static const _darkGreen = Color(0xFF0E5A03);
   static const _lime = Color(0xFF5AA000);
 
   int _qty = 1;
   int _page = 0;
-  bool _liked = true;
+  bool _liked = false;
+  bool _adding = false;
 
-  static const _similar = [
-    (V2Assets.prodCarrot, 'Fresh Carrot', Color(0xFFFFCC95)),
-    (V2Assets.prodCapsicum, 'Capsicum', Color(0xFFEEFBDD)),
-    (V2Assets.prodOnion, 'Onion', Color(0xFFFFCECE)),
-  ];
+  String _money(num value) {
+    if (value == value.roundToDouble()) return value.toInt().toString();
+    return value.toStringAsFixed(2);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final id = widget.productId;
+    final detailAsync = id == null || id.isEmpty
+        ? const AsyncValue<ProductDetailDto>.data(
+            ProductDetailDto(
+              id: '',
+              name: '',
+              price: 0,
+              ourPrice: 0,
+              finalPrice: 0,
+              displayPrice: 0,
+              preorderAvailable: false,
+              hasDiscount: false,
+              discountPercentage: 0,
+              imageUrl: '',
+              weight: '',
+              category: '',
+              stock: 0,
+            ),
+          )
+        : ref.watch(productDetailProvider(id));
+    final detail = detailAsync.value;
+    final title = (detail != null && detail.name.isNotEmpty)
+        ? detail.name
+        : widget.title;
+    final weight = (detail != null && detail.weight.isNotEmpty)
+        ? detail.weight
+        : widget.weight;
+    final price = detail?.displayPrice ?? widget.price.toDouble();
+    final oldPrice = detail?.price ?? widget.oldPrice.toDouble();
+    final images = <String>[
+      if (detail != null && detail.imageUrl.isNotEmpty) detail.imageUrl,
+      if (detail != null) ...detail.images.where((e) => e.isNotEmpty),
+      if ((widget.image ?? '').isNotEmpty) widget.image!,
+    ];
+    final similar = detail == null || detail.category.isEmpty
+        ? const <CatalogProduct>[]
+        : ref
+                .watch(
+                  catalogQueryProvider(CatalogQuery(category: detail.category)),
+                )
+                .value
+                ?.where((item) => item.id != detail.id)
+                .take(8)
+                .toList() ??
+            const <CatalogProduct>[];
+
     final bottomPad = MediaQuery.paddingOf(context).bottom;
-    final hero = widget.image ?? V2Assets.prodDetailTomato;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
@@ -58,13 +112,20 @@ class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
                 physics: const BouncingScrollPhysics(),
                 slivers: [
                   SliverToBoxAdapter(child: _buildTopBar()),
-                  SliverToBoxAdapter(child: _buildHero(hero)),
-                  SliverToBoxAdapter(child: _buildInfo()),
+                  if (detailAsync.isLoading)
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    ),
+                  SliverToBoxAdapter(child: _buildHero(images)),
+                  SliverToBoxAdapter(child: _buildInfo(title, weight, price, oldPrice, detail)),
                   SliverToBoxAdapter(child: _buildFeatures()),
-                  SliverToBoxAdapter(child: _buildDescription()),
+                  SliverToBoxAdapter(child: _buildDescription(detail?.description)),
                   SliverToBoxAdapter(child: _buildNutritions()),
                   SliverToBoxAdapter(child: _buildReview()),
-                  SliverToBoxAdapter(child: _buildSimilar()),
+                  SliverToBoxAdapter(child: _buildSimilar(similar)),
                   SliverToBoxAdapter(
                     child: SizedBox(height: 110 + bottomPad),
                   ),
@@ -75,7 +136,7 @@ class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
               left: 0,
               right: 0,
               bottom: 0,
-              child: _buildBottomBar(bottomPad),
+              child: _buildBottomBar(bottomPad, detail),
             ),
           ],
         ),
@@ -149,24 +210,21 @@ class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
     );
   }
 
-  Widget _buildHero(String hero) {
+  Widget _buildHero(List<String> images) {
+    final count = images.isEmpty ? 1 : images.length;
     return Column(
       children: [
         const SizedBox(height: 8),
         SizedBox(
           height: 220,
           child: PageView.builder(
-            itemCount: 2,
+            itemCount: count,
             onPageChanged: (i) => setState(() => _page = i),
             itemBuilder: (_, i) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 28),
-              child: Image.asset(
-                hero,
+              child: AppImage(
+                path: images.isEmpty ? '' : images[i],
                 fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => Image.asset(
-                  V2Assets.prodTomato,
-                  fit: BoxFit.contain,
-                ),
               ),
             ),
           ),
@@ -174,7 +232,7 @@ class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(2, (i) {
+          children: List.generate(count, (i) {
             final active = _page == i;
             return AnimatedContainer(
               duration: const Duration(milliseconds: 180),
@@ -192,7 +250,13 @@ class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
     );
   }
 
-  Widget _buildInfo() {
+  Widget _buildInfo(
+    String title,
+    String weight,
+    double price,
+    double oldPrice,
+    ProductDetailDto? detail,
+  ) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
       child: Column(
@@ -203,7 +267,9 @@ class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
               if (context.canPop()) context.pop();
             },
             child: Text(
-              'Explore all vegetables category items  >',
+              detail == null || detail.category.isEmpty
+                  ? 'Product'
+                  : 'Explore ${detail.category}  >',
               style: GoogleFonts.poppins(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
@@ -217,7 +283,7 @@ class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
             children: [
               Expanded(
                 child: Text(
-                  widget.title,
+                  title.isEmpty ? 'Product' : title,
                   style: GoogleFonts.poppins(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
@@ -227,7 +293,7 @@ class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
                 ),
               ),
               Text(
-                'In Stock',
+                (detail?.stock ?? 0) > 0 ? 'In Stock' : 'Out of stock',
                 style: GoogleFonts.poppins(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -238,7 +304,7 @@ class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            widget.weight,
+            weight,
             style: GoogleFonts.poppins(
               fontSize: 14,
               color: const Color(0xFF9E9E9E),
@@ -248,7 +314,7 @@ class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
           Row(
             children: [
               Text(
-                '₹ ${widget.price}',
+                '₹ ${_money(price)}',
                 style: GoogleFonts.poppins(
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
@@ -257,7 +323,7 @@ class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
               ),
               const SizedBox(width: 10),
               Text(
-                '₹ ${widget.oldPrice}',
+                '₹ ${_money(oldPrice)}',
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   color: const Color(0xFFB0B0B0),
@@ -315,7 +381,7 @@ class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
     );
   }
 
-  Widget _buildDescription() {
+  Widget _buildDescription(String? description) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
       child: Column(
@@ -331,9 +397,9 @@ class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Apples Are Nutritious. Apples May Be Good For Weight Loss. '
-            'Apples May Be Good For Your Heart. As Part Of A Healthful And '
-            'Varied Diet.',
+            (description == null || description.trim().isEmpty)
+                ? 'No description from the store yet.'
+                : description,
             style: GoogleFonts.poppins(
               fontSize: 13,
               height: 1.45,
@@ -400,7 +466,7 @@ class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
     );
   }
 
-  Widget _buildSimilar() {
+  Widget _buildSimilar(List<CatalogProduct> similar) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -420,26 +486,26 @@ class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: _similar.length,
+            itemCount: similar.length,
             separatorBuilder: (_, __) => const SizedBox(width: 12),
             itemBuilder: (context, i) {
-              final s = _similar[i];
-              return _SimilarCard(
-                image: s.$1,
-                name: s.$2,
-                bg: s.$3,
-                onTap: () {
-                  context.push(
-                    AppRouter.v2ProductDetails,
-                    extra: {
-                      'title': s.$2,
-                      'image': s.$1,
-                      'price': 20,
-                      'oldPrice': 25,
-                      'weight': '500 gm',
-                    },
-                  );
-                },
+              final s = similar[i];
+              return GestureDetector(
+                onTap: () => context.push(
+                  AppRouter.v2ProductDetails,
+                  extra: {'id': s.id},
+                ),
+                child: _SimilarCard(
+                  image: s.imageUrl,
+                  name: s.name,
+                  bg: const Color(0xFFF4F7EF),
+                  onTap: () {
+                    context.push(
+                      AppRouter.v2ProductDetails,
+                      extra: {'id': s.id},
+                    );
+                  },
+                ),
               );
             },
           ),
@@ -448,7 +514,7 @@ class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
     );
   }
 
-  Widget _buildBottomBar(double bottomPad) {
+  Widget _buildBottomBar(double bottomPad, ProductDetailDto? detail) {
     return Container(
       padding: EdgeInsets.fromLTRB(16, 14, 16, 14 + bottomPad * 0.5),
       decoration: BoxDecoration(
@@ -517,7 +583,29 @@ class _V2ProductDetailsScreenState extends State<V2ProductDetailsScreen> {
                   color: Colors.transparent,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(33),
-                    onTap: () => context.push(AppRouter.v2Cart),
+                    onTap: _adding
+                        ? null
+                        : () async {
+                            final id = detail?.id ?? widget.productId;
+                            if (id == null || id.isEmpty) return;
+                            setState(() => _adding = true);
+                            try {
+                              await ref
+                                  .read(cartNotifierProvider.notifier)
+                                  .addToCart(id, quantity: _qty);
+                              if (context.mounted) {
+                                context.push(AppRouter.v2Cart);
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(e.toString())),
+                                );
+                              }
+                            } finally {
+                              if (mounted) setState(() => _adding = false);
+                            }
+                          },
                     child: Center(
                       child: Text(
                         'Add to cart',
@@ -605,7 +693,7 @@ class _SimilarCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.asset(image, fit: BoxFit.cover),
+                  AppImage(path: image, fit: BoxFit.cover),
                   Positioned(
                     left: 8,
                     top: 8,

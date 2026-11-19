@@ -58,5 +58,9 @@
             <action android:name="android.intent.action.VIEW"/>
             <data android:scheme="market"/>
         </intent>
+        <!-- speech_to_text looks up the device speech recognizer -->
+        <intent>
+            <action android:name="android.speech.RecognitionService"/>
+        </intent>
     </queries>
 </manifest>

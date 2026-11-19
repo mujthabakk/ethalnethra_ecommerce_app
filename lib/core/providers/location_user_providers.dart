@@ -6,6 +6,7 @@ import '../models/location/zone_item.dart';
 import '../models/user/user_details_models.dart';
 import '../models/orders/orders_models.dart';
 import '../models/user/user_address_models.dart';
+import '../repositories/content_repository.dart';
 import '../repositories/locations_repository.dart';
 import '../repositories/orders_repository.dart';
 import '../repositories/user_profile_repository.dart';
@@ -60,6 +61,19 @@ final pincodesForAreaProvider = FutureProvider.autoDispose
 final userDetailsProvider =
     FutureProvider.autoDispose<UserDetails>((ref) async {
   return ref.watch(userProfileRepositoryProvider).fetchUserDetails();
+});
+
+final contentRepositoryProvider = Provider<ContentRepository>((ref) {
+  return ContentRepository(ref.watch(dioProvider));
+});
+
+final notificationsProvider =
+    FutureProvider.autoDispose<GroupedNotifications>((ref) async {
+  return ref.watch(contentRepositoryProvider).fetchNotifications();
+});
+
+final aiSuggestionsProvider = FutureProvider.autoDispose<List<String>>((ref) async {
+  return ref.watch(contentRepositoryProvider).fetchAiSuggestions();
 });
 
 class SaveAddressUiState {

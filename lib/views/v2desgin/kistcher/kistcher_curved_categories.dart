@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/widgets/app_network_image.dart';
+
 class KistcherCategory {
   const KistcherCategory({required this.image, required this.label});
   final String image;
@@ -204,11 +206,11 @@ class _CategoryItem extends StatelessWidget {
             color: Colors.black,
           ),
           clipBehavior: Clip.antiAlias,
-          child: Image.asset(
-            category.image,
+          child: AppImage(
+            path: category.image,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) =>
-                const Icon(Icons.fastfood, color: Colors.white),
+            width: diameter,
+            height: diameter,
           ),
         ),
         SizedBox(height: 4 * scale),

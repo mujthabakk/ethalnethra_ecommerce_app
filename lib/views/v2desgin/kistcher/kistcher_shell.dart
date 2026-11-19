@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/providers/kitchen_providers.dart';
+import '../../../core/widgets/app_network_image.dart';
 import 'kistcher_assets.dart';
 import 'kistcher_cart_screen.dart';
 import 'kistcher_glass.dart';
@@ -154,13 +157,14 @@ class _KistcherShellState extends State<KistcherShell> {
 }
 
 /// Standalone white page (e.g. Our Services from kitchen home).
-class KistcherBlankScreen extends StatelessWidget {
+class KistcherBlankScreen extends ConsumerWidget {
   const KistcherBlankScreen({super.key, this.title = ''});
 
   final String title;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final services = ref.watch(servicesProvider);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -169,7 +173,48 @@ class KistcherBlankScreen extends StatelessWidget {
         foregroundColor: Colors.black,
         title: Text(title),
       ),
-      body: const SizedBox.expand(child: ColoredBox(color: Colors.white)),
+      body: services.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, __) => const SizedBox.expand(
+          child: ColoredBox(color: Colors.white),
+        ),
+        data: (items) {
+          if (items.isEmpty) {
+            return const SizedBox.expand(child: ColoredBox(color: Colors.white));
+          }
+          return ListView.separated(
+            padding: const EdgeInsets.all(20),
+            itemCount: items.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: AppImage(
+                      path: item.imageUrl,
+                      width: 56,
+                      height: 56,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(
+                      item.title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

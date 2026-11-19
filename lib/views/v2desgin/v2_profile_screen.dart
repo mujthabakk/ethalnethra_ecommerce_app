@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/models/user/user_details_models.dart';
+import '../../core/providers/location_user_providers.dart';
 import '../../core/routes/app_router.dart';
 import 'v2_assets.dart';
 
 /// Figma Profile — avatar, refer banner, For you / Support menus.
-class V2ProfileScreen extends StatelessWidget {
+class V2ProfileScreen extends ConsumerWidget {
   const V2ProfileScreen({super.key});
 
   static const _green = Color(0xFF3C7A32);
@@ -15,7 +18,14 @@ class V2ProfileScreen extends StatelessWidget {
   static const _subText = Color(0xFF609259);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(userDetailsProvider).value;
+    final name = (user?.displayName.isNotEmpty ?? false)
+        ? user!.displayName
+        : 'Guest';
+    final contact = (user?.email != null && user!.email!.trim().isNotEmpty)
+        ? user.email!
+        : (user?.phone ?? 'Sign in to see your account');
     final bottomPad = MediaQuery.paddingOf(context).bottom;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -31,7 +41,7 @@ class V2ProfileScreen extends StatelessWidget {
                   padding: EdgeInsets.fromLTRB(16, 8, 16, 24 + bottomPad),
                   physics: const BouncingScrollPhysics(),
                   children: [
-                    _buildUserRow(context),
+                    _buildUserRow(context, name, contact),
                     const SizedBox(height: 16),
                     _buildReferBanner(),
                     const SizedBox(height: 20),
@@ -163,7 +173,7 @@ class V2ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildUserRow(BuildContext context) {
+  Widget _buildUserRow(BuildContext context, String name, String contact) {
     return Row(
       children: [
         Stack(
@@ -210,7 +220,7 @@ class V2ProfileScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Saadhiya Patil',
+                name,
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -218,7 +228,7 @@ class V2ProfileScreen extends StatelessWidget {
                 ),
               ),
               Text(
-                'saadhiya@gmail.com',
+                contact,
                 style: GoogleFonts.poppins(
                   fontSize: 12.5,
                   color: Colors.grey.shade600,
